@@ -33,4 +33,19 @@ Plataforma de gestión de eventos y entradas QR. Proyecto de **portfolio y apren
 - Frontend: componentes standalone, signals, `@if`/`@for`, formularios reactivos tipados, features con carga diferida. No editar `core/api/` (es código generado).
 
 ## Comandos
-_Se completarán en la Fase 1._
+
+Requisitos: Docker Desktop arrancado, `uv`, Node 24.
+
+```bash
+docker compose up -d db                      # PostgreSQL 17 (desde la raíz)
+
+# backend/ (todo vía uv; Python 3.13 lo gestiona uv)
+uv sync                                      # instalar dependencias
+uv run python manage.py migrate
+uv run python manage.py runserver            # http://127.0.0.1:8000/api/docs/
+uv run python manage.py createsuperuser      # para entrar en /admin/
+uv run pytest                                # tests (usan PostgreSQL)
+uv run ruff check . && uv run ruff format .  # lint + formato
+```
+
+Nota: en `DATABASE_URL` usar `127.0.0.1`, no `localhost` (en Windows, `::1` se cuelga).
