@@ -46,6 +46,14 @@ uv run python manage.py runserver            # http://127.0.0.1:8000/api/docs/
 uv run python manage.py createsuperuser      # para entrar en /admin/
 uv run pytest                                # tests (usan PostgreSQL)
 uv run ruff check . && uv run ruff format .  # lint + formato
+
+# frontend/ (Angular 22, tests con Vitest)
+npm install
+npm start                                    # http://localhost:4200 (proxy /api → :8000)
+npm test                                     # tests una vez (npm run test:watch en modo watch)
+npm run lint
+npm run format                               # prettier
+npm run build
 ```
 
 Nota: en `DATABASE_URL` usar `127.0.0.1`, no `localhost` (en Windows, `::1` se cuelga).
