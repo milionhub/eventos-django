@@ -73,7 +73,7 @@
 - [x] ESLint + Prettier + primer test
 
 **CI**
-- [ ] GitHub Actions: backend (ruff + pytest con PostgreSQL) y frontend (lint + test + build) — workflows escritos; falta verlos en verde en GitHub
+- [x] GitHub Actions: backend (ruff + pytest con PostgreSQL) y frontend (lint + test + build)
 
 **Cierre:** `docker compose up db` + backend + frontend en local; Angular muestra el estado de `/health/`; CI en verde.
 
@@ -195,5 +195,5 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 
 ## Estado actual
 
-**Fase activa:** 1 — a falta de ver la CI en verde en GitHub.
-**Siguiente paso:** push a [GitHub](https://github.com/milionhub/eventos-django) y comprobar la CI en verde → Fase 2 (auth, organizaciones y eventos).
+**Fase activa:** 2 — Auth, organizaciones y eventos (Fase 1 cerrada el 2026-10-28, CI en verde).
+**Siguiente paso:** dividir la Fase 2 en bloques, empezando por registro, login y refresh con cookie httpOnly (ADR-0003).
