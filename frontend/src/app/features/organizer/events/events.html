@@ -1,0 +1,90 @@
+<a class="back-link" [routerLink]="['/org', org()]"><mat-icon>arrow_back</mat-icon> Organización</a>
+
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Programación</p>
+    <h1 class="display">Eventos<span class="accent">_</span></h1>
+  </div>
+  @if (canManage()) {
+    <a mat-flat-button [routerLink]="['/org', org(), 'events', 'new']">
+      <mat-icon>add</mat-icon> Nuevo evento
+    </a>
+  }
+</header>
+
+<div class="filters" role="group" aria-label="Filtrar por estado">
+  @for (option of filters; track option.label) {
+    <button
+      type="button"
+      class="filter"
+      [class.active]="status() === option.status"
+      [attr.aria-pressed]="status() === option.status"
+      (click)="filter(option.status)"
+    >
+      {{ option.label }}
+    </button>
+  }
+</div>
+
+@if (events.isLoading() && !events.hasValue()) {
+  <mat-spinner class="loading" diameter="32" aria-label="Cargando eventos" />
+} @else if (events.error()) {
+  <p class="notice error" role="alert">No se han podido cargar los eventos.</p>
+} @else if (events.value(); as data) {
+  @if (data.count === 0) {
+    <div class="surface-card empty">
+      <mat-icon>event</mat-icon>
+      <h2>{{ status() ? 'No hay eventos con este estado' : 'Todavía no hay eventos' }}</h2>
+      <p>
+        @if (canManage()) {
+          Crea el primero: empieza como borrador y lo publicas cuando tenga sus entradas.
+        } @else {
+          Aquí verás los eventos en los que te asignen para validar entradas.
+        }
+      </p>
+    </div>
+  } @else {
+    <ul class="list" role="list">
+      @for (event of data.results; track event.id) {
+        <li>
+          <a
+            class="surface-card row"
+            [class.static]="!canManage()"
+            [routerLink]="canManage() ? ['/org', org(), 'events', event.id] : null"
+          >
+            <app-date-badge [date]="event.start_at" />
+            <div class="info">
+              <h2>{{ event.title }}</h2>
+              <p>{{ event.start_at | date: 'EEEE, HH:mm' | capitalize }} · {{ event.location }}</p>
+            </div>
+            <span
+              class="chip status"
+              [attr.data-status]="event.is_finished ? 'FINISHED' : event.status"
+              >{{ statusLabel(event) }}</span
+            >
+            @if (canManage()) {
+              <mat-icon class="arrow" aria-hidden="true">chevron_right</mat-icon>
+            }
+          </a>
+        </li>
+      }
+    </ul>
+
+    @if (pages() > 1) {
+      <nav class="pager" aria-label="Páginas">
+        <button mat-button type="button" [disabled]="page() === 1" (click)="page.set(page() - 1)">
+          <mat-icon>chevron_left</mat-icon> Anterior
+        </button>
+        <span>Página {{ page() }} de {{ pages() }}</span>
+        <button
+          mat-button
+          type="button"
+          [disabled]="page() === pages()"
+          (click)="page.set(page() + 1)"
+        >
+          Siguiente <mat-icon iconPositionEnd>chevron_right</mat-icon>
+        </button>
+      </nav>
+    }
+  }
+}

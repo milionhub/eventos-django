@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
@@ -15,6 +17,8 @@ describe('Shell', () => {
       imports: [Shell],
       providers: [
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(), // the footer's API status light
         { provide: AuthService, useValue: { user, isAuthenticated: computed(() => !!user()) } },
       ],
     }).compileComponents();
@@ -22,6 +26,12 @@ describe('Shell', () => {
 
   async function render(): Promise<HTMLElement> {
     const fixture = TestBed.createComponent(Shell);
+    fixture.detectChanges();
+    await new Promise((resolve) => setTimeout(resolve));
+    // Answer the footer's /health/ call so the fixture can become stable.
+    TestBed.inject(HttpTestingController)
+      .match('/api/v1/health/')
+      .forEach((req) => req.flush({ api: true, database: true }));
     await fixture.whenStable();
     return fixture.nativeElement;
   }
@@ -38,15 +48,12 @@ describe('Shell', () => {
   });
 
   it('toggles the theme from the header', async () => {
-    const fixture = TestBed.createComponent(Shell);
-    await fixture.whenStable();
-    const toggle = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
-      'button.theme-toggle',
-    )!;
+    const element = await render();
+    const toggle = element.querySelector<HTMLButtonElement>('button.theme-toggle')!;
     const before = toggle.getAttribute('aria-label');
 
     toggle.click();
-    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve));
 
     expect(toggle.getAttribute('aria-label')).not.toBe(before);
   });

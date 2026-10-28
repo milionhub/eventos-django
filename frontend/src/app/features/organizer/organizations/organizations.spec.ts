@@ -67,6 +67,19 @@ describe('Organizations', () => {
     expect(element().textContent).toContain('Aún no formas parte de ninguna organización');
   });
 
+  it('previews the address the organization will get', async () => {
+    await respondWith([]);
+    (element().querySelector('button.new') as HTMLButtonElement).click();
+    await fixture.whenStable();
+
+    const name = element().querySelector<HTMLInputElement>('input[formcontrolname="name"]')!;
+    name.value = 'Peña Flamenca Ñandú';
+    name.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+
+    expect(element().textContent).toContain('/org/pena-flamenca-nandu');
+  });
+
   it('creates an organization and opens it', async () => {
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     await respondWith([]);

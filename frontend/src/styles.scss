@@ -44,6 +44,19 @@ html {
     )
   );
 
+  // Form fields: rounded like the cards, a quiet outline that lights up in coral on focus.
+  @include mat.form-field-overrides(
+    (
+      outlined-container-shape: 12px,
+      outlined-outline-color: var(--mat-sys-outline-variant),
+      outlined-hover-outline-color: var(--mat-sys-outline),
+      outlined-focus-outline-color: var(--app-accent),
+      outlined-focus-label-text-color: var(--app-accent),
+      outlined-focus-outline-width: 2px,
+      leading-icon-color: var(--mat-sys-on-surface-variant),
+    )
+  );
+
   // Brand tokens shared by every component.
   --app-accent: light-dark(#c8302a, #ff5a4e);
   --app-font-display: 'Bricolage Grotesque', sans-serif;
@@ -120,6 +133,150 @@ h3 {
   color: var(--app-accent);
   font: var(--mat-sys-label-medium);
   white-space: nowrap;
+
+  // Event status: published keeps the accent, the rest read as neutral or as an error.
+  &[data-status='DRAFT'],
+  &[data-status='FINISHED'] {
+    background: var(--mat-sys-surface-container-highest);
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &[data-status='CANCELLED'] {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+  }
+}
+
+// "← Back" link above a page headline.
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-large);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--mat-sys-on-surface);
+  }
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+// Inline feedback after an action: success by default, `.error` for failures.
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: var(--app-radius-sm);
+  background: color-mix(in srgb, #3ddc84 14%, transparent);
+  font: var(--mat-sys-body-medium);
+
+  &.error {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+  }
+}
+
+// --- Forms ------------------------------------------------------------------------------
+// A long form is split into numbered sections: what and why on the left, fields on the right.
+//
+//   <section class="form-section">
+//     <header><span class="step">01</span><h2>Lo básico</h2><p>Ayuda…</p></header>
+//     <div class="fields">…mat-form-field…</div>
+//   </section>
+
+.form-section {
+  display: grid;
+  gap: 8px 40px;
+  padding: 28px 0;
+
+  & + & {
+    border-top: var(--app-border);
+  }
+
+  @media (min-width: 900px) {
+    grid-template-columns: 240px 1fr;
+  }
+
+  > header {
+    h2 {
+      margin: 6px 0 6px;
+      font-size: 1.125rem;
+    }
+
+    p {
+      margin: 0;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-medium);
+    }
+  }
+
+  .step {
+    color: var(--app-accent);
+    font-family: var(--app-font-display);
+    font-size: 0.875rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  > .fields {
+    display: grid;
+    gap: 4px 16px;
+    align-content: start;
+
+    @media (min-width: 560px) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    > .wide {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+// Actions at the end of a form, kept in view while scrolling long forms.
+.form-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: 0 -24px -24px;
+  padding: 16px 24px;
+  border-top: var(--app-border);
+  border-radius: 0 0 var(--app-radius) var(--app-radius);
+  background: color-mix(in srgb, var(--mat-sys-surface-container) 88%, transparent);
+  backdrop-filter: blur(8px);
+
+  .spacer {
+    flex: 1;
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-body-small);
+  }
+
+  button[type='submit'] {
+    min-width: 160px;
+    height: 48px;
+  }
+}
+
+// Secondary text buttons (Editar, Quitar…): neutral, red only while asking for confirmation.
+.quiet {
+  --mat-button-text-label-text-color: var(--mat-sys-on-surface-variant);
+
+  &.confirming {
+    --mat-button-text-label-text-color: var(--mat-sys-error);
+  }
 }
 
 :focus-visible {

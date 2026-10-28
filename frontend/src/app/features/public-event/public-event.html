@@ -1,0 +1,99 @@
+<a class="back-link" routerLink="/"><mat-icon>arrow_back</mat-icon> Eventos</a>
+
+@if (event.isLoading()) {
+  <mat-spinner class="loading" diameter="32" aria-label="Cargando evento" />
+} @else if (notFound()) {
+  <section class="missing">
+    <p class="eyebrow">404</p>
+    <h1>Este evento no existe o ya no está publicado</h1>
+    <p>Puede que el organizador lo haya cancelado o retirado.</p>
+    <a mat-flat-button routerLink="/">Ver otros eventos</a>
+  </section>
+} @else if (event.error()) {
+  <p class="notice error" role="alert">No se ha podido cargar el evento.</p>
+} @else if (event.value(); as e) {
+  <div class="layout">
+    <article class="main">
+      <div
+        class="poster"
+        [style.background-image]="e.image_url ? 'url(' + e.image_url + ')' : null"
+      ></div>
+
+      <p class="eyebrow">{{ e.organization_name }}</p>
+      <h1 class="display">{{ e.title }}</h1>
+
+      <ul class="facts" role="list">
+        <li>
+          <mat-icon aria-hidden="true">event</mat-icon>
+          {{ e.start_at | date: "EEEE d 'de' MMMM 'de' y" | capitalize }}
+        </li>
+        <li>
+          <mat-icon aria-hidden="true">schedule</mat-icon>
+          {{ e.start_at | date: 'HH:mm' }} – {{ e.end_at | date: 'HH:mm' }}
+        </li>
+        <li>
+          <mat-icon aria-hidden="true">place</mat-icon>
+          {{ e.location }}
+        </li>
+      </ul>
+
+      @if (e.description) {
+        <p class="description">{{ e.description }}</p>
+      }
+    </article>
+
+    <aside class="ticket-box surface-card" aria-label="Entradas">
+      <h2>Entradas</h2>
+
+      @if (e.is_finished) {
+        <p class="notice">Este evento ya ha terminado.</p>
+      } @else {
+        <ul class="options" role="radiogroup" aria-label="Elige una categoría">
+          @for (ticketType of e.ticket_types; track ticketType.id) {
+            <li>
+              <button
+                type="button"
+                role="radio"
+                class="option"
+                [class.selected]="selected() === ticketType.id"
+                [attr.aria-checked]="selected() === ticketType.id"
+                [disabled]="ticketType.sold_out"
+                (click)="selected.set(ticketType.id)"
+              >
+                <span class="radio" aria-hidden="true"></span>
+                <span class="name">
+                  <strong>{{ ticketType.name }}</strong>
+                  @if (ticketType.description) {
+                    <small>{{ ticketType.description }}</small>
+                  }
+                </span>
+                <span class="left">
+                  {{ ticketType.sold_out ? 'Agotado' : ticketType.available + ' libres' }}
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+
+        @if (soldOut()) {
+          <p class="notice error">Entradas agotadas.</p>
+        } @else if (auth.isAuthenticated()) {
+          <button mat-flat-button type="button" class="cta" disabled>Reservar gratis</button>
+          <p class="hint">Las reservas estarán disponibles muy pronto.</p>
+        } @else {
+          <a
+            mat-flat-button
+            class="cta"
+            routerLink="/login"
+            [queryParams]="{ returnUrl: returnUrl() }"
+            >Inicia sesión para reservar</a
+          >
+          <p class="hint">
+            ¿No tienes cuenta?
+            <a routerLink="/register" [queryParams]="{ returnUrl: returnUrl() }">Créala gratis</a>
+          </p>
+        }
+      }
+    </aside>
+  </div>
+}

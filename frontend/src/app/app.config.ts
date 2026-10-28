@@ -2,6 +2,7 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import {
   ApplicationConfig,
   inject,
+  LOCALE_ID,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
@@ -19,5 +20,7 @@ export const appConfig: ApplicationConfig = {
     // Restore the session from the refresh cookie before the first route renders,
     // so guards and the header already know who is signed in.
     provideAppInitializer(() => inject(AuthService).refresh()),
+    // Spanish formats; dates are shown in the browser's time zone (RNF-04).
+    { provide: LOCALE_ID, useValue: 'es' },
   ],
 };

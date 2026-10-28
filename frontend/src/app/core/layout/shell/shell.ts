@@ -11,6 +11,7 @@ import { map } from 'rxjs';
 
 import { AuthService } from '../../auth/auth.service';
 import { initials } from '../../../shared/roles';
+import { ApiStatus } from '../api-status/api-status';
 import { ThemeService } from '../../theme/theme.service';
 
 interface NavItem {
@@ -42,6 +43,7 @@ const ORGANIZATIONS: NavItem = {
     MatMenu,
     MatMenuItem,
     MatMenuTrigger,
+    ApiStatus,
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',

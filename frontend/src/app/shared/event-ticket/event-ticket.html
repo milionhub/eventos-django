@@ -1,0 +1,41 @@
+<ng-template #body>
+  <div
+    class="poster"
+    [style.background-image]="event().image_url ? 'url(' + event().image_url + ')' : null"
+  >
+    @if (event().start_at) {
+      <span class="poster-date">
+        <strong>{{ event().start_at | date: 'd' }}</strong>
+        {{ event().start_at | date: 'MMM' }}
+      </span>
+    }
+  </div>
+  <div class="ticket-main">
+    <p class="when">
+      {{
+        event().start_at
+          ? (event().start_at | date: 'EEEE, HH:mm' | capitalize)
+          : 'Fecha por definir'
+      }}
+    </p>
+    <h2>{{ event().title || 'Título del evento' }}</h2>
+    <p class="where">
+      <mat-icon aria-hidden="true">place</mat-icon>{{ event().location || 'Ubicación' }}
+    </p>
+  </div>
+  <div class="ticket-tear" aria-hidden="true"></div>
+  <div class="ticket-stub">
+    <span class="seats" [class.sold-out]="event().available === 0">
+      {{ event().available === 0 ? 'Agotado' : event().available + ' plazas libres' }}
+    </span>
+    <span class="by">{{ event().organization_name }}</span>
+  </div>
+</ng-template>
+
+@if (event().slug) {
+  <a class="ticket link" [routerLink]="['/events', event().slug]">
+    <ng-container [ngTemplateOutlet]="body" />
+  </a>
+} @else {
+  <div class="ticket"><ng-container [ngTemplateOutlet]="body" /></div>
+}

@@ -1,0 +1,133 @@
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <section class="form-section">
+    <header>
+      <span class="step">01</span>
+      <h2>Lo básico</h2>
+      <p>Cómo se llama y dónde es. Es lo primero que verá el público.</p>
+    </header>
+    <div class="fields">
+      <mat-form-field appearance="outline" class="wide">
+        <mat-label>Título</mat-label>
+        <mat-icon matPrefix>edit</mat-icon>
+        <input matInput formControlName="title" maxlength="200" />
+        <mat-hint align="end">{{ form.controls.title.value.length }}/200</mat-hint>
+        @if (form.controls.title.hasError('required')) {
+          <mat-error>Ponle un título.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="wide">
+        <mat-label>Ubicación</mat-label>
+        <mat-icon matPrefix>place</mat-icon>
+        <input matInput formControlName="location" maxlength="255" />
+        <mat-hint>Sala y ciudad, por ejemplo «Sala Apolo, Barcelona».</mat-hint>
+        @if (form.controls.location.hasError('required')) {
+          <mat-error>Indica dónde será.</mat-error>
+        }
+      </mat-form-field>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <header>
+      <span class="step">02</span>
+      <h2>Cuándo</h2>
+      <p>En tu hora local. Un evento publicado solo puede moverse a fechas futuras.</p>
+    </header>
+    <div class="fields">
+      <mat-form-field appearance="outline">
+        <mat-label>Empieza</mat-label>
+        <mat-icon matPrefix>event</mat-icon>
+        <input matInput type="datetime-local" formControlName="start_at" />
+        @if (form.controls.start_at.hasError('required')) {
+          <mat-error>Indica cuándo empieza.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Termina</mat-label>
+        <mat-icon matPrefix>event_available</mat-icon>
+        <input matInput type="datetime-local" formControlName="end_at" />
+        @if (duration(); as d) {
+          <mat-hint>Dura {{ d }}</mat-hint>
+        }
+        @if (form.controls.end_at.hasError('required')) {
+          <mat-error>Indica cuándo termina.</mat-error>
+        }
+      </mat-form-field>
+
+      @if (form.hasError('endBeforeStart') && form.controls.end_at.touched) {
+        <p class="notice error wide" role="alert">
+          <mat-icon>error</mat-icon> El fin debe ser posterior al inicio.
+        </p>
+      }
+    </div>
+  </section>
+
+  <section class="form-section">
+    <header>
+      <span class="step">03</span>
+      <h2>Aforo e imagen</h2>
+      <p>El aforo total se reparte después entre las categorías de entrada.</p>
+    </header>
+    <div class="fields">
+      <mat-form-field appearance="outline">
+        <mat-label>Aforo total</mat-label>
+        <mat-icon matPrefix>groups</mat-icon>
+        <input matInput type="number" min="1" formControlName="capacity" />
+        <span matTextSuffix>personas</span>
+        @if (form.controls.capacity.invalid) {
+          <mat-error>Debe ser al menos 1.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Imagen (opcional)</mat-label>
+        <mat-icon matPrefix>image</mat-icon>
+        <input matInput type="url" formControlName="image_url" placeholder="https://…" />
+        <mat-hint>Enlace a una imagen horizontal.</mat-hint>
+        @if (form.controls.image_url.hasError('pattern')) {
+          <mat-error>Debe ser una dirección http(s).</mat-error>
+        }
+      </mat-form-field>
+
+      @if (imagePreview(); as src) {
+        <img class="image-preview wide" [src]="src" alt="Vista previa de la imagen" />
+      }
+    </div>
+  </section>
+
+  <section class="form-section">
+    <header>
+      <span class="step">04</span>
+      <h2>Descripción</h2>
+      <p>Qué va a pasar, horarios, accesos… Se respetan los saltos de línea.</p>
+    </header>
+    <div class="fields">
+      <mat-form-field appearance="outline" class="wide">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput formControlName="description" rows="6"></textarea>
+      </mat-form-field>
+    </div>
+  </section>
+
+  @if (!readonly()) {
+    <div class="form-actions">
+      <span class="spacer">
+        @if (form.dirty) {
+          Tienes cambios sin guardar.
+        }
+      </span>
+      @if (cancelLink(); as link) {
+        <a mat-button class="quiet" [routerLink]="link">Cancelar</a>
+      }
+      <button mat-flat-button type="submit" [disabled]="busy()">
+        @if (busy()) {
+          <mat-spinner diameter="20" aria-label="Guardando" />
+        } @else {
+          {{ submitLabel() }}
+        }
+      </button>
+    </div>
+  }
+</form>

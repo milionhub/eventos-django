@@ -7,7 +7,7 @@ Plataforma de gestión de eventos y entradas digitales con QR: los organizadores
 
 **Stack:** Angular · Django REST Framework · PostgreSQL · Docker
 
-> 🚧 En desarrollo — Fase 1 (fundaciones) completada. Consulta [`docs/ROADMAP.md`](docs/ROADMAP.md).
+> 🚧 En desarrollo — Fases 1 y 2 completadas (auth, organizaciones y eventos). Consulta [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Cómo ejecutarlo
 

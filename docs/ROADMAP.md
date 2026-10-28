@@ -95,8 +95,8 @@
 - [x] AuthService con signals + interceptor con refresh + guards
 - [x] Login y registro
 - [x] Mis organizaciones / crear organización / miembros
-- [ ] Listado y formulario de eventos, pestañas Datos / Entradas / Staff
-- [ ] Listado y detalle público
+- [x] Listado y formulario de eventos, pestañas Datos / Entradas / Staff
+- [x] Listado y detalle público
 
 **Cierre:** un organizador crea una organización, un evento y sus categorías, y lo publica; aparece en público. Otra organización recibe 404.
 
@@ -111,8 +111,8 @@
 | 4 | Organizaciones frontend: mis organizaciones, crear, miembros | ✅ |
 | 5 | Eventos backend: modelo, servicios y transiciones de estado | ✅ |
 | 6 | Categorías y staff backend + endpoints públicos | ✅ |
-| 7 | Eventos frontend (organizador): listado, formulario con pestañas, publicar/cancelar | |
-| 8 | Público frontend (listado y detalle) + cierre de fase | |
+| 7 | Eventos frontend (organizador): listado, formulario con pestañas, publicar/cancelar | ✅ |
+| 8 | Público frontend (listado y detalle) + cierre de fase | ✅ |
 
 ---
 
@@ -209,5 +209,5 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 
 ## Estado actual
 
-**Fase activa:** 2 — Auth, organizaciones y eventos (Fase 1 cerrada el 2026-10-28, CI en verde).
-**Siguiente paso:** dividir la Fase 2 en bloques, empezando por registro, login y refresh con cookie httpOnly (ADR-0003).
+**Fase activa:** 3 — Reservas (Fase 2 cerrada el 2026-10-28: escenario de cierre probado contra la API real).
+**Siguiente paso:** dividir la Fase 3 en bloques, empezando por `Reservation` + `Ticket` y el servicio `reserve()` con UPDATE condicional (ADR-0004).

@@ -682,7 +682,9 @@ paths:
   /api/v1/organizations/{org_slug}/members/:
     get:
       operationId: members_list
-      description: 'RN-05: only the OWNER manages members.'
+      description: |-
+        RN-05: only the OWNER manages members. MANAGERs may read the list, because they
+        assign members as staff of their events (requirements.md §4).
       parameters:
       - in: path
         name: org_slug
@@ -704,7 +706,9 @@ paths:
           description: ''
     post:
       operationId: members_create
-      description: 'RN-05: only the OWNER manages members.'
+      description: |-
+        RN-05: only the OWNER manages members. MANAGERs may read the list, because they
+        assign members as staff of their events (requirements.md §4).
       parameters:
       - in: path
         name: org_slug

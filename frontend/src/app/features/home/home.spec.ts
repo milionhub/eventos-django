@@ -1,50 +1,77 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
+import { vi } from 'vitest';
 
+import { PublicEvent } from '../../core/api/models';
 import { Home } from './home';
 
+const flushMicrotasks = () => new Promise((resolve) => setTimeout(resolve));
+const URL = '/api/v1/public/events/';
+
+const event = (slug: string, available: number): PublicEvent => ({
+  slug,
+  title: `Evento ${slug}`,
+  location: 'Barcelona',
+  image_url: '',
+  start_at: '2026-11-20T18:30:00Z',
+  end_at: '2026-11-20T21:30:00Z',
+  organization_name: 'Sala Apolo',
+  available,
+});
+
 describe('Home', () => {
-  let httpTesting: HttpTestingController;
+  let fixture: ComponentFixture<Home>;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Home],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
-    httpTesting = TestBed.inject(HttpTestingController);
+    http = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => httpTesting.verify());
+  afterEach(() => http.verify());
 
-  async function renderWith(
-    respond: (req: ReturnType<HttpTestingController['expectOne']>) => void,
-  ): Promise<HTMLElement> {
-    const fixture = TestBed.createComponent(Home);
+  async function render(results: PublicEvent[], q?: string): Promise<HTMLElement> {
+    fixture = TestBed.createComponent(Home);
+    if (q) fixture.componentRef.setInput('q', q);
     fixture.detectChanges();
-    await Promise.resolve(); // let the resource loader issue the request
-    respond(httpTesting.expectOne('/api/v1/health/'));
+    await flushMicrotasks();
+    const req = http.expectOne((r) => r.url === URL);
+    expect(req.request.params.get('q')).toBe(q ?? null);
+    req.flush({ count: results.length, results });
     await fixture.whenStable();
-    return (fixture.nativeElement as HTMLElement).querySelector('[role="status"]')!;
+    return fixture.nativeElement;
   }
 
-  it('reports API and database as operational', async () => {
-    const status = await renderWith((req) => req.flush({ api: true, database: true }));
+  it('shows published events as tickets linking to their page', async () => {
+    const element = await render([event('jazz', 42), event('indie', 0)]);
 
-    expect(status.dataset['status']).toBe('ok');
+    const cards = element.querySelectorAll('a.ticket');
+    expect(cards[0].getAttribute('href')).toBe('/events/jazz');
+    expect(cards[0].textContent).toContain('42 plazas libres');
+    expect(cards[1].textContent).toContain('Agotado');
   });
 
-  it('reports the database as down on 503', async () => {
-    const status = await renderWith((req) =>
-      req.flush({ api: true, database: false }, { status: 503, statusText: 'Service Unavailable' }),
-    );
+  it('puts the search in the URL', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const element = await render([]);
 
-    expect(status.dataset['status']).toBe('database-down');
+    const input = element.querySelector<HTMLInputElement>('input[type="search"]')!;
+    input.value = '  jazz ';
+    input.dispatchEvent(new Event('input'));
+    element.querySelector('form')!.dispatchEvent(new Event('submit'));
+
+    expect(navigate).toHaveBeenCalledWith([], { queryParams: { q: 'jazz' } });
   });
 
-  it('reports the API as unreachable on network errors', async () => {
-    const status = await renderWith((req) => req.error(new ProgressEvent('error')));
+  it('searches with the q from the URL and offers to clear it', async () => {
+    const element = await render([], 'nada');
 
-    expect(status.dataset['status']).toBe('api-down');
+    expect(element.textContent).toContain('0 resultados para «nada»');
+    expect(element.textContent).toContain('Nada por aquí');
   });
 });

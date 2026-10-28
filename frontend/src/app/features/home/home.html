@@ -2,35 +2,74 @@
   <p class="eyebrow">Conciertos · Charlas · Festivales</p>
   <h1 class="display">Próximos <br />eventos<span class="cursor" aria-hidden="true">_</span></h1>
   <p class="lead">Reserva tu plaza en segundos y entra con el QR desde el móvil.</p>
+
+  <form class="search" role="search" (ngSubmit)="submit()">
+    <mat-icon aria-hidden="true">search</mat-icon>
+    <input
+      type="search"
+      name="q"
+      aria-label="Buscar eventos por nombre o lugar"
+      placeholder="Busca por nombre o ciudad"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+    />
+    <button mat-flat-button type="submit">Buscar</button>
+  </form>
 </section>
 
-<article class="ticket">
-  <div class="ticket-main">
-    <mat-icon class="ticket-icon">confirmation_number</mat-icon>
-    <h2>Aún no hay eventos publicados</h2>
-    <p>Cuando los organizadores publiquen sus eventos, aparecerán aquí.</p>
-  </div>
-  <div class="ticket-tear" aria-hidden="true"></div>
-  <div class="ticket-stub" aria-hidden="true">
-    <span>Entrada</span>
-    <span>Nº 0000</span>
-  </div>
-</article>
+@if (events.isLoading() && !events.hasValue()) {
+  <mat-spinner class="loading" diameter="32" aria-label="Cargando eventos" />
+} @else if (events.error()) {
+  <p class="notice error" role="alert">No se han podido cargar los eventos.</p>
+} @else if (events.value(); as data) {
+  @if (q()) {
+    <p class="results">
+      {{ data.count }} {{ data.count === 1 ? 'resultado' : 'resultados' }} para «{{ q() }}»
+      <a routerLink="/">Ver todos</a>
+    </p>
+  }
 
-<p class="health" role="status" [attr.data-status]="status()">
-  <span class="dot"></span>
-  @switch (status()) {
-    @case ('loading') {
-      Comprobando el estado del servidor…
-    }
-    @case ('ok') {
-      API y base de datos operativas
-    }
-    @case ('database-down') {
-      La API responde, pero la base de datos no está disponible
-    }
-    @case ('api-down') {
-      No se puede conectar con la API
+  @if (data.count === 0) {
+    <article class="ticket empty">
+      <div class="ticket-main">
+        <mat-icon class="ticket-icon">confirmation_number</mat-icon>
+        <h2>{{ q() ? 'Nada por aquí' : 'Aún no hay eventos publicados' }}</h2>
+        <p>
+          {{
+            q()
+              ? 'Prueba con otras palabras o mira todos los eventos.'
+              : 'Cuando los organizadores publiquen sus eventos, aparecerán aquí.'
+          }}
+        </p>
+      </div>
+      <div class="ticket-tear" aria-hidden="true"></div>
+      <div class="ticket-stub" aria-hidden="true">
+        <span>Entrada</span>
+        <span>Nº 0000</span>
+      </div>
+    </article>
+  } @else {
+    <ul class="grid" role="list">
+      @for (event of data.results; track event.slug) {
+        <li><app-event-ticket [event]="event" /></li>
+      }
+    </ul>
+
+    @if (pages() > 1) {
+      <nav class="pager" aria-label="Páginas">
+        <button mat-button type="button" [disabled]="page() === 1" (click)="page.set(page() - 1)">
+          <mat-icon>chevron_left</mat-icon> Anterior
+        </button>
+        <span>Página {{ page() }} de {{ pages() }}</span>
+        <button
+          mat-button
+          type="button"
+          [disabled]="page() === pages()"
+          (click)="page.set(page() + 1)"
+        >
+          Siguiente <mat-icon iconPositionEnd>chevron_right</mat-icon>
+        </button>
+      </nav>
     }
   }
-</p>
+}

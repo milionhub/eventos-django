@@ -1,0 +1,130 @@
+@use 'ticket';
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.ticket {
+  @include ticket.notched($at: calc(100% - 52px));
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: var(--app-radius);
+  background: var(--mat-sys-surface-container);
+  color: inherit;
+  text-decoration: none;
+}
+
+.link {
+  transition: transform 150ms;
+
+  &:hover {
+    transform: translateY(-3px);
+
+    h2 {
+      color: var(--app-accent);
+    }
+  }
+}
+
+// Image when there is one; otherwise a poster made of the brand glow.
+.poster {
+  position: relative;
+  height: 150px;
+  border-radius: var(--app-radius) var(--app-radius) 0 0;
+  background:
+    radial-gradient(
+      120% 140% at 0% 0%,
+      color-mix(in srgb, var(--app-accent) 55%, transparent),
+      transparent 60%
+    ),
+    light-dark(#3a3841, var(--mat-sys-surface-container-highest));
+  background-position: center;
+  background-size: cover;
+}
+
+.poster-date {
+  position: absolute;
+  left: 20px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  font: var(--mat-sys-label-large);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 50%);
+
+  strong {
+    font-family: var(--app-font-display);
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+}
+
+.ticket-main {
+  flex: 1;
+  padding: 20px 20px 16px;
+
+  h2 {
+    margin: 4px 0 8px;
+    font-size: 1.375rem;
+    overflow-wrap: anywhere;
+  }
+
+  p {
+    margin: 0;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.when {
+  font: var(--mat-sys-label-large);
+}
+
+.where {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+.ticket-tear {
+  @include ticket.tear-line;
+}
+
+.ticket-stub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 52px;
+  box-sizing: border-box;
+  padding: 0 20px;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-medium);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.seats {
+  color: var(--app-accent);
+
+  &.sold-out {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.by {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

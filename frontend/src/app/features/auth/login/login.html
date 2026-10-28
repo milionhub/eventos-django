@@ -8,7 +8,7 @@
   <form class="card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
     <div class="fields">
       @if (error(); as message) {
-        <p class="form-error" role="alert">
+        <p class="notice error" role="alert">
           <mat-icon>error</mat-icon>
           {{ message }}
         </p>

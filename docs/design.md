@@ -55,12 +55,25 @@ Las tarjetas que representan eventos o entradas tienen forma de entrada física:
 
 Úsalo para eventos y entradas; no para formularios ni tablas.
 
+## Formularios
+- Campos `outline` con esquinas de 12px; el borde y la etiqueta se vuelven coral al enfocar.
+- Icono a la izquierda (`matPrefix`) que dice qué se escribe, y ayudas (`mat-hint`) con ejemplos o el efecto del dato (duración del evento, dirección de la organización, plazas que quedan).
+- Formularios largos en **secciones numeradas** (`.form-section`): título y explicación a la izquierda, campos a la derecha; en móvil, apilados.
+- Acciones en una barra fija al final (`.form-actions`), con aviso de cambios sin guardar.
+- Formularios cortos dentro de una página (añadir miembro, nueva categoría): cabecera con icono en una pastilla coral, título y una línea de ayuda.
+- Crear un evento muestra al lado la **vista previa** de la tarjeta pública (`app-event-ticket`), la misma que ve el público.
+
 ## Clases globales
 - `.display`: titular tipo cartel.
 - `.eyebrow`: etiqueta pequeña en mayúsculas y coral, encima de un titular.
 - `.lead`: párrafo de introducción bajo el titular.
 - `.surface-card`: superficie elevada para tarjetas y paneles.
-- `.chip`: etiqueta en forma de píldora (roles, estados).
+- `.chip`: etiqueta en forma de píldora (roles, estados). Con `data-status="DRAFT|PUBLISHED|CANCELLED|FINISHED"` toma el color del estado del evento.
+- `.back-link`: enlace "← Volver" encima del titular.
+- `.notice` / `.notice.error`: aviso tras una acción (éxito o error).
+- `.quiet`: botón de texto secundario (Editar, Quitar…), gris; con `.confirming` se vuelve rojo mientras pide confirmación.
+
+Las fechas formateadas pasan por el pipe `capitalize` (solo la primera letra): `text-transform: capitalize` pondría "Sábado 12 De Diciembre".
 
 ## Reglas
 - Un único acento por pantalla: el coral marca la acción principal; el resto, en neutros. Las acciones secundarias ("Quitar", "Cancelar") van en gris y solo se vuelven rojas al pedir confirmación.

@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, input, resource, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -18,22 +17,12 @@ import {
 } from '../../../core/api/functions';
 import { Member, RoleEnum } from '../../../core/api/models';
 import { AuthService } from '../../../core/auth/auth.service';
-import { initials, ROLE_LABELS, ROLES } from '../../../shared/roles';
+import { errorText } from '../../../shared/api-errors';
+import { initials, ROLE_DESCRIPTIONS, ROLE_LABELS, ROLES } from '../../../shared/roles';
 
 interface Notice {
   kind: 'success' | 'error';
   text: string;
-}
-
-/** Business errors come back as `{code, detail}` with a message meant for the user. */
-function errorText(error: unknown): string {
-  if (error instanceof HttpErrorResponse) {
-    if (error.error?.code && error.error?.detail) return error.error.detail;
-    if (error.status === 403 || error.status === 404) {
-      return 'Ya no tienes permiso para gestionar esta organización.';
-    }
-  }
-  return 'No se ha podido completar la acción. Inténtalo de nuevo.';
 }
 
 const displayName = (member: Member) =>
@@ -65,6 +54,7 @@ export class Members {
 
   protected readonly roles = ROLES;
   protected readonly roleLabels = ROLE_LABELS;
+  protected readonly roleDescriptions = ROLE_DESCRIPTIONS;
   protected readonly initials = initials;
   protected readonly displayName = displayName;
   protected readonly myId = computed(() => this.auth.user()?.id);

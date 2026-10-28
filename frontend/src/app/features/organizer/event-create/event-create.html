@@ -1,0 +1,30 @@
+<a class="back-link" [routerLink]="['/org', org(), 'events']">
+  <mat-icon>arrow_back</mat-icon> Eventos
+</a>
+
+<header class="page-header">
+  <p class="eyebrow">Nuevo evento</p>
+  <h1 class="display">Crea tu<br />evento<span class="accent">_</span></h1>
+  <p class="lead">Se guarda como borrador. Después añadirás las entradas y lo publicarás.</p>
+</header>
+
+@if (error(); as message) {
+  <p class="notice error" role="alert"><mat-icon>error</mat-icon> {{ message }}</p>
+}
+
+<div class="layout">
+  <section class="surface-card form-card">
+    <app-event-form
+      submitLabel="Crear borrador"
+      [cancelLink]="['/org', org(), 'events']"
+      [busy]="saving()"
+      (changes)="draft.set($event)"
+      (save)="create($event)"
+    />
+  </section>
+
+  <aside class="preview" aria-label="Vista previa">
+    <p class="preview-label"><mat-icon>visibility</mat-icon> Así se verá en la página pública</p>
+    <app-event-ticket [event]="preview()" />
+  </aside>
+</div>

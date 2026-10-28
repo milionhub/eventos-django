@@ -4,43 +4,76 @@
     <h1 class="display">Organiza&shy;ciones</h1>
     <p class="lead">Crea una organización para publicar eventos y gestionar a tu equipo.</p>
   </div>
-  <button mat-flat-button type="button" class="new" (click)="toggleForm()">
-    <mat-icon>{{ creating() ? 'close' : 'add' }}</mat-icon>
-    {{ creating() ? 'Cancelar' : 'Nueva organización' }}
-  </button>
+  @if (!creating()) {
+    <button mat-flat-button type="button" class="new" (click)="toggleForm()">
+      <mat-icon>add</mat-icon> Nueva organización
+    </button>
+  }
 </header>
 
 @if (creating()) {
   <form class="surface-card create" [formGroup]="form" (ngSubmit)="create()" novalidate>
-    <h2>Nueva organización</h2>
-    @if (error(); as message) {
-      <p class="form-error" role="alert">{{ message }}</p>
-    }
-    <mat-form-field appearance="outline">
-      <mat-label>Nombre</mat-label>
-      <input matInput formControlName="name" maxlength="120" />
-      @if (form.controls.name.hasError('required')) {
-        <mat-error>Ponle un nombre.</mat-error>
+    <div class="create-main">
+      <header class="create-head">
+        <span class="create-icon" aria-hidden="true"><mat-icon>domain_add</mat-icon></span>
+        <div>
+          <h2>Nueva organización</h2>
+          <p>Una sala, un festival, una asociación… quien organiza los eventos.</p>
+        </div>
+      </header>
+      @if (error(); as message) {
+        <p class="notice error" role="alert"><mat-icon>error</mat-icon> {{ message }}</p>
       }
-    </mat-form-field>
-    <mat-form-field appearance="outline">
-      <mat-label>Descripción (opcional)</mat-label>
-      <textarea matInput formControlName="description" rows="3"></textarea>
-    </mat-form-field>
-    <button mat-flat-button type="submit" [disabled]="submitting()">
-      @if (submitting()) {
-        <mat-spinner diameter="20" aria-label="Creando" />
-      } @else {
-        Crear organización
-      }
-    </button>
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre</mat-label>
+        <mat-icon matPrefix>apartment</mat-icon>
+        <input matInput formControlName="name" maxlength="120" />
+        @if (slug(); as s) {
+          <mat-hint
+            >Tu dirección será <strong>/org/{{ s }}</strong></mat-hint
+          >
+        }
+        @if (form.controls.name.hasError('required')) {
+          <mat-error>Ponle un nombre.</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Descripción (opcional)</mat-label>
+        <mat-icon matPrefix>notes</mat-icon>
+        <textarea matInput formControlName="description" rows="3"></textarea>
+        <mat-hint>Aparece en la página de la organización.</mat-hint>
+      </mat-form-field>
+      <div class="create-actions">
+        <button mat-button type="button" class="quiet" (click)="toggleForm()">Cancelar</button>
+        <button mat-flat-button type="submit" [disabled]="submitting()">
+          @if (submitting()) {
+            <mat-spinner diameter="20" aria-label="Creando" />
+          } @else {
+            Crear organización
+          }
+        </button>
+      </div>
+    </div>
+    <aside class="create-aside">
+      <h3>Al crearla</h3>
+      <ul>
+        <li>
+          <mat-icon>verified_user</mat-icon><span>Serás su <strong>propietario</strong>.</span>
+        </li>
+        <li><mat-icon>group_add</mat-icon><span>Podrás añadir a tu equipo con su email.</span></li>
+        <li>
+          <mat-icon>event</mat-icon
+          ><span>Crearás eventos y los publicarás cuando estén listos.</span>
+        </li>
+      </ul>
+    </aside>
   </form>
 }
 
 @if (organizations.isLoading()) {
   <mat-spinner class="loading" diameter="32" aria-label="Cargando organizaciones" />
 } @else if (organizations.error()) {
-  <p class="form-error" role="alert">No se han podido cargar tus organizaciones.</p>
+  <p class="notice error" role="alert">No se han podido cargar tus organizaciones.</p>
 } @else if (organizations.value()?.length === 0) {
   @if (!creating()) {
     <div class="surface-card empty">

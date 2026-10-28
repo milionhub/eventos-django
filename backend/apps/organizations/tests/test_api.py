@@ -86,7 +86,7 @@ EXPECTED = {
     #                  OWNER  MANAGER  STAFF  outsider
     "detail.get":    (200,   200,     200,   404),
     "detail.patch":  (200,   403,     403,   404),
-    "members.get":   (200,   403,     403,   404),
+    "members.get":   (200,   200,     403,   404),  # MANAGER reads to assign staff
     "members.post":  (201,   403,     403,   404),
     "member.patch":  (200,   403,     403,   404),
     "member.delete": (204,   403,     403,   404),

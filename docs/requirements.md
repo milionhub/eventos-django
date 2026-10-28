@@ -122,6 +122,8 @@ Un mismo usuario puede ser asistente y, a la vez, miembro de una o varias organi
 | Validar entradas | – | – | Eventos asignados | ✅ | ✅ |
 | Gestionar miembros y editar la organización | – | – | – | – | ✅ |
 
+> MANAGER puede **ver** la lista de miembros (sin modificarla) porque la necesita para asignar STAFF a sus eventos.
+
 ## 5. Requisitos no funcionales
 
 - RNF-01. Responsive: todo usable a 360 px de ancho.

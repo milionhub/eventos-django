@@ -66,10 +66,11 @@ class OrganizationDetailView(OrganizationScopedMixin, APIView):
 
 
 class MemberListView(OrganizationScopedMixin, APIView):
-    """RN-05: only the OWNER manages members."""
+    """RN-05: only the OWNER manages members. MANAGERs may read the list, because they
+    assign members as staff of their events (requirements.md §4)."""
 
     permission_classes = [IsAuthenticated]
-    roles_by_method = {"GET": OWNER_ONLY, "POST": OWNER_ONLY}
+    roles_by_method = {"GET": OWNER_ONLY | {Membership.Role.MANAGER}, "POST": OWNER_ONLY}
 
     @extend_schema(operation_id="members_list", responses=MemberSerializer(many=True))
     def get(self, request: Request, org_slug: str) -> Response:

@@ -1,4 +1,4 @@
-<a class="back" routerLink="/org"><mat-icon>arrow_back</mat-icon> Organizaciones</a>
+<a class="back-link" routerLink="/org"><mat-icon>arrow_back</mat-icon> Organizaciones</a>
 
 @if (details.isLoading()) {
   <mat-spinner class="loading" diameter="32" aria-label="Cargando organización" />
@@ -14,11 +14,19 @@
   </header>
 
   <ul class="tiles" role="list">
-    <li class="surface-card tile soon">
-      <mat-icon>event</mat-icon>
-      <h2>Eventos</h2>
-      <p>Crea, publica y gestiona tus eventos.</p>
-      <span class="chip">Próximamente</span>
+    <li>
+      <a class="surface-card tile" [routerLink]="['/org', org(), 'events']">
+        <mat-icon>event</mat-icon>
+        <h2>Eventos</h2>
+        <p>
+          {{
+            item.role === 'STAFF'
+              ? 'Los eventos en los que validas entradas.'
+              : 'Crea, publica y gestiona tus eventos.'
+          }}
+        </p>
+        <mat-icon class="arrow" aria-hidden="true">arrow_forward</mat-icon>
+      </a>
     </li>
     @if (item.role === 'OWNER') {
       <li>

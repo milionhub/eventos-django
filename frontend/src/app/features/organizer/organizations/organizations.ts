@@ -1,4 +1,5 @@
-import { Component, inject, resource, signal } from '@angular/core';
+import { Component, computed, inject, resource, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -44,6 +45,17 @@ export class Organizations {
     name: ['', [Validators.required, Validators.maxLength(120)]],
     description: [''],
   });
+
+  private readonly name = toSignal(this.form.controls.name.valueChanges, { initialValue: '' });
+  /** Preview of the address the backend will generate (it adds -2, -3… if taken). */
+  protected readonly slug = computed(() =>
+    this.name()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '') // á → a, ñ → n
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, ''),
+  );
 
   protected toggleForm(): void {
     this.creating.update((open) => !open);

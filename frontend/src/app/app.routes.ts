@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { authGuard, guestGuard, orgRoleGuard } from './core/auth/auth.guards';
-import { ROLES } from './shared/roles';
+import { ORGANIZERS, ROLES } from './shared/roles';
 
 export const routes: Routes = [
   {
@@ -22,6 +22,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/register/register').then((m) => m.Register),
   },
   {
+    path: 'events/:slug',
+    title: 'Evento · #4events',
+    loadComponent: () => import('./features/public-event/public-event').then((m) => m.PublicEvent),
+  },
+  {
     path: 'org',
     canActivate: [authGuard],
     children: [
@@ -37,6 +42,26 @@ export const routes: Routes = [
         canActivate: [orgRoleGuard(ROLES)],
         loadComponent: () =>
           import('./features/organizer/organization/organization').then((m) => m.Organization),
+      },
+      {
+        path: ':org/events',
+        title: 'Eventos · #4events',
+        canActivate: [orgRoleGuard(ROLES)],
+        loadComponent: () => import('./features/organizer/events/events').then((m) => m.Events),
+      },
+      {
+        path: ':org/events/new',
+        title: 'Nuevo evento · #4events',
+        canActivate: [orgRoleGuard(ORGANIZERS)],
+        loadComponent: () =>
+          import('./features/organizer/event-create/event-create').then((m) => m.EventCreate),
+      },
+      {
+        path: ':org/events/:id',
+        title: 'Gestionar evento · #4events',
+        canActivate: [orgRoleGuard(ORGANIZERS)],
+        loadComponent: () =>
+          import('./features/organizer/event-manage/event-manage').then((m) => m.EventManage),
       },
       {
         path: ':org/members',

@@ -1,0 +1,351 @@
+<a class="back-link" [routerLink]="['/org', org(), 'events']"
+  ><mat-icon>arrow_back</mat-icon> Eventos</a
+>
+
+@if (event.isLoading() && !event.hasValue()) {
+  <mat-spinner class="loading" diameter="32" aria-label="Cargando evento" />
+} @else if (event.error()) {
+  <p class="notice error" role="alert">No se ha podido cargar el evento.</p>
+} @else if (event.value(); as e) {
+  <header class="page-header">
+    <span class="chip status" [attr.data-status]="e.is_finished ? 'FINISHED' : e.status">{{
+      statusLabel(e)
+    }}</span>
+    <h1 class="display">{{ e.title }}</h1>
+    <p class="meta">
+      <mat-icon>schedule</mat-icon>
+      {{ e.start_at | date: "EEEE d 'de' MMMM, HH:mm" | capitalize }} –
+      {{ e.end_at | date: 'HH:mm' }}
+      <mat-icon>place</mat-icon>
+      {{ e.location }}
+    </p>
+
+    <div class="actions">
+      @if (e.status === 'DRAFT') {
+        <button
+          mat-flat-button
+          type="button"
+          class="publish"
+          [disabled]="e.publish_blockers.length > 0 || busy() === 'publish'"
+          (click)="publish()"
+        >
+          <mat-icon>rocket_launch</mat-icon> Publicar
+        </button>
+      }
+      @if (e.status === 'PUBLISHED' && !e.is_finished) {
+        <a mat-stroked-button [routerLink]="['/events', e.slug]">
+          <mat-icon>open_in_new</mat-icon> Ver página pública
+        </a>
+      }
+      @if (editable()) {
+        <button
+          mat-button
+          type="button"
+          class="quiet"
+          [class.confirming]="confirming() === 'cancel'"
+          [disabled]="busy() === 'cancel'"
+          (click)="cancel()"
+        >
+          {{ confirming() === 'cancel' ? '¿Seguro? Cancelar evento' : 'Cancelar evento' }}
+        </button>
+      }
+    </div>
+
+    @if (e.status === 'DRAFT' && e.publish_blockers.length) {
+      <div class="blockers" role="note">
+        <strong>Para publicar falta:</strong>
+        <ul>
+          @for (blocker of e.publish_blockers; track blocker) {
+            <li>{{ blocker }}</li>
+          }
+        </ul>
+      </div>
+    }
+    @if (e.status === 'CANCELLED') {
+      <p class="notice error">Este evento está cancelado y ya no se puede modificar.</p>
+    }
+  </header>
+
+  @if (notice(); as n) {
+    <p
+      class="notice"
+      [class.error]="n.kind === 'error'"
+      [attr.role]="n.kind === 'error' ? 'alert' : 'status'"
+    >
+      <mat-icon>{{ n.kind === 'error' ? 'error' : 'check_circle' }}</mat-icon>
+      {{ n.text }}
+    </p>
+  }
+
+  <mat-tab-group
+    class="tabs"
+    mat-stretch-tabs="false"
+    [selectedIndex]="selectedTab()"
+    (selectedIndexChange)="selectedTab.set($event)"
+  >
+    <!-- Datos -->
+    <mat-tab label="Datos">
+      <section class="surface-card panel">
+        <app-event-form
+          [event]="e"
+          [readonly]="!editable()"
+          [busy]="busy() === 'data'"
+          (save)="saveData($event)"
+        />
+      </section>
+    </mat-tab>
+
+    <!-- Entradas -->
+    <mat-tab [label]="'Entradas (' + e.ticket_types.length + ')'">
+      <section class="surface-card panel">
+        <div
+          class="meter"
+          [attr.aria-label]="'Aforo asignado: ' + e.allocated_capacity + ' de ' + e.capacity"
+        >
+          <div class="meter-text">
+            <span
+              ><strong>{{ e.allocated_capacity }}</strong> de {{ e.capacity }} plazas
+              asignadas</span
+            >
+            <span>{{ e.capacity - e.allocated_capacity }} sin asignar</span>
+          </div>
+          <div class="meter-bar">
+            <span [style.width.%]="(e.allocated_capacity / e.capacity) * 100"></span>
+          </div>
+        </div>
+
+        @if (e.ticket_types.length) {
+          <ul class="rows" role="list">
+            @for (ticketType of e.ticket_types; track ticketType.id) {
+              <li class="row">
+                @if (editing() === ticketType.id) {
+                  <form
+                    class="inline-edit"
+                    [formGroup]="editForm"
+                    (ngSubmit)="saveTicketType(ticketType)"
+                  >
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                      <mat-label>Nombre</mat-label>
+                      <input matInput formControlName="name" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="narrow">
+                      <mat-label>Cupo</mat-label>
+                      <input matInput type="number" min="1" formControlName="capacity" />
+                    </mat-form-field>
+                    <button
+                      mat-flat-button
+                      type="submit"
+                      [disabled]="busy() === 'tt-' + ticketType.id"
+                    >
+                      Guardar
+                    </button>
+                    <button mat-button type="button" (click)="editing.set(null)">Descartar</button>
+                  </form>
+                } @else {
+                  <div class="what">
+                    <strong>{{ ticketType.name }}</strong>
+                    @if (ticketType.description) {
+                      <span>{{ ticketType.description }}</span>
+                    }
+                  </div>
+                  <div class="numbers">
+                    <span
+                      ><strong>{{ ticketType.capacity }}</strong> cupo</span
+                    >
+                    <span
+                      ><strong>{{ ticketType.reserved_count }}</strong> reservadas</span
+                    >
+                    <span
+                      ><strong>{{ ticketType.available }}</strong> libres</span
+                    >
+                  </div>
+                  @if (editable()) {
+                    <div class="row-actions">
+                      <button
+                        mat-button
+                        type="button"
+                        class="quiet"
+                        (click)="startEdit(ticketType)"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        mat-button
+                        type="button"
+                        class="quiet"
+                        [class.confirming]="confirming() === 'tt-' + ticketType.id"
+                        [disabled]="busy() === 'tt-' + ticketType.id"
+                        (click)="deleteTicketType(ticketType)"
+                      >
+                        {{ confirming() === 'tt-' + ticketType.id ? '¿Seguro? Borrar' : 'Borrar' }}
+                      </button>
+                    </div>
+                  }
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="empty">Aún no hay categorías. Añade al menos una para poder publicar.</p>
+        }
+
+        @if (editable()) {
+          <form class="add" [formGroup]="ticketForm" (ngSubmit)="addTicketType()" novalidate>
+            <header class="add-head">
+              <span class="add-icon" aria-hidden="true"
+                ><mat-icon>confirmation_number</mat-icon></span
+              >
+              <div>
+                <h2>Nueva categoría</h2>
+                <p>
+                  @if (remaining() > 0) {
+                    Quedan <strong>{{ remaining() }}</strong> plazas del aforo por asignar.
+                  } @else {
+                    Todo el aforo está asignado. Amplía el aforo en «Datos» o reduce otra categoría.
+                  }
+                </p>
+              </div>
+            </header>
+            @if (remaining() > 0) {
+              <div class="add-fields">
+                <mat-form-field appearance="outline">
+                  <mat-label>Nombre</mat-label>
+                  <mat-icon matPrefix>sell</mat-icon>
+                  <input
+                    matInput
+                    formControlName="name"
+                    placeholder="General, VIP…"
+                    maxlength="80"
+                  />
+                  @if (ticketForm.controls.name.hasError('required')) {
+                    <mat-error>Ponle un nombre.</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Cupo</mat-label>
+                  <mat-icon matPrefix>event_seat</mat-icon>
+                  <input
+                    matInput
+                    type="number"
+                    min="1"
+                    [max]="remaining()"
+                    formControlName="capacity"
+                  />
+                  <span matTextSuffix>plazas</span>
+                  @if (ticketForm.controls.capacity.hasError('max')) {
+                    <mat-error>Solo quedan {{ remaining() }} libres.</mat-error>
+                  } @else if (ticketForm.controls.capacity.invalid) {
+                    <mat-error>Al menos 1.</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="wide">
+                  <mat-label>Descripción (opcional)</mat-label>
+                  <mat-icon matPrefix>notes</mat-icon>
+                  <input matInput formControlName="description" maxlength="255" />
+                  <mat-hint>Qué incluye: «Primera fila», «Copa de bienvenida»…</mat-hint>
+                </mat-form-field>
+              </div>
+              <div class="add-actions">
+                @if (remaining() > 0) {
+                  <button mat-button type="button" class="quiet" (click)="useAllRemaining()">
+                    Usar las {{ remaining() }} libres
+                  </button>
+                }
+                <button
+                  mat-flat-button
+                  type="submit"
+                  [disabled]="remaining() === 0 || busy() === 'add-ticket'"
+                >
+                  <mat-icon>add</mat-icon> Añadir categoría
+                </button>
+              </div>
+            }
+          </form>
+        }
+      </section>
+    </mat-tab>
+
+    <!-- Staff -->
+    <mat-tab label="Staff">
+      <section class="surface-card panel">
+        <p class="hint">
+          El personal asignado podrá validar entradas de este evento desde el móvil.
+        </p>
+        @if (staff.isLoading() && !staff.hasValue()) {
+          <mat-spinner class="loading" diameter="28" aria-label="Cargando staff" />
+        } @else if (staff.error()) {
+          <p class="notice error" role="alert">No se ha podido cargar el staff.</p>
+        } @else {
+          @if (staff.value()?.length) {
+            <ul class="rows" role="list">
+              @for (assignment of staff.value(); track assignment.id) {
+                <li class="row">
+                  <span class="avatar" aria-hidden="true">{{ initials(assignment.user) }}</span>
+                  <div class="what">
+                    <strong
+                      >{{ assignment.user.first_name }} {{ assignment.user.last_name }}</strong
+                    >
+                    <span>{{ assignment.user.email }}</span>
+                  </div>
+                  @if (editable()) {
+                    <button
+                      mat-button
+                      type="button"
+                      class="quiet"
+                      [class.confirming]="confirming() === 'staff-' + assignment.id"
+                      [disabled]="busy() === 'staff-' + assignment.id"
+                      (click)="unassign(assignment)"
+                    >
+                      {{ confirming() === 'staff-' + assignment.id ? '¿Seguro? Quitar' : 'Quitar' }}
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="empty">Nadie asignado todavía.</p>
+          }
+
+          @if (editable()) {
+            <div class="add">
+              <header class="add-head">
+                <span class="add-icon" aria-hidden="true"><mat-icon>badge</mat-icon></span>
+                <div>
+                  <h2>Asignar personal</h2>
+                  <p>
+                    Elige a alguien de la organización. Los propietarios y gestores ya pueden
+                    validar en cualquier evento.
+                  </p>
+                </div>
+              </header>
+              <div class="staff-row">
+                <mat-form-field appearance="outline" class="wide-select">
+                  <mat-label>Miembro de la organización</mat-label>
+                  <mat-icon matPrefix>person_search</mat-icon>
+                  <mat-select [formControl]="staffChoice">
+                    @for (member of candidates(); track member.id) {
+                      <mat-option [value]="member.user.id">
+                        {{ member.user.first_name }} {{ member.user.last_name }} ·
+                        {{ roleLabels[member.role] }}
+                      </mat-option>
+                    } @empty {
+                      <mat-option disabled>No quedan miembros por asignar</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                <button
+                  mat-flat-button
+                  type="button"
+                  [disabled]="staffChoice.invalid || busy() === 'assign'"
+                  (click)="assign()"
+                >
+                  <mat-icon>person_add</mat-icon> Asignar
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </section>
+    </mat-tab>
+  </mat-tab-group>
+}
