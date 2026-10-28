@@ -82,23 +82,37 @@
 ## FASE 2 — Auth, organizaciones y eventos · 16–24 h
 
 **Backend**
-- [ ] Registro, login, refresh y logout con cookie httpOnly; `/auth/me/` (ADR-0003)
+- [x] Registro, login, refresh y logout con cookie httpOnly; `/auth/me/` (ADR-0003)
 - [ ] Organization + Membership + servicios (crear organización → OWNER, gestión de miembros, RN-04)
 - [ ] `OrganizationScopedMixin` + permisos por rol
 - [ ] Event + TicketType + EventStaff con sus restricciones
 - [ ] Servicios: crear, editar, publicar (RN-09) y cancelar eventos; categorías (RN-13/14/15); staff
 - [ ] Endpoints públicos de eventos
-- [ ] Throttling de login
+- [x] Throttling de login
 - [ ] **Tests:** auth, matriz de permisos y aislamiento entre organizaciones, transiciones de estado
 
 **Frontend**
-- [ ] AuthService con signals + interceptor con refresh + guards
-- [ ] Login y registro
+- [x] AuthService con signals + interceptor con refresh + guards
+- [x] Login y registro
 - [ ] Mis organizaciones / crear organización / miembros
 - [ ] Listado y formulario de eventos, pestañas Datos / Entradas / Staff
 - [ ] Listado y detalle público
 
 **Cierre:** un organizador crea una organización, un evento y sus categorías, y lo publica; aparece en público. Otra organización recibe 404.
+
+**Bloques de trabajo** (un commit por bloque):
+
+| # | Bloque | Estado |
+|---|---|---|
+| 0 | Identidad visual `#4events` → [`design.md`](design.md) | ✅ |
+| 1 | Auth backend: registro, login, refresh, logout, `me`, throttling | ✅ |
+| 2 | Auth frontend: AuthService, interceptor, guard, login y registro | ✅ |
+| 3 | Organizaciones backend: modelos, servicios, `OrganizationScopedMixin`, permisos | |
+| 4 | Organizaciones frontend: mis organizaciones, crear, miembros | |
+| 5 | Eventos backend: modelo, servicios y transiciones de estado | |
+| 6 | Categorías y staff backend + endpoints públicos | |
+| 7 | Eventos frontend (organizador): listado, formulario con pestañas, publicar/cancelar | |
+| 8 | Público frontend (listado y detalle) + cierre de fase | |
 
 ---
 

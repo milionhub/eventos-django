@@ -93,6 +93,47 @@
   flex: 1;
 }
 
+.account {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 12px 4px 4px;
+  border: var(--app-border);
+  border-radius: 999px;
+  background: none;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-label-large);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--mat-sys-surface-container-high);
+  }
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--app-accent);
+  color: var(--mat-sys-on-primary);
+  font-family: var(--app-font-display);
+  font-weight: 800;
+}
+
+.menu-identity {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  border-bottom: var(--app-border);
+  font: var(--mat-sys-body-medium);
+
+  span {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
 .main {
   flex: 1;
   padding: 24px var(--gutter) 48px;

@@ -1,0 +1,87 @@
+// Shared by login and register: poster headline on one side, the form as a ticket on the other.
+@use 'ticket';
+
+.auth {
+  display: grid;
+  gap: 32px;
+  align-items: center;
+  padding: 16px 0;
+
+  @media (min-width: 900px) {
+    grid-template-columns: 1fr 440px;
+    gap: 64px;
+    padding: 48px 0;
+  }
+}
+
+.accent {
+  color: var(--app-accent);
+}
+
+.lead {
+  max-width: 28rem;
+  margin: 20px 0 0;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-title-medium);
+}
+
+.card {
+  // The notches sit on the tear line, a fixed distance from the bottom.
+  @include ticket.notched($at: calc(100% - 64px));
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--app-radius);
+  background: var(--mat-sys-surface-container);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 28px 24px 20px;
+}
+
+.row {
+  display: grid;
+  gap: 0 12px;
+
+  @media (min-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: var(--app-radius-sm);
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+  font: var(--mat-sys-body-medium);
+}
+
+.submit {
+  height: 48px;
+  margin-top: 8px;
+}
+
+.tear {
+  @include ticket.tear-line;
+}
+
+.switch {
+  height: 64px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--mat-sys-on-surface-variant);
+
+  a {
+    color: var(--app-accent);
+    font-weight: 600;
+  }
+}

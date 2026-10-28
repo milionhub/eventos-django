@@ -1,5 +1,6 @@
 """Settings shared by every environment. Values that change per machine come from `.env`."""
 
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -26,6 +27,7 @@ DJANGO_APPS = [
 ]
 THIRD_PARTY_APPS = [
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
 ]
 LOCAL_APPS = [
@@ -90,10 +92,36 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    # The only client is the Angular SPA: JSON in, JSON out.
+    "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
     "EXCEPTION_HANDLER": "apps.core.exceptions.exception_handler",
+    # Opt-in per view with `throttle_scope` (RNF-05).
+    "DEFAULT_THROTTLE_RATES": {
+        "login": env("THROTTLE_LOGIN_RATE", default="10/min"),
+    },
+}
+
+# ADR-0003: short-lived access token in memory (Angular), refresh token in an httpOnly cookie.
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": True,
+}
+REFRESH_COOKIE = {
+    "key": "refresh_token",
+    "path": "/api/v1/auth/",  # only sent to the auth endpoints
+    "httponly": True,
+    "samesite": "Strict",
+    "secure": env.bool("REFRESH_COOKIE_SECURE", default=not DEBUG),
 }
 
 SPECTACULAR_SETTINGS = {

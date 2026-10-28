@@ -1,13 +1,22 @@
+import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { User } from '../../api/models';
+import { AuthService } from '../../auth/auth.service';
 import { Shell } from './shell';
 
 describe('Shell', () => {
+  const user = signal<User | null>(null);
+
   beforeEach(async () => {
+    user.set(null);
     await TestBed.configureTestingModule({
       imports: [Shell],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        { provide: AuthService, useValue: { user, isAuthenticated: computed(() => !!user()) } },
+      ],
     }).compileComponents();
   });
 
@@ -40,5 +49,20 @@ describe('Shell', () => {
     await fixture.whenStable();
 
     expect(toggle.getAttribute('aria-label')).not.toBe(before);
+  });
+
+  it('offers to sign in when there is no session', async () => {
+    const element = await render();
+
+    expect(element.querySelector('a.sign-in')?.getAttribute('href')).toBe('/login');
+    expect(element.querySelector('button.account')).toBeNull();
+  });
+
+  it("shows the user's initials when signed in", async () => {
+    user.set({ id: 1, email: 'ana@example.com', first_name: 'Ana', last_name: 'García' });
+    const element = await render();
+
+    expect(element.querySelector('.avatar')?.textContent).toBe('AG');
+    expect(element.querySelector('a.sign-in')).toBeNull();
   });
 });

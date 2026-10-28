@@ -50,6 +50,37 @@
       >
         <mat-icon>{{ theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
       </button>
+
+      @if (user(); as user) {
+        <!-- The menu code (CDK overlay) is only downloaded once someone is signed in. -->
+        @defer {
+          <button
+            type="button"
+            class="account"
+            [matMenuTriggerFor]="accountMenu"
+            aria-label="Menú de la cuenta"
+          >
+            <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+            @if (!isHandset()) {
+              <span class="account-name">{{ user.first_name || user.email }}</span>
+            }
+          </button>
+          <mat-menu #accountMenu="matMenu" xPosition="before">
+            <div class="menu-identity">
+              <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+              <span>{{ user.email }}</span>
+            </div>
+            <button mat-menu-item type="button" (click)="logout()">
+              <mat-icon>logout</mat-icon>
+              <span>Cerrar sesión</span>
+            </button>
+          </mat-menu>
+        } @placeholder {
+          <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+        }
+      } @else {
+        <a mat-flat-button class="sign-in" routerLink="/login">Entrar</a>
+      }
     </header>
 
     <main class="main">

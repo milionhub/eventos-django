@@ -75,7 +75,7 @@ Los errores de validación de DRF mantienen su formato estándar por campo.
 
 ## API (v1)
 
-Prefijo `/api/v1/`. Paginación por página (`?page=`, tamaño 20).
+Prefijo `/api/v1/`. Paginación por página (`?page=`, tamaño 20). Solo JSON: el único cliente es la SPA, así que no se aceptan formularios (`DEFAULT_PARSER_CLASSES`).
 
 ### Auth y cuenta
 | Método | Ruta | Descripción |

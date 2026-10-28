@@ -1,0 +1,86 @@
+<section class="auth">
+  <div>
+    <p class="eyebrow">Es gratis</p>
+    <h1 class="display">Consigue<br />tu sitio<span class="accent">_</span></h1>
+    <p class="lead">
+      Crea tu cuenta para reservar entradas o empezar a organizar tus propios eventos.
+    </p>
+  </div>
+
+  <form class="card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="fields">
+      @if (error(); as message) {
+        <p class="form-error" role="alert">
+          <mat-icon>error</mat-icon>
+          {{ message }}
+        </p>
+      }
+
+      <div class="row">
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="first_name" autocomplete="given-name" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Apellidos</mat-label>
+          <input matInput formControlName="last_name" autocomplete="family-name" />
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" autocomplete="email" />
+        @if (form.controls.email.hasError('required')) {
+          <mat-error>Introduce tu email.</mat-error>
+        } @else if (form.controls.email.hasError('email')) {
+          <mat-error>Este email no es válido.</mat-error>
+        } @else if (form.controls.email.hasError('taken')) {
+          <mat-error
+            >Ya existe una cuenta con este email. <a routerLink="/login">Entra</a></mat-error
+          >
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input
+          matInput
+          [type]="hidePassword() ? 'password' : 'text'"
+          formControlName="password"
+          autocomplete="new-password"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+          (click)="hidePassword.set(!hidePassword())"
+        >
+          <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+        </button>
+        <mat-hint>Mínimo {{ minPasswordLength }} caracteres.</mat-hint>
+        @if (form.controls.password.hasError('required')) {
+          <mat-error>Elige una contraseña.</mat-error>
+        } @else if (form.controls.password.hasError('minlength')) {
+          <mat-error>Debe tener al menos {{ minPasswordLength }} caracteres.</mat-error>
+        } @else if (form.controls.password.hasError('server')) {
+          <mat-error>{{ form.controls.password.getError('server') }}</mat-error>
+        }
+      </mat-form-field>
+
+      <button mat-flat-button class="submit" type="submit" [disabled]="submitting()">
+        @if (submitting()) {
+          <mat-spinner diameter="20" aria-label="Creando cuenta" />
+        } @else {
+          Crear cuenta
+        }
+      </button>
+    </div>
+
+    <div class="tear" aria-hidden="true"></div>
+    <p class="switch">
+      ¿Ya tienes cuenta?
+      <a routerLink="/login" [queryParams]="{ returnUrl: returnUrl() }">Entra</a>
+    </p>
+  </form>
+</section>
