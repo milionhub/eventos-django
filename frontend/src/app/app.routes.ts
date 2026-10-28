@@ -27,6 +27,23 @@ export const routes: Routes = [
     loadComponent: () => import('./features/public-event/public-event').then((m) => m.PublicEvent),
   },
   {
+    path: 'me/tickets',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        title: 'Mis entradas · #4events',
+        loadComponent: () =>
+          import('./features/my-tickets/my-tickets/my-tickets').then((m) => m.MyTickets),
+      },
+      {
+        path: ':id',
+        title: 'Entrada · #4events',
+        loadComponent: () => import('./features/my-tickets/ticket/ticket').then((m) => m.Ticket),
+      },
+    ],
+  },
+  {
     path: 'org',
     canActivate: [authGuard],
     children: [

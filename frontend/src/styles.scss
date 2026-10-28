@@ -136,7 +136,8 @@ h3 {
 
   // Event status: published keeps the accent, the rest read as neutral or as an error.
   &[data-status='DRAFT'],
-  &[data-status='FINISHED'] {
+  &[data-status='FINISHED'],
+  &[data-status='USED'] {
     background: var(--mat-sys-surface-container-highest);
     color: var(--mat-sys-on-surface-variant);
   }

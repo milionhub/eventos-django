@@ -75,11 +75,35 @@
           }
         </ul>
 
+        @if (bookingError(); as problem) {
+          <p class="notice error" role="alert">
+            <mat-icon>error</mat-icon>
+            <span>
+              {{ problem.text }}
+              @if (problem.mine) {
+                <a routerLink="/me/tickets">Ver mis entradas</a>
+              }
+            </span>
+          </p>
+        }
+
         @if (soldOut()) {
           <p class="notice error">Entradas agotadas.</p>
         } @else if (auth.isAuthenticated()) {
-          <button mat-flat-button type="button" class="cta" disabled>Reservar gratis</button>
-          <p class="hint">Las reservas estarán disponibles muy pronto.</p>
+          <button
+            mat-flat-button
+            type="button"
+            class="cta"
+            [disabled]="selected() === null || booking()"
+            (click)="book()"
+          >
+            @if (booking()) {
+              <mat-spinner diameter="20" aria-label="Reservando" />
+            } @else {
+              Reservar gratis
+            }
+          </button>
+          <p class="hint">Una entrada por persona. Recibirás tu QR al instante.</p>
         } @else {
           <a
             mat-flat-button

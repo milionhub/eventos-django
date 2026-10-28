@@ -23,6 +23,12 @@ interface NavItem {
 }
 
 const EVENTS: NavItem = { label: 'Eventos', icon: 'event', path: '/', exact: true };
+const MY_TICKETS: NavItem = {
+  label: 'Mis entradas',
+  icon: 'confirmation_number',
+  path: '/me/tickets',
+  exact: false,
+};
 const ORGANIZATIONS: NavItem = {
   label: 'Organizaciones',
   icon: 'groups',
@@ -54,7 +60,7 @@ export class Shell {
 
   // Sections are added here as each phase delivers them.
   protected readonly navItems = computed<NavItem[]>(() =>
-    this.auth.isAuthenticated() ? [EVENTS, ORGANIZATIONS] : [EVENTS],
+    this.auth.isAuthenticated() ? [EVENTS, MY_TICKETS, ORGANIZATIONS] : [EVENTS],
   );
 
   protected readonly isHandset = toSignal(

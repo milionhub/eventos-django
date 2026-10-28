@@ -1,0 +1,70 @@
+<header class="page-header">
+  <p class="eyebrow">Tu cartera</p>
+  <h1 class="display">Mis entradas<span class="accent">_</span></h1>
+  <p class="lead">
+    Enseña el QR en la puerta. Sube el brillo de la pantalla para que se lea a la primera.
+  </p>
+</header>
+
+@if (tickets.isLoading() && !tickets.hasValue()) {
+  <mat-spinner class="loading" diameter="32" aria-label="Cargando entradas" />
+} @else if (tickets.error()) {
+  <p class="notice error" role="alert">No se han podido cargar tus entradas.</p>
+} @else {
+  <section aria-labelledby="upcoming-title">
+    <h2 id="upcoming-title" class="section-title">Próximas</h2>
+    @if (upcoming().length) {
+      <ul class="list" role="list">
+        @for (ticket of upcoming(); track ticket.id) {
+          <li>
+            <a class="row surface-card" [routerLink]="['/me/tickets', ticket.id]">
+              <app-date-badge [date]="ticket.event.start_at" />
+              <div class="info">
+                <h3>{{ ticket.event.title }}</h3>
+                <p>
+                  {{ ticket.event.start_at | date: 'EEEE, HH:mm' | capitalize }} ·
+                  {{ ticket.event.location }}
+                </p>
+              </div>
+              <span class="chip">{{ ticket.ticket_type.name }}</span>
+              <span class="qr-hint" aria-hidden="true"><mat-icon>qr_code_2</mat-icon></span>
+            </a>
+          </li>
+        }
+      </ul>
+    } @else {
+      <div class="surface-card empty">
+        <mat-icon>confirmation_number</mat-icon>
+        <div>
+          <h3>No tienes entradas para próximos eventos</h3>
+          <p>Cuando reserves, tu entrada con el QR aparecerá aquí.</p>
+        </div>
+        <a mat-flat-button routerLink="/">Ver eventos</a>
+      </div>
+    }
+  </section>
+
+  @if (history().length) {
+    <section aria-labelledby="history-title">
+      <h2 id="history-title" class="section-title">Historial</h2>
+      <ul class="list" role="list">
+        @for (ticket of history(); track ticket.id) {
+          <li>
+            <a class="row surface-card past" [routerLink]="['/me/tickets', ticket.id]">
+              <app-date-badge [date]="ticket.event.start_at" />
+              <div class="info">
+                <h3>{{ ticket.event.title }}</h3>
+                <p>{{ ticket.ticket_type.name }} · {{ ticket.event.location }}</p>
+              </div>
+              <span
+                class="chip"
+                [attr.data-status]="ticket.status === 'VALID' ? 'FINISHED' : ticket.status"
+                >{{ ticket.status === 'VALID' ? 'Finalizado' : statusLabels[ticket.status] }}</span
+              >
+            </a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+}

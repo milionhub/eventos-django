@@ -124,7 +124,7 @@
 - [x] Endpoints del asistente + QR SVG (segno)
 - [x] **Test de concurrencia:** 50 reservas sobre un cupo de 10 → 10 confirmadas
 - [x] Test de consistencia de `reserved_count`
-- [ ] UI: botón de reserva en el detalle, Mis entradas, pantalla de entrada con QR
+- [x] UI: botón de reserva en el detalle, Mis entradas, pantalla de entrada con QR
 - [x] Throttling de reservas
 
 **Cierre:** un asistente reserva desde el móvil y ve su QR; nunca se supera el cupo.
@@ -136,7 +136,7 @@
 | 1 | Reserva atómica (backend): `Reservation` + `Ticket`, `reserve()` con UPDATE condicional, test 50 → 10 | ✅ |
 | 2 | Cancelaciones (backend): asistente y organizador, cascada al cancelar evento (RN-10), RN-15 histórico | ✅ |
 | 3 | Mis entradas y QR (backend): `me/tickets/`, detalle con token, `qr.svg` con segno | ✅ |
-| 4 | Reservar y Mis entradas (frontend): botón de reserva, listado, entrada con QR | |
+| 4 | Reservar y Mis entradas (frontend): botón de reserva, listado, entrada con QR | ✅ |
 | 5 | Cierre: recorrido en móvil, ROADMAP y README (concurrencia) | |
 
 ---

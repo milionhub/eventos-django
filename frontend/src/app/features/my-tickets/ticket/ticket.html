@@ -1,0 +1,105 @@
+<a class="back-link" routerLink="/me/tickets"><mat-icon>arrow_back</mat-icon> Mis entradas</a>
+
+@if (ticket.isLoading() && !ticket.hasValue()) {
+  <mat-spinner class="loading" diameter="32" aria-label="Cargando entrada" />
+} @else if (notFound()) {
+  <section class="missing">
+    <h1>Esta entrada no existe</h1>
+    <p>O no es tuya. Revisa tus entradas.</p>
+    <a mat-flat-button routerLink="/me/tickets">Mis entradas</a>
+  </section>
+} @else if (ticket.error()) {
+  <p class="notice error" role="alert">No se ha podido cargar la entrada.</p>
+} @else if (ticket.value(); as t) {
+  @if (nueva() && t.status === 'VALID') {
+    <p class="notice" role="status">
+      <mat-icon>celebration</mat-icon> ¡Reserva confirmada! Esta es tu entrada.
+    </p>
+  }
+
+  <article class="pass" [attr.data-status]="t.status">
+    <header class="pass-head">
+      <p class="eyebrow">{{ t.event.organization_name }}</p>
+      <h1>{{ t.event.title }}</h1>
+      <ul class="facts" role="list">
+        <li>
+          <mat-icon aria-hidden="true">event</mat-icon>
+          {{ t.event.start_at | date: "EEEE d 'de' MMMM" | capitalize }}
+        </li>
+        <li>
+          <mat-icon aria-hidden="true">schedule</mat-icon>
+          {{ t.event.start_at | date: 'HH:mm' }} – {{ t.event.end_at | date: 'HH:mm' }}
+        </li>
+        <li>
+          <mat-icon aria-hidden="true">place</mat-icon>
+          {{ t.event.location }}
+        </li>
+      </ul>
+      <div class="meta">
+        <span class="chip">{{ t.ticket_type.name }}</span>
+        <span class="holder">{{ holder() }}</span>
+      </div>
+    </header>
+
+    <div class="stub">
+      @if (t.status === 'CANCELLED') {
+        <div class="void">
+          <mat-icon>block</mat-icon>
+          <strong>Entrada cancelada</strong>
+          <span>Ya no da acceso al evento.</span>
+        </div>
+      } @else {
+        <div class="qr-frame" [class.used]="t.status === 'USED'">
+          @if (qrUrl(); as src) {
+            <img [src]="src" alt="Código QR de la entrada" />
+          } @else {
+            <mat-spinner diameter="32" aria-label="Generando QR" />
+          }
+          @if (t.status === 'USED') {
+            <span class="stamp">Utilizada</span>
+          }
+        </div>
+      }
+      <p class="status" [attr.data-status]="t.status">
+        <span class="dot" aria-hidden="true"></span>{{ statusLabels[t.status] }}
+        @if (t.status === 'USED' && t.checked_in_at) {
+          · {{ t.checked_in_at | date: 'd MMM, HH:mm' }}
+        }
+      </p>
+    </div>
+  </article>
+
+  @if (t.status === 'VALID') {
+    <section class="cancel">
+      @if (error(); as message) {
+        <p class="notice error" role="alert"><mat-icon>error</mat-icon> {{ message }}</p>
+      }
+      @if (t.can_cancel) {
+        <p>
+          Puedes cancelar hasta el
+          <strong>{{ t.cancel_deadline | date: "d 'de' MMMM, HH:mm" }}</strong
+          >. La plaza quedará libre para otra persona.
+        </p>
+        <button
+          mat-button
+          type="button"
+          class="quiet"
+          [class.confirming]="confirming()"
+          [disabled]="cancelling()"
+          (click)="cancel()"
+        >
+          {{ confirming() ? '¿Seguro? Cancelar reserva' : 'Cancelar reserva' }}
+        </button>
+      } @else {
+        <p>
+          El plazo para cancelar terminó el
+          {{ t.cancel_deadline | date: "d 'de' MMMM, HH:mm" }}.
+        </p>
+      }
+    </section>
+  }
+
+  <a class="event-link" [routerLink]="['/events', t.event.slug]">
+    Ver la página del evento <mat-icon>arrow_forward</mat-icon>
+  </a>
+}

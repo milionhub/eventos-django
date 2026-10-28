@@ -1,0 +1,218 @@
+// Explicit path: this file is itself called ticket.scss, so 'ticket' would load itself.
+@use '../../../../styles/ticket' as ticket;
+
+:host {
+  display: block;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.loading {
+  margin: 48px auto;
+}
+
+.missing p {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.notice {
+  margin: 16px 0 0;
+}
+
+// The pass is two pieces joined at the tear line: the details, notched at their bottom
+// corners, and the stub, notched at its top ones. Each piece places its notches at its own
+// edge, so they always meet the perforation whatever the height of the title.
+.pass {
+  margin-top: 16px;
+
+  &[data-status='CANCELLED'] {
+    opacity: 0.7;
+  }
+}
+
+.pass-head {
+  @include ticket.notched($at: 100%);
+  padding: 24px 24px 20px;
+  border-radius: 20px 20px 0 0;
+  background: var(--mat-sys-surface-container);
+
+  .eyebrow {
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+}
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--app-accent);
+    font-size: 18px;
+  }
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.holder {
+  overflow: hidden;
+  font: var(--mat-sys-label-large);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stub {
+  @include ticket.notched($at: 0%);
+  position: relative;
+  border-radius: 0 0 20px 20px;
+  background: var(--mat-sys-surface-container);
+
+  // The perforation, between the notches.
+  &::before {
+    @include ticket.tear-line(20px);
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    content: '';
+  }
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 24px;
+}
+
+// Always white: scanners need dark modules on a light background, in any theme.
+.qr-frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(100%, 280px);
+  aspect-ratio: 1;
+  border-radius: 16px;
+  background: #fff;
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+  }
+
+  &.used img {
+    opacity: 0.25;
+  }
+}
+
+.stamp {
+  position: absolute;
+  padding: 6px 14px;
+  border: 3px solid var(--mat-sys-error);
+  border-radius: 8px;
+  color: var(--mat-sys-error);
+  font-family: var(--app-font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(-12deg);
+}
+
+.void {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px 0;
+  text-align: center;
+
+  mat-icon {
+    width: 40px;
+    height: 40px;
+    color: var(--mat-sys-error);
+    font-size: 40px;
+  }
+
+  span {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font: var(--mat-sys-label-large);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3ddc84;
+
+  [data-status='USED'] & {
+    background: var(--mat-sys-outline);
+  }
+
+  [data-status='CANCELLED'] & {
+    background: var(--mat-sys-error);
+  }
+}
+
+.cancel {
+  margin-top: 24px;
+  text-align: center;
+
+  p {
+    margin: 0 0 8px;
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-body-medium);
+  }
+}
+
+.event-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 24px;
+  color: var(--app-accent);
+  font: var(--mat-sys-label-large);
+  text-decoration: none;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}

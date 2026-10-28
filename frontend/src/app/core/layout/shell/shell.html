@@ -70,6 +70,14 @@
               <strong>{{ user.first_name }} {{ user.last_name }}</strong>
               <span>{{ user.email }}</span>
             </div>
+            <a mat-menu-item routerLink="/me/tickets">
+              <mat-icon>confirmation_number</mat-icon>
+              <span>Mis entradas</span>
+            </a>
+            <a mat-menu-item routerLink="/org">
+              <mat-icon>groups</mat-icon>
+              <span>Organizaciones</span>
+            </a>
             <button mat-menu-item type="button" (click)="logout()">
               <mat-icon>logout</mat-icon>
               <span>Cerrar sesión</span>
