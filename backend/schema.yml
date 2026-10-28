@@ -230,6 +230,233 @@ paths:
               schema:
                 $ref: '#/components/schemas/MyOrganization'
           description: ''
+  /api/v1/organizations/{org_slug}/events/:
+    get:
+      operationId: events_list
+      description: |-
+        For views under `organizations/<org_slug>/...` (RN-06).
+
+        Resolves the organization from the URL through the user's own memberships, so an
+        organization the user does not belong to is indistinguishable from one that does
+        not exist: 404. A member whose role is not enough for the method gets 403.
+
+        Views declare who may call each method:
+
+            roles_by_method = {"GET": ALL_ROLES, "PATCH": {Role.OWNER}}
+
+        and then use `self.organization` / `self.membership`, filtering every queryset by
+        `self.organization`.
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - CANCELLED
+          - DRAFT
+          - PUBLISHED
+      tags:
+      - events
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEventList'
+          description: ''
+    post:
+      operationId: events_create
+      description: |-
+        For views under `organizations/<org_slug>/...` (RN-06).
+
+        Resolves the organization from the URL through the user's own memberships, so an
+        organization the user does not belong to is indistinguishable from one that does
+        not exist: 404. A member whose role is not enough for the method gets 403.
+
+        Views declare who may call each method:
+
+            roles_by_method = {"GET": ALL_ROLES, "PATCH": {Role.OWNER}}
+
+        and then use `self.organization` / `self.membership`, filtering every queryset by
+        `self.organization`.
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/organizations/{org_slug}/events/{event_id}/:
+    get:
+      operationId: events_retrieve
+      description: 'Adds `get_event()`: the event from the URL, only within the URL''s
+        organization.'
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetail'
+          description: ''
+    patch:
+      operationId: events_update
+      description: 'Adds `get_event()`: the event from the URL, only within the URL''s
+        organization.'
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEventWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/organizations/{org_slug}/events/{event_id}/cancel/:
+    post:
+      operationId: events_cancel
+      description: 'Adds `get_event()`: the event from the URL, only within the URL''s
+        organization.'
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetail'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/organizations/{org_slug}/events/{event_id}/publish/:
+    post:
+      operationId: events_publish
+      description: 'Adds `get_event()`: the event from the URL, only within the URL''s
+        organization.'
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetail'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/organizations/{org_slug}/members/:
     get:
       operationId: members_list
@@ -415,6 +642,223 @@ components:
       required:
       - code
       - detail
+    Event:
+      type: object
+      description: An event in the organizer's list.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+          title: Título
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        location:
+          type: string
+          readOnly: true
+          title: Ubicación
+        image_url:
+          type: string
+          format: uri
+          readOnly: true
+          title: Imagen
+        start_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Inicio
+        end_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Fin
+        capacity:
+          type: integer
+          readOnly: true
+          title: Aforo
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EventStatusEnum'
+          readOnly: true
+        is_finished:
+          type: boolean
+          readOnly: true
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - cancelled_at
+      - capacity
+      - end_at
+      - id
+      - image_url
+      - is_finished
+      - location
+      - published_at
+      - slug
+      - start_at
+      - status
+      - title
+    EventDetail:
+      type: object
+      description: One event for its organizers, with what is needed to manage and
+        publish it.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+          title: Título
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        location:
+          type: string
+          readOnly: true
+          title: Ubicación
+        image_url:
+          type: string
+          format: uri
+          readOnly: true
+          title: Imagen
+        start_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Inicio
+        end_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Fin
+        capacity:
+          type: integer
+          readOnly: true
+          title: Aforo
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EventStatusEnum'
+          readOnly: true
+        is_finished:
+          type: boolean
+          readOnly: true
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        description:
+          type: string
+          readOnly: true
+          title: Descripción
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        ticket_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/TicketTypeSummary'
+          readOnly: true
+        allocated_capacity:
+          type: integer
+          readOnly: true
+        publish_blockers:
+          type: array
+          items:
+            type: string
+          readOnly: true
+      required:
+      - allocated_capacity
+      - cancelled_at
+      - capacity
+      - created_at
+      - description
+      - end_at
+      - id
+      - image_url
+      - is_finished
+      - location
+      - publish_blockers
+      - published_at
+      - slug
+      - start_at
+      - status
+      - ticket_types
+      - title
+    EventStatusEnum:
+      enum:
+      - DRAFT
+      - PUBLISHED
+      - CANCELLED
+      type: string
+      description: |-
+        * `DRAFT` - Borrador
+        * `PUBLISHED` - Publicado
+        * `CANCELLED` - Cancelado
+    EventWriteRequest:
+      type: object
+      description: Input for create and edit. Business rules are checked by the services.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          title: Título
+          maxLength: 200
+        description:
+          type: string
+          title: Descripción
+        location:
+          type: string
+          minLength: 1
+          title: Ubicación
+          maxLength: 255
+        image_url:
+          title: Imagen
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        start_at:
+          type: string
+          format: date-time
+          title: Inicio
+        end_at:
+          type: string
+          format: date-time
+          title: Fin
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+          title: Aforo
+      required:
+      - capacity
+      - end_at
+      - location
+      - start_at
+      - title
     Health:
       type: object
       properties:
@@ -531,11 +975,72 @@ components:
           title: Descripción
       required:
       - name
+    PaginatedEventList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
     PatchedChangeRoleRequest:
       type: object
       properties:
         role:
           $ref: '#/components/schemas/RoleEnum'
+    PatchedEventWriteRequest:
+      type: object
+      description: Input for create and edit. Business rules are checked by the services.
+      properties:
+        title:
+          type: string
+          minLength: 1
+          title: Título
+          maxLength: 200
+        description:
+          type: string
+          title: Descripción
+        location:
+          type: string
+          minLength: 1
+          title: Ubicación
+          maxLength: 255
+        image_url:
+          title: Imagen
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+        start_at:
+          type: string
+          format: date-time
+          title: Inicio
+        end_at:
+          type: string
+          format: date-time
+          title: Fin
+        capacity:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+          title: Aforo
     PatchedOrganizationRequest:
       type: object
       properties:
@@ -610,6 +1115,28 @@ components:
       - id
       - last_name
       - memberships
+    TicketTypeSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nombre
+        capacity:
+          type: integer
+          readOnly: true
+          title: Cupo
+        reserved_count:
+          type: integer
+          readOnly: true
+      required:
+      - capacity
+      - id
+      - name
+      - reserved_count
     User:
       type: object
       properties:

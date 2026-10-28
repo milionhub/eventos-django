@@ -131,4 +131,9 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
+    # Explicit names: several models have a "status", and generic names would collide.
+    "ENUM_NAME_OVERRIDES": {
+        "EventStatusEnum": "apps.events.models.Event.Status",
+        "RoleEnum": "apps.organizations.models.Membership.Role",
+    },
 }

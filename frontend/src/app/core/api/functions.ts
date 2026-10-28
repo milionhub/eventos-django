@@ -29,3 +29,15 @@ export type { MembersDestroy$Params as MembersDestroy$Params } from './fn/organi
 export { membersDestroy as membersDestroy } from './fn/organizations/members-destroy';
 export type { MembersUpdate$Params as MembersUpdate$Params } from './fn/organizations/members-update';
 export { membersUpdate as membersUpdate } from './fn/organizations/members-update';
+export type { EventsList$Params as EventsList$Params } from './fn/events/events-list';
+export { eventsList as eventsList } from './fn/events/events-list';
+export type { EventsCreate$Params as EventsCreate$Params } from './fn/events/events-create';
+export { eventsCreate as eventsCreate } from './fn/events/events-create';
+export type { EventsRetrieve$Params as EventsRetrieve$Params } from './fn/events/events-retrieve';
+export { eventsRetrieve as eventsRetrieve } from './fn/events/events-retrieve';
+export type { EventsUpdate$Params as EventsUpdate$Params } from './fn/events/events-update';
+export { eventsUpdate as eventsUpdate } from './fn/events/events-update';
+export type { EventsCancel$Params as EventsCancel$Params } from './fn/events/events-cancel';
+export { eventsCancel as eventsCancel } from './fn/events/events-cancel';
+export type { EventsPublish$Params as EventsPublish$Params } from './fn/events/events-publish';
+export { eventsPublish as eventsPublish } from './fn/events/events-publish';

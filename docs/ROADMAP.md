@@ -109,7 +109,7 @@
 | 2 | Auth frontend: AuthService, interceptor, guard, login y registro | ✅ |
 | 3 | Organizaciones backend: modelos, servicios, `OrganizationScopedMixin`, permisos | ✅ |
 | 4 | Organizaciones frontend: mis organizaciones, crear, miembros | ✅ |
-| 5 | Eventos backend: modelo, servicios y transiciones de estado | |
+| 5 | Eventos backend: modelo, servicios y transiciones de estado | ✅ |
 | 6 | Categorías y staff backend + endpoints públicos | |
 | 7 | Eventos frontend (organizador): listado, formulario con pestañas, publicar/cancelar | |
 | 8 | Público frontend (listado y detalle) + cierre de fase | |

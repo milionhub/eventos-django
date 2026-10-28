@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 
 from apps.organizations import views
 
@@ -11,4 +11,5 @@ urlpatterns = [
         views.MemberDetailView.as_view(),
         name="member",
     ),
+    path("<slug:org_slug>/events/", include("apps.events.urls")),
 ]
