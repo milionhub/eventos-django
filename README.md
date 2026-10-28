@@ -7,7 +7,53 @@ Plataforma de gestión de eventos y entradas digitales con QR: los organizadores
 
 **Stack:** Angular · Django REST Framework · PostgreSQL · Docker
 
-> 🚧 En desarrollo — Fases 1 y 2 completadas (auth, organizaciones y eventos). Consulta [`docs/ROADMAP.md`](docs/ROADMAP.md).
+> 🚧 En desarrollo — Fases 1 a 3 completadas (auth, organizaciones, eventos, reservas y entradas con QR). Consulta [`docs/ROADMAP.md`](docs/ROADMAP.md).
+
+## Destacado: reservas sin sobreventa
+
+Cuando quedan pocas plazas, muchas personas pulsan «Reservar» a la vez. El código tiene que garantizar que **nunca se reservan más plazas de las que hay**, y eso se demuestra con tests contra PostgreSQL ([ADR-0004](docs/adr/0004-concurrencia-reservas-checkin.md)).
+
+### El problema: «leer, comprobar y escribir»
+```python
+ticket_type = TicketType.objects.get(pk=id)        # leer: queda 1 plaza
+if ticket_type.reserved_count < ticket_type.capacity:
+    ticket_type.reserved_count += 1                # entre la lectura y la escritura
+    ticket_type.save()                             # otras peticiones leyeron lo mismo
+```
+Con este código, el test de **50 personas a la vez para 10 plazas** confirma **las 50 reservas**. Ni siquiera la restricción `reserved_count <= capacity` de la base de datos lo impide: todas escriben el mismo valor bajo y las escrituras se pisan.
+
+### La solución: un `UPDATE` condicional
+```sql
+UPDATE events_tickettype
+   SET reserved_count = reserved_count + 1
+ WHERE id = %s AND reserved_count < capacity
+```
+Comprobar e incrementar es **una sola sentencia**. PostgreSQL bloquea la fila durante el `UPDATE`: la siguiente petición espera, vuelve a evaluar el `WHERE` con el valor nuevo y, si ya no queda sitio, no actualiza nada (`SoldOut`). Todo va en una transacción: si después falla algo, la plaza vuelve sola. Ver [`ticketing/services.py`](backend/apps/ticketing/services.py).
+
+Defensa en profundidad, en la base de datos:
+- `CHECK (reserved_count <= capacity)`: última barrera aunque un bug se saltara el servicio.
+- Índice único **parcial** `(user, event) WHERE status = 'CONFIRMED'`: una reserva por persona y evento. También cubre el **doble clic**: 5 clics simultáneos crean 1 reserva y el contador queda en 1.
+
+### Un deadlock real que encontraron los tests
+El test que lanza reservas mientras se cancela el evento fallaba en un tercio de las pasadas con `deadlock detected`:
+1. Cancelar el evento bloqueaba la fila del **evento** (`FOR UPDATE`) y esperaba a la de la **categoría**.
+2. Una reserva ya tenía la **categoría** bloqueada y, al insertar, PostgreSQL comprueba la clave foránea hacia el evento con un bloqueo `FOR KEY SHARE`… incompatible con `FOR UPDATE`.
+
+La solución fue bloquear el evento con **`FOR NO KEY UPDATE`** (`select_for_update(no_key=True)`): sigue serializando los cambios del evento pero deja pasar las comprobaciones de clave foránea. Ahora pasa 20 de 20 veces.
+
+### Los tests
+```bash
+cd backend && uv run pytest apps/ticketing/tests/test_concurrency.py -v
+```
+| Test | Qué garantiza |
+|---|---|
+| 50 personas, 10 plazas | Exactamente 10 confirmadas y 40 «agotado» |
+| Doble clic | 1 reserva; las rechazadas devuelven su plaza |
+| Cancelar la misma reserva 5 veces a la vez | La plaza se libera una sola vez (contador en 0, no en −4) |
+| Reservas mientras se cancela el evento | Ninguna reserva confirmada sobrevive en un evento cancelado |
+| Reservas y cancelaciones mezcladas | El contador coincide siempre con las reservas confirmadas |
+
+Cada test se validó también **quitando la protección** que comprueba, para asegurar que de verdad detecta el fallo.
 
 ## Cómo ejecutarlo
 

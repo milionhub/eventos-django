@@ -33,6 +33,10 @@ El patrón ingenuo "leer → comprobar en Python → escribir" falla: entre la l
 - ✅ La BD garantiza la invariante aunque haya un bug en Python.
 - ⚠️ `reserved_count` está desnormalizado: hay que actualizarlo siempre a través del servicio (nunca con `.save()` directo). Un test de consistencia lo verifica.
 
+## Nota de implementación (Fase 3)
+- Las operaciones que bloquean un evento usan `select_for_update(no_key=True)` (`FOR NO KEY UPDATE`), no `FOR UPDATE`. Insertar una reserva comprueba su clave foránea al evento con un bloqueo `FOR KEY SHARE`, incompatible con `FOR UPDATE`: una reserva con la categoría bloqueada y una cancelación del evento esperando esa categoría producían un *deadlock*. Lo detectó el test de concurrencia de reservas frente a cancelación.
+- `reserve()` vuelve a leer el estado del evento tras el `UPDATE` (ya con la fila de la categoría bloqueada) y `cancel_event()` bloquea las categorías antes de anular reservas: así ninguna reserva confirmada sobrevive a la cancelación del evento.
+
 ## Alternativas descartadas
 - **`select_for_update()`:** también es válido, pero serializa más y el código es más largo. Lo mencionaremos en el README como alternativa.
 - **Contar reservas con `COUNT(*)` en cada petición:** no es seguro sin bloqueo de tabla.

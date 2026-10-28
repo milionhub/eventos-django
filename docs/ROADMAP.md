@@ -137,7 +137,7 @@
 | 2 | Cancelaciones (backend): asistente y organizador, cascada al cancelar evento (RN-10), RN-15 histórico | ✅ |
 | 3 | Mis entradas y QR (backend): `me/tickets/`, detalle con token, `qr.svg` con segno | ✅ |
 | 4 | Reservar y Mis entradas (frontend): botón de reserva, listado, entrada con QR | ✅ |
-| 5 | Cierre: recorrido en móvil, ROADMAP y README (concurrencia) | |
+| 5 | Cierre: recorrido en móvil, ROADMAP y README (concurrencia) | ✅ |
 
 ---
 
@@ -219,5 +219,5 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 
 ## Estado actual
 
-**Fase activa:** 3 — Reservas (Fase 2 cerrada el 2026-10-28: escenario de cierre probado contra la API real).
-**Siguiente paso:** dividir la Fase 3 en bloques, empezando por `Reservation` + `Ticket` y el servicio `reserve()` con UPDATE condicional (ADR-0004).
+**Fase activa:** 4 — Check-in (Fase 3 cerrada el 2026-10-28: reserva desde el móvil con QR y cupo garantizado bajo concurrencia).
+**Siguiente paso:** dividir la Fase 4 en bloques, empezando por `CheckInLog` y el servicio `scan()` con UPDATE condicional (ADR-0004, RN-28 a RN-32).
