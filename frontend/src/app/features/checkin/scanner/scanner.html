@@ -1,0 +1,129 @@
+<header class="bar">
+  <a class="back-link" routerLink="/checkin"><mat-icon>arrow_back</mat-icon> Eventos</a>
+  @if (activity.value(); as a) {
+    <span class="count" aria-label="Personas dentro">
+      <strong>{{ a.stats.validated }}</strong> / {{ a.stats.expected }} dentro
+    </span>
+  }
+</header>
+
+<h1 class="title">{{ event()?.title ?? 'Validar entradas' }}</h1>
+
+@if (event(); as e) {
+  @if (!e.is_open) {
+    <p class="notice error" role="status">
+      <mat-icon>schedule</mat-icon>
+      La puerta abre el {{ e.opens_at | date: "d 'de' MMMM, HH:mm" }}. Hasta entonces las entradas
+      saldrán «Fuera de horario».
+    </p>
+  }
+}
+
+<section class="viewport" aria-label="Cámara">
+  <zxing-scanner
+    [formats]="formats"
+    [device]="device()"
+    [autofocusEnabled]="true"
+    previewFitMode="cover"
+    (scanSuccess)="onScan($event)"
+    (permissionResponse)="onPermission($event)"
+    (camerasFound)="onCameras($event)"
+    (camerasNotFound)="camera.set('none')"
+  />
+  <div class="frame" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
+  @switch (camera()) {
+    @case ('starting') {
+      <p class="camera-msg">Activando la cámara…</p>
+    }
+    @case ('denied') {
+      <p class="camera-msg">
+        <mat-icon>no_photography</mat-icon>
+        Sin permiso para usar la cámara. Actívalo en el navegador o escribe el código abajo.
+      </p>
+    }
+    @case ('none') {
+      <p class="camera-msg">
+        <mat-icon>videocam_off</mat-icon>
+        No se ha encontrado ninguna cámara. Escribe el código abajo.
+      </p>
+    }
+  }
+
+  @if (devices().length > 1) {
+    <!-- mat-icon-button, not mat-mini-fab: the FAB code would land in the initial bundle,
+         because the button module is shared with the header. -->
+    <button
+      mat-icon-button
+      type="button"
+      class="switch"
+      aria-label="Cambiar de cámara"
+      (click)="nextCamera()"
+    >
+      <mat-icon>cameraswitch</mat-icon>
+    </button>
+  }
+</section>
+
+@if (problem(); as message) {
+  <p class="notice error" role="alert"><mat-icon>wifi_off</mat-icon> {{ message }}</p>
+}
+
+<!-- Native submit: (ngSubmit) only exists with a [formGroup] or FormsModule. -->
+<form class="manual" (submit)="submitManual($event)">
+  <label for="manual-code">¿No lee el QR?</label>
+  <div class="manual-row">
+    <input
+      id="manual-code"
+      [formControl]="manual"
+      placeholder="Código de la entrada"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+    />
+    <button mat-flat-button type="submit" [disabled]="busy()">Validar</button>
+  </div>
+</form>
+
+@if (activity.value()?.logs?.length) {
+  <section class="recent" aria-labelledby="recent-title">
+    <h2 id="recent-title">Últimos escaneos</h2>
+    <ul role="list">
+      @for (log of activity.value()!.logs; track log.id) {
+        <li [attr.data-tone]="results[log.result].tone">
+          <mat-icon aria-hidden="true">{{ results[log.result].icon }}</mat-icon>
+          <span class="what">
+            <strong>{{ results[log.result].title }}</strong>
+            @if (log.ticket) {
+              <span>{{ log.ticket.holder_name }} · {{ log.ticket.ticket_type }}</span>
+            }
+          </span>
+          <time>{{ log.checked_at | date: 'HH:mm:ss' }}</time>
+        </li>
+      }
+    </ul>
+  </section>
+}
+
+<!-- The answer, full screen: readable at arm's length in a dark doorway. -->
+@if (shown(); as s) {
+  <button
+    type="button"
+    class="result"
+    [attr.data-tone]="s.view.tone"
+    role="alert"
+    aria-live="assertive"
+    (click)="dismiss()"
+  >
+    <mat-icon class="result-icon">{{ s.view.icon }}</mat-icon>
+    <span class="result-title">{{ s.view.title }}</span>
+    @if (s.data.ticket; as ticket) {
+      <span class="result-holder">{{ ticket.holder_name }}</span>
+      <span class="result-type">{{ ticket.ticket_type }}</span>
+      @if (s.data.result === 'ALREADY_USED' && ticket.checked_in_at) {
+        <span class="result-extra">Entró a las {{ ticket.checked_in_at | date: 'HH:mm' }}</span>
+      }
+    }
+    <span class="result-hint">Toca para seguir</span>
+  </button>
+}

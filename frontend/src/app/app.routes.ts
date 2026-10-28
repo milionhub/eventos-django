@@ -44,6 +44,23 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'checkin',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        title: 'Validar · #4events',
+        loadComponent: () =>
+          import('./features/checkin/checkin-events/checkin-events').then((m) => m.CheckinEvents),
+      },
+      {
+        path: ':id',
+        title: 'Escáner · #4events',
+        loadComponent: () => import('./features/checkin/scanner/scanner').then((m) => m.Scanner),
+      },
+    ],
+  },
+  {
     path: 'org',
     canActivate: [authGuard],
     children: [

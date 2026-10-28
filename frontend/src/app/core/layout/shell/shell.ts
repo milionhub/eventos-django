@@ -29,6 +29,13 @@ const MY_TICKETS: NavItem = {
   path: '/me/tickets',
   exact: false,
 };
+// Only members of an organization can be door staff (RN-28).
+const CHECKIN: NavItem = {
+  label: 'Validar',
+  icon: 'qr_code_scanner',
+  path: '/checkin',
+  exact: false,
+};
 const ORGANIZATIONS: NavItem = {
   label: 'Organizaciones',
   icon: 'groups',
@@ -59,9 +66,13 @@ export class Shell {
   private readonly router = inject(Router);
 
   // Sections are added here as each phase delivers them.
-  protected readonly navItems = computed<NavItem[]>(() =>
-    this.auth.isAuthenticated() ? [EVENTS, MY_TICKETS, ORGANIZATIONS] : [EVENTS],
-  );
+  protected readonly navItems = computed<NavItem[]>(() => {
+    if (!this.auth.isAuthenticated()) return [EVENTS];
+    const isMember = (this.auth.user()?.memberships.length ?? 0) > 0;
+    return isMember
+      ? [EVENTS, MY_TICKETS, CHECKIN, ORGANIZATIONS]
+      : [EVENTS, MY_TICKETS, ORGANIZATIONS];
+  });
 
   protected readonly isHandset = toSignal(
     inject(BreakpointObserver)

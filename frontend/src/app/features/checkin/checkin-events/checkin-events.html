@@ -1,0 +1,50 @@
+<header class="page-header">
+  <p class="eyebrow">Control de acceso</p>
+  <h1 class="display">Validar<span class="accent">_</span></h1>
+  <p class="lead">Elige el evento y escanea los QR de las entradas en la puerta.</p>
+</header>
+
+@if (events.isLoading() && !events.hasValue()) {
+  <mat-spinner class="loading" diameter="32" aria-label="Cargando eventos" />
+} @else if (events.error()) {
+  <p class="notice error" role="alert">No se han podido cargar tus eventos.</p>
+} @else if (events.value()?.length === 0) {
+  <div class="surface-card empty">
+    <mat-icon>qr_code_scanner</mat-icon>
+    <div>
+      <h2>No tienes eventos para validar</h2>
+      <p>
+        Aquí aparecen los eventos en los que te asignan como personal de acceso, o los de las
+        organizaciones que gestionas.
+      </p>
+    </div>
+  </div>
+} @else {
+  <ul class="list" role="list">
+    @for (event of events.value(); track event.id) {
+      <li>
+        <a
+          class="row surface-card"
+          [class.closed]="!event.is_open"
+          [routerLink]="['/checkin', event.id]"
+        >
+          <app-event-thumb [date]="event.start_at" [imageUrl]="event.image_url" />
+          <div class="info">
+            <h2>{{ event.title }}</h2>
+            <p>{{ event.organization_name }} · {{ event.location }}</p>
+          </div>
+          @if (event.is_open) {
+            <span class="chip open"
+              ><span class="dot" aria-hidden="true"></span>Puerta abierta</span
+            >
+          } @else {
+            <span class="chip" data-status="DRAFT">
+              Abre {{ event.opens_at | date: 'EEE d MMM, HH:mm' | capitalize }}
+            </span>
+          }
+          <mat-icon class="arrow" aria-hidden="true">qr_code_scanner</mat-icon>
+        </a>
+      </li>
+    }
+  </ul>
+}

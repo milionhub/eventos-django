@@ -1,0 +1,294 @@
+:host {
+  display: block;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.count {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-large);
+
+  strong {
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.title {
+  margin: 12px 0 16px;
+  font-size: 1.5rem;
+  line-height: 1.15;
+}
+
+.notice {
+  margin: 0 0 16px;
+}
+
+.viewport {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1;
+  max-height: 55vh; // on desktop, keep the recent scans in view
+  border-radius: 20px;
+  background: #000;
+
+  zxing-scanner {
+    width: 100%;
+    height: 100%;
+
+    ::ng-deep video {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+// Corner marks: where to put the QR.
+.frame {
+  position: absolute;
+  inset: 18%;
+  pointer-events: none;
+
+  span {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    border-color: var(--app-accent);
+    border-style: solid;
+    border-width: 0;
+  }
+
+  span:nth-child(1) {
+    top: 0;
+    left: 0;
+    border-top-width: 4px;
+    border-left-width: 4px;
+    border-top-left-radius: 12px;
+  }
+
+  span:nth-child(2) {
+    top: 0;
+    right: 0;
+    border-top-width: 4px;
+    border-right-width: 4px;
+    border-top-right-radius: 12px;
+  }
+
+  span:nth-child(3) {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 4px;
+    border-left-width: 4px;
+    border-bottom-left-radius: 12px;
+  }
+
+  span:nth-child(4) {
+    right: 0;
+    bottom: 0;
+    border-right-width: 4px;
+    border-bottom-width: 4px;
+    border-bottom-right-radius: 12px;
+  }
+}
+
+.camera-msg {
+  position: absolute;
+  inset: auto 16px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgb(0 0 0 / 70%);
+  color: #fff;
+  font: var(--mat-sys-body-medium);
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+}
+
+.switch {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgb(0 0 0 / 55%);
+  color: #fff;
+  backdrop-filter: blur(6px);
+}
+
+.manual {
+  margin-top: 20px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-label-large);
+  }
+}
+
+.manual-row {
+  display: flex;
+  gap: 8px;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0 16px;
+    border: var(--app-border);
+    border-radius: 12px;
+    background: var(--mat-sys-surface-container);
+    color: var(--mat-sys-on-surface);
+    font: var(--mat-sys-body-large);
+
+    &:focus {
+      border-color: var(--app-accent);
+      outline: none;
+    }
+  }
+
+  button {
+    height: 48px;
+  }
+}
+
+.recent {
+  margin-top: 28px;
+
+  h2 {
+    margin: 0 0 8px;
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-label-large);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+
+    & + li {
+      border-top: var(--app-border);
+    }
+  }
+
+  [data-tone='ok'] mat-icon {
+    color: #3ddc84;
+  }
+
+  [data-tone='warn'] mat-icon {
+    color: #ffb547;
+  }
+
+  [data-tone='error'] mat-icon {
+    color: var(--mat-sys-error);
+  }
+
+  .what {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+
+    span {
+      overflow: hidden;
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-small);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  time {
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-label-medium);
+  }
+}
+
+// The answer, full screen. Fixed colours: they mean the same in any theme.
+.result {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  border: 0;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  animation: pop 160ms ease-out;
+
+  &[data-tone='ok'] {
+    background: #12a150;
+  }
+
+  &[data-tone='warn'] {
+    background: #c27c0e;
+  }
+
+  &[data-tone='error'] {
+    background: #d63a3a;
+  }
+}
+
+.result-icon {
+  width: 120px;
+  height: 120px;
+  font-size: 120px;
+}
+
+.result-title {
+  font-family: var(--app-font-display);
+  font-size: clamp(2.25rem, 10vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.result-holder {
+  margin-top: 16px;
+  font: var(--mat-sys-headline-small);
+}
+
+.result-type,
+.result-extra {
+  font: var(--mat-sys-title-medium);
+  opacity: 0.9;
+}
+
+.result-hint {
+  position: absolute;
+  bottom: 32px;
+  font: var(--mat-sys-label-large);
+  opacity: 0.75;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
