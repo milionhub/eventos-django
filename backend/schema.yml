@@ -125,6 +125,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/Health'
           description: ''
+  /api/v1/me/tickets/:
+    get:
+      operationId: my_tickets_list
+      tags:
+      - my tickets
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MyTicket'
+          description: ''
+  /api/v1/me/tickets/{ticket_id}/:
+    get:
+      operationId: my_tickets_retrieve
+      parameters:
+      - in: path
+        name: ticket_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - my tickets
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyTicketDetail'
+          description: ''
+  /api/v1/me/tickets/{ticket_id}/qr.svg:
+    get:
+      operationId: my_tickets_qr
+      parameters:
+      - in: path
+        name: ticket_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - my tickets
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /api/v1/organizations/:
     get:
       operationId: organizations_list
@@ -1311,6 +1370,169 @@ components:
       required:
       - organization
       - role
+    MyTicket:
+      type: object
+      description: 'A ticket in "my tickets". No token here: it only travels in the
+        detail and the QR.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TicketStatusEnum'
+          readOnly: true
+        issued_at:
+          type: string
+          format: date-time
+          readOnly: true
+        checked_in_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        event:
+          allOf:
+          - $ref: '#/components/schemas/MyTicketEvent'
+          readOnly: true
+        ticket_type:
+          allOf:
+          - $ref: '#/components/schemas/ReservationTicketType'
+          readOnly: true
+        reservation:
+          allOf:
+          - $ref: '#/components/schemas/MyTicketReservation'
+          readOnly: true
+      required:
+      - checked_in_at
+      - event
+      - id
+      - issued_at
+      - reservation
+      - status
+      - ticket_type
+    MyTicketDetail:
+      type: object
+      description: 'One ticket for its owner: the token (for the QR) and whether it
+        can still be cancelled.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TicketStatusEnum'
+          readOnly: true
+        issued_at:
+          type: string
+          format: date-time
+          readOnly: true
+        checked_in_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        event:
+          allOf:
+          - $ref: '#/components/schemas/MyTicketEvent'
+          readOnly: true
+        ticket_type:
+          allOf:
+          - $ref: '#/components/schemas/ReservationTicketType'
+          readOnly: true
+        reservation:
+          allOf:
+          - $ref: '#/components/schemas/MyTicketReservation'
+          readOnly: true
+        token:
+          type: string
+          readOnly: true
+        cancel_deadline:
+          type: string
+          format: date-time
+          readOnly: true
+        can_cancel:
+          type: boolean
+          description: RN-20 to RN-22, so the screen does not have to repeat them.
+          readOnly: true
+      required:
+      - can_cancel
+      - cancel_deadline
+      - checked_in_at
+      - event
+      - id
+      - issued_at
+      - reservation
+      - status
+      - ticket_type
+      - token
+    MyTicketEvent:
+      type: object
+      properties:
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          readOnly: true
+          title: Título
+        location:
+          type: string
+          readOnly: true
+          title: Ubicación
+        start_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Inicio
+        end_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Fin
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EventStatusEnum'
+          readOnly: true
+        organization_name:
+          type: string
+          readOnly: true
+      required:
+      - end_at
+      - location
+      - organization_name
+      - slug
+      - start_at
+      - status
+      - title
+    MyTicketReservation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReservationStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - cancelled_at
+      - created_at
+      - id
+      - status
     Organization:
       type: object
       properties:

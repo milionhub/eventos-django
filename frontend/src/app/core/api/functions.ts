@@ -13,6 +13,12 @@ export type { AuthRegister$Params as AuthRegister$Params } from './fn/auth/auth-
 export { authRegister as authRegister } from './fn/auth/auth-register';
 export type { HealthRetrieve$Params as HealthRetrieve$Params } from './fn/health/health-retrieve';
 export { healthRetrieve as healthRetrieve } from './fn/health/health-retrieve';
+export type { MyTicketsList$Params as MyTicketsList$Params } from './fn/my-tickets/my-tickets-list';
+export { myTicketsList as myTicketsList } from './fn/my-tickets/my-tickets-list';
+export type { MyTicketsRetrieve$Params as MyTicketsRetrieve$Params } from './fn/my-tickets/my-tickets-retrieve';
+export { myTicketsRetrieve as myTicketsRetrieve } from './fn/my-tickets/my-tickets-retrieve';
+export type { MyTicketsQr$Params as MyTicketsQr$Params } from './fn/my-tickets/my-tickets-qr';
+export { myTicketsQr as myTicketsQr } from './fn/my-tickets/my-tickets-qr';
 export type { OrganizationsList$Params as OrganizationsList$Params } from './fn/organizations/organizations-list';
 export { organizationsList as organizationsList } from './fn/organizations/organizations-list';
 export type { OrganizationsCreate$Params as OrganizationsCreate$Params } from './fn/organizations/organizations-create';

@@ -4,6 +4,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from apps.core.views import HealthView
 from apps.events.urls import public_urlpatterns as public_events
+from apps.ticketing.urls import my_ticket_urlpatterns as my_tickets
 
 api_v1 = [
     path("health/", HealthView.as_view(), name="health"),
@@ -11,6 +12,7 @@ api_v1 = [
     path("organizations/", include("apps.organizations.urls")),
     path("public/", include(public_events)),
     path("reservations/", include("apps.ticketing.urls")),
+    path("me/tickets/", include(my_tickets)),
 ]
 
 urlpatterns = [

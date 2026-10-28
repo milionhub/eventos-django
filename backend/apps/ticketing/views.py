@@ -1,4 +1,5 @@
 from django.http import Http404
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -9,7 +10,14 @@ from rest_framework.views import APIView
 
 from apps.core.schema import ErrorSerializer
 from apps.ticketing import selectors, services
-from apps.ticketing.serializers import ReservationSerializer, ReserveSerializer
+from apps.ticketing.qr import ticket_qr_svg
+from apps.ticketing.renderers import SVGRenderer
+from apps.ticketing.serializers import (
+    MyTicketDetailSerializer,
+    MyTicketSerializer,
+    ReservationSerializer,
+    ReserveSerializer,
+)
 
 
 @extend_schema(tags=["reservations"])
@@ -59,3 +67,47 @@ class ReservationCancelView(APIView):
             reservation=reservation, cancelled_by=request.user
         )
         return Response(ReservationSerializer(reservation).data)
+
+
+# --- My tickets ---------------------------------------------------------------------------
+# Scoped to the signed-in user: another user's ticket is a 404, never a 403.
+
+
+@extend_schema(tags=["my tickets"])
+class MyTicketListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    # A person's own tickets are few and the screen groups them (upcoming / past), so the
+    # list is not paginated.
+    @extend_schema(operation_id="my_tickets_list", responses=MyTicketSerializer(many=True))
+    def get(self, request: Request) -> Response:
+        return Response(MyTicketSerializer(selectors.tickets_of(request.user), many=True).data)
+
+
+@extend_schema(tags=["my tickets"])
+class MyTicketDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(operation_id="my_tickets_retrieve", responses=MyTicketDetailSerializer)
+    def get(self, request: Request, ticket_id) -> Response:
+        ticket = selectors.ticket_of(request.user, ticket_id)
+        if ticket is None:
+            raise Http404
+        return Response(MyTicketDetailSerializer(ticket).data)
+
+
+@extend_schema(tags=["my tickets"])
+class MyTicketQRView(APIView):
+    permission_classes = [IsAuthenticated]
+    renderer_classes = [SVGRenderer]
+
+    @extend_schema(
+        operation_id="my_tickets_qr",
+        responses={(200, "image/svg+xml"): OpenApiTypes.BINARY},
+    )
+    def get(self, request: Request, ticket_id) -> Response:
+        ticket = selectors.ticket_of(request.user, ticket_id)
+        if ticket is None:
+            raise Http404
+        # The QR is the entry pass: never keep it in a shared or browser cache.
+        return Response(ticket_qr_svg(ticket.token), headers={"Cache-Control": "no-store"})
