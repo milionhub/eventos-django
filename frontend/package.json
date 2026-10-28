@@ -10,7 +10,10 @@
     "lint": "ng lint",
     "test:watch": "ng test",
     "format": "prettier --write \"src/**/*.{ts,html,scss}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,html,scss}\""
+    "format:check": "prettier --check \"src/**/*.{ts,html,scss}\"",
+    "api:schema": "cd ../backend && uv run python manage.py spectacular --file schema.yml --validate --fail-on-warn",
+    "api:client": "ng-openapi-gen",
+    "api:generate": "npm run api:schema && npm run api:client"
   },
   "private": true,
   "packageManager": "npm@11.13.0",
@@ -34,6 +37,7 @@
     "angular-eslint": "22.6.0",
     "eslint": "^10.12.0",
     "jsdom": "^30.0.0",
+    "ng-openapi-gen": "^1.1.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "8.71.0",

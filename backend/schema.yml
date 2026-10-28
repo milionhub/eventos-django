@@ -1,0 +1,39 @@
+openapi: 3.0.3
+info:
+  title: eventos-django API
+  version: 1.0.0
+  description: Gestión de eventos, reservas y entradas QR.
+paths:
+  /api/v1/health/:
+    get:
+      operationId: health_retrieve
+      description: Liveness check that also verifies the database connection.
+      tags:
+      - health
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+          description: ''
+components:
+  schemas:
+    Health:
+      type: object
+      properties:
+        api:
+          type: boolean
+        database:
+          type: boolean
+      required:
+      - api
+      - database

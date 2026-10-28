@@ -6,6 +6,11 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+HealthSerializer = inline_serializer(
+    name="Health",
+    fields={"api": serializers.BooleanField(), "database": serializers.BooleanField()},
+)
+
 
 class HealthView(APIView):
     """Liveness check that also verifies the database connection."""
@@ -15,10 +20,8 @@ class HealthView(APIView):
 
     @extend_schema(
         operation_id="health_retrieve",
-        responses=inline_serializer(
-            name="Health",
-            fields={"api": serializers.BooleanField(), "database": serializers.BooleanField()},
-        ),
+        # 503 shares the body shape so clients can tell which component is down.
+        responses={200: HealthSerializer, 503: HealthSerializer},
     )
     def get(self, request: Request) -> Response:
         try:
