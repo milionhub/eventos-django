@@ -54,7 +54,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/SessionUser'
           description: ''
   /api/v1/auth/refresh/:
     post:
@@ -125,8 +125,274 @@ paths:
               schema:
                 $ref: '#/components/schemas/Health'
           description: ''
+  /api/v1/organizations/:
+    get:
+      operationId: organizations_list
+      tags:
+      - organizations
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MyOrganization'
+          description: ''
+    post:
+      operationId: organizations_create
+      tags:
+      - organizations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyOrganization'
+          description: ''
+  /api/v1/organizations/{org_slug}/:
+    get:
+      operationId: organizations_retrieve
+      description: |-
+        For views under `organizations/<org_slug>/...` (RN-06).
+
+        Resolves the organization from the URL through the user's own memberships, so an
+        organization the user does not belong to is indistinguishable from one that does
+        not exist: 404. A member whose role is not enough for the method gets 403.
+
+        Views declare who may call each method:
+
+            roles_by_method = {"GET": ALL_ROLES, "PATCH": {Role.OWNER}}
+
+        and then use `self.organization` / `self.membership`, filtering every queryset by
+        `self.organization`.
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - organizations
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyOrganization'
+          description: ''
+    patch:
+      operationId: organizations_update
+      description: |-
+        For views under `organizations/<org_slug>/...` (RN-06).
+
+        Resolves the organization from the URL through the user's own memberships, so an
+        organization the user does not belong to is indistinguishable from one that does
+        not exist: 404. A member whose role is not enough for the method gets 403.
+
+        Views declare who may call each method:
+
+            roles_by_method = {"GET": ALL_ROLES, "PATCH": {Role.OWNER}}
+
+        and then use `self.organization` / `self.membership`, filtering every queryset by
+        `self.organization`.
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - organizations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOrganizationRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyOrganization'
+          description: ''
+  /api/v1/organizations/{org_slug}/members/:
+    get:
+      operationId: members_list
+      description: 'RN-05: only the OWNER manages members.'
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - organizations
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Member'
+          description: ''
+    post:
+      operationId: members_create
+      description: 'RN-05: only the OWNER manages members.'
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - organizations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddMemberRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/organizations/{org_slug}/members/{member_id}/:
+    patch:
+      operationId: members_update
+      description: |-
+        For views under `organizations/<org_slug>/...` (RN-06).
+
+        Resolves the organization from the URL through the user's own memberships, so an
+        organization the user does not belong to is indistinguishable from one that does
+        not exist: 404. A member whose role is not enough for the method gets 403.
+
+        Views declare who may call each method:
+
+            roles_by_method = {"GET": ALL_ROLES, "PATCH": {Role.OWNER}}
+
+        and then use `self.organization` / `self.membership`, filtering every queryset by
+        `self.organization`.
+      parameters:
+      - in: path
+        name: member_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - organizations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedChangeRoleRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: members_destroy
+      description: |-
+        For views under `organizations/<org_slug>/...` (RN-06).
+
+        Resolves the organization from the URL through the user's own memberships, so an
+        organization the user does not belong to is indistinguishable from one that does
+        not exist: 404. A member whose role is not enough for the method gets 403.
+
+        Views declare who may call each method:
+
+            roles_by_method = {"GET": ALL_ROLES, "PATCH": {Role.OWNER}}
+
+        and then use `self.organization` / `self.membership`, filtering every queryset by
+        `self.organization`.
+      parameters:
+      - in: path
+        name: member_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - organizations
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
 components:
   schemas:
+    AddMemberRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+      required:
+      - email
+      - role
     AuthSession:
       type: object
       description: 'Response of login and refresh: the access token plus who it belongs
@@ -135,7 +401,7 @@ components:
         access:
           type: string
         user:
-          $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/SessionUser'
       required:
       - access
       - user
@@ -173,6 +439,114 @@ components:
       required:
       - email
       - password
+    Member:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+          title: Rol
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - role
+      - user
+    MembershipSummary:
+      type: object
+      properties:
+        organization_slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        organization_name:
+          type: string
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+          title: Rol
+      required:
+      - organization_name
+      - organization_slug
+      - role
+    MyOrganization:
+      type: object
+      description: 'An organization as seen by one of its members: the organization
+        plus their role.'
+      properties:
+        organization:
+          $ref: '#/components/schemas/Organization'
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+      required:
+      - organization
+      - role
+    Organization:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Nombre
+          maxLength: 120
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+          title: Descripción
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - slug
+    OrganizationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nombre
+          maxLength: 120
+        description:
+          type: string
+          title: Descripción
+      required:
+      - name
+    PatchedChangeRoleRequest:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+    PatchedOrganizationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nombre
+          maxLength: 120
+        description:
+          type: string
+          title: Descripción
     RegisterRequest:
       type: object
       properties:
@@ -193,6 +567,49 @@ components:
       required:
       - email
       - password
+    RoleEnum:
+      enum:
+      - OWNER
+      - MANAGER
+      - STAFF
+      type: string
+      description: |-
+        * `OWNER` - Propietario
+        * `MANAGER` - Gestor
+        * `STAFF` - Personal de acceso
+    SessionUser:
+      type: object
+      description: |-
+        The signed-in user plus their roles, so the frontend can adapt menus and guards.
+
+        Only UX: every permission is checked again by the backend.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        first_name:
+          type: string
+          readOnly: true
+          title: Nombre
+        last_name:
+          type: string
+          readOnly: true
+          title: Apellidos
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/MembershipSummary'
+          readOnly: true
+      required:
+      - email
+      - first_name
+      - id
+      - last_name
+      - memberships
     User:
       type: object
       properties:

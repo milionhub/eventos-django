@@ -58,8 +58,11 @@ Las tarjetas que representan eventos o entradas tienen forma de entrada física:
 ## Clases globales
 - `.display`: titular tipo cartel.
 - `.eyebrow`: etiqueta pequeña en mayúsculas y coral, encima de un titular.
+- `.lead`: párrafo de introducción bajo el titular.
+- `.surface-card`: superficie elevada para tarjetas y paneles.
+- `.chip`: etiqueta en forma de píldora (roles, estados).
 
 ## Reglas
-- Un único acento por pantalla: el coral marca la acción principal; el resto, en neutros.
+- Un único acento por pantalla: el coral marca la acción principal; el resto, en neutros. Las acciones secundarias ("Quitar", "Cancelar") van en gris y solo se vuelven rojas al pedir confirmación.
 - Todo usable a 360 px (RNF-01) y con foco visible (`:focus-visible` en coral).
 - Las animaciones se desactivan con `prefers-reduced-motion`.

@@ -7,12 +7,12 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { User } from '../../models/user';
+import { SessionUser } from '../../models/session-user';
 
 export interface AuthMe$Params {
 }
 
-export function authMe(http: HttpClient, rootUrl: string, params?: AuthMe$Params, context?: HttpContext): Observable<StrictHttpResponse<User>> {
+export function authMe(http: HttpClient, rootUrl: string, params?: AuthMe$Params, context?: HttpContext): Observable<StrictHttpResponse<SessionUser>> {
   const rb = new RequestBuilder(rootUrl, authMe.PATH, 'get');
   if (params) {
   }
@@ -22,7 +22,7 @@ export function authMe(http: HttpClient, rootUrl: string, params?: AuthMe$Params
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<User>;
+      return r as StrictHttpResponse<SessionUser>;
     })
   );
 }

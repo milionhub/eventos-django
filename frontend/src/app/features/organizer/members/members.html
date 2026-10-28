@@ -1,0 +1,90 @@
+<a class="back" [routerLink]="['/org', org()]"><mat-icon>arrow_back</mat-icon> Organización</a>
+
+<header class="page-header">
+  <p class="eyebrow">Equipo</p>
+  <h1 class="display">Miembros<span class="accent">_</span></h1>
+  <p class="lead">
+    Los propietarios gestionan el equipo, los gestores crean y publican eventos y el personal de
+    acceso valida entradas.
+  </p>
+</header>
+
+<form class="surface-card add" [formGroup]="form" (ngSubmit)="add()" novalidate>
+  <mat-form-field appearance="outline" class="email">
+    <mat-label>Email de una cuenta registrada</mat-label>
+    <input matInput type="email" formControlName="email" autocomplete="off" />
+    @if (form.controls.email.hasError('required')) {
+      <mat-error>Introduce un email.</mat-error>
+    } @else if (form.controls.email.hasError('email')) {
+      <mat-error>Este email no es válido.</mat-error>
+    }
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="role">
+    <mat-label>Rol</mat-label>
+    <mat-select formControlName="role">
+      @for (role of roles; track role) {
+        <mat-option [value]="role">{{ roleLabels[role] }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <button mat-flat-button type="submit" class="add-button" [disabled]="adding()">
+    <mat-icon>{{ adding() ? 'hourglass_top' : 'person_add' }}</mat-icon>
+    Añadir
+  </button>
+</form>
+
+@if (notice(); as notice) {
+  <p
+    class="notice"
+    [class.error]="notice.kind === 'error'"
+    [attr.role]="notice.kind === 'error' ? 'alert' : 'status'"
+  >
+    <mat-icon>{{ notice.kind === 'error' ? 'error' : 'check_circle' }}</mat-icon>
+    {{ notice.text }}
+  </p>
+}
+
+@if (members.isLoading() && !members.hasValue()) {
+  <mat-spinner class="loading" diameter="32" aria-label="Cargando miembros" />
+} @else if (members.error()) {
+  <p class="notice error" role="alert">No se han podido cargar los miembros.</p>
+} @else {
+  <ul class="list surface-card" role="list">
+    @for (member of members.value(); track member.id) {
+      <li class="member">
+        <span class="avatar" aria-hidden="true">{{ initials(member.user) }}</span>
+        <div class="who">
+          <strong>
+            {{ displayName(member) }}
+            @if (member.user.id === myId()) {
+              <span class="chip">Tú</span>
+            }
+          </strong>
+          <span>{{ member.user.email }}</span>
+        </div>
+        <mat-form-field appearance="outline" class="role-select" subscriptSizing="dynamic">
+          <mat-select
+            [value]="member.role"
+            [disabled]="busyId() === member.id"
+            [attr.aria-label]="'Rol de ' + displayName(member)"
+            (selectionChange)="changeRole(member, $event)"
+          >
+            @for (role of roles; track role) {
+              <mat-option [value]="role">{{ roleLabels[role] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button
+          mat-button
+          type="button"
+          class="remove"
+          [class.confirming]="confirmingId() === member.id"
+          [disabled]="busyId() === member.id"
+          (click)="remove(member)"
+        >
+          {{ confirmingId() === member.id ? '¿Seguro? Quitar' : 'Quitar' }}
+        </button>
+      </li>
+    }
+  </ul>
+}

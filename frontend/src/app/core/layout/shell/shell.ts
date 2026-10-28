@@ -10,13 +10,24 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { map } from 'rxjs';
 
 import { AuthService } from '../../auth/auth.service';
+import { initials } from '../../../shared/roles';
 import { ThemeService } from '../../theme/theme.service';
 
 interface NavItem {
   label: string;
   icon: string;
   path: string;
+  /** Highlight only on this exact URL (home), not on its children. */
+  exact: boolean;
 }
+
+const EVENTS: NavItem = { label: 'Eventos', icon: 'event', path: '/', exact: true };
+const ORGANIZATIONS: NavItem = {
+  label: 'Organizaciones',
+  icon: 'groups',
+  path: '/org',
+  exact: false,
+};
 
 /** App frame: sticky header, links inline on desktop and in a drawer on mobile, and a footer. */
 @Component({
@@ -40,7 +51,9 @@ export class Shell {
   private readonly router = inject(Router);
 
   // Sections are added here as each phase delivers them.
-  protected readonly navItems: NavItem[] = [{ label: 'Eventos', icon: 'event', path: '/' }];
+  protected readonly navItems = computed<NavItem[]>(() =>
+    this.auth.isAuthenticated() ? [EVENTS, ORGANIZATIONS] : [EVENTS],
+  );
 
   protected readonly isHandset = toSignal(
     inject(BreakpointObserver)
@@ -55,9 +68,7 @@ export class Shell {
   protected readonly user = this.auth.user;
   protected readonly initials = computed(() => {
     const user = this.user();
-    if (!user) return '';
-    const fromName = `${user.first_name.charAt(0)}${user.last_name.charAt(0)}`;
-    return (fromName || user.email.charAt(0)).toUpperCase();
+    return user ? initials(user) : '';
   });
 
   protected toggleTheme(): void {

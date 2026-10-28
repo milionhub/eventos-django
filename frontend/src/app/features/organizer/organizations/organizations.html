@@ -1,0 +1,67 @@
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Tu espacio de organizador</p>
+    <h1 class="display">Organiza&shy;ciones</h1>
+    <p class="lead">Crea una organización para publicar eventos y gestionar a tu equipo.</p>
+  </div>
+  <button mat-flat-button type="button" class="new" (click)="toggleForm()">
+    <mat-icon>{{ creating() ? 'close' : 'add' }}</mat-icon>
+    {{ creating() ? 'Cancelar' : 'Nueva organización' }}
+  </button>
+</header>
+
+@if (creating()) {
+  <form class="surface-card create" [formGroup]="form" (ngSubmit)="create()" novalidate>
+    <h2>Nueva organización</h2>
+    @if (error(); as message) {
+      <p class="form-error" role="alert">{{ message }}</p>
+    }
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="name" maxlength="120" />
+      @if (form.controls.name.hasError('required')) {
+        <mat-error>Ponle un nombre.</mat-error>
+      }
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Descripción (opcional)</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+    <button mat-flat-button type="submit" [disabled]="submitting()">
+      @if (submitting()) {
+        <mat-spinner diameter="20" aria-label="Creando" />
+      } @else {
+        Crear organización
+      }
+    </button>
+  </form>
+}
+
+@if (organizations.isLoading()) {
+  <mat-spinner class="loading" diameter="32" aria-label="Cargando organizaciones" />
+} @else if (organizations.error()) {
+  <p class="form-error" role="alert">No se han podido cargar tus organizaciones.</p>
+} @else if (organizations.value()?.length === 0) {
+  @if (!creating()) {
+    <div class="surface-card empty">
+      <mat-icon>groups</mat-icon>
+      <h2>Aún no formas parte de ninguna organización</h2>
+      <p>Crea la tuya o pide a un propietario que te añada con tu email.</p>
+    </div>
+  }
+} @else {
+  <ul class="grid" role="list">
+    @for (item of organizations.value(); track item.organization.slug) {
+      <li>
+        <a class="surface-card org" [routerLink]="['/org', item.organization.slug]">
+          <span class="chip">{{ roleLabels[item.role] }}</span>
+          <h2>{{ item.organization.name }}</h2>
+          @if (item.organization.description) {
+            <p>{{ item.organization.description }}</p>
+          }
+          <mat-icon class="arrow" aria-hidden="true">arrow_forward</mat-icon>
+        </a>
+      </li>
+    }
+  </ul>
+}

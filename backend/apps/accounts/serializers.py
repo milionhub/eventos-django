@@ -3,12 +3,36 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from apps.accounts.models import User
+from apps.organizations.models import Membership
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "email", "first_name", "last_name"]
+        read_only_fields = fields
+
+
+class MembershipSummarySerializer(serializers.ModelSerializer):
+    organization_slug = serializers.SlugField(source="organization.slug")
+    organization_name = serializers.CharField(source="organization.name")
+
+    class Meta:
+        model = Membership
+        fields = ["organization_slug", "organization_name", "role"]
+        read_only_fields = fields
+
+
+class SessionUserSerializer(UserSerializer):
+    """The signed-in user plus their roles, so the frontend can adapt menus and guards.
+
+    Only UX: every permission is checked again by the backend.
+    """
+
+    memberships = MembershipSummarySerializer(many=True, read_only=True)
+
+    class Meta(UserSerializer.Meta):
+        fields = [*UserSerializer.Meta.fields, "memberships"]
         read_only_fields = fields
 
 
@@ -41,4 +65,4 @@ class AuthSessionSerializer(serializers.Serializer):
     """Response of login and refresh: the access token plus who it belongs to."""
 
     access = serializers.CharField()
-    user = UserSerializer()
+    user = SessionUserSerializer()

@@ -7,7 +7,13 @@ import { AuthService } from './auth.service';
 
 const SESSION: AuthSession = {
   access: 'access-1',
-  user: { id: 1, email: 'ana@example.com', first_name: 'Ana', last_name: 'García' },
+  user: {
+    id: 1,
+    email: 'ana@example.com',
+    first_name: 'Ana',
+    last_name: 'García',
+    memberships: [],
+  },
 };
 
 /** Lets pending promise callbacks run so the next request reaches HttpTestingController. */

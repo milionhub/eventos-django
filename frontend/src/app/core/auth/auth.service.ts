@@ -1,8 +1,8 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { Api } from '../api/api';
-import { authLogin, authLogout, authRefresh, authRegister } from '../api/functions';
-import { AuthSession, LoginRequest, RegisterRequest, User } from '../api/models';
+import { authLogin, authLogout, authMe, authRefresh, authRegister } from '../api/functions';
+import { AuthSession, LoginRequest, RegisterRequest, RoleEnum, SessionUser } from '../api/models';
 
 /**
  * Session state (ADR-0003). The access token lives only in this signal (memory);
@@ -14,23 +14,37 @@ export class AuthService {
   private readonly session = signal<AuthSession | null>(null);
   private refreshing: Promise<boolean> | null = null;
 
-  readonly user = computed<User | null>(() => this.session()?.user ?? null);
+  readonly user = computed<SessionUser | null>(() => this.session()?.user ?? null);
   readonly isAuthenticated = computed(() => this.session() !== null);
 
   get accessToken(): string | null {
     return this.session()?.access ?? null;
   }
 
-  async login(credentials: LoginRequest): Promise<User> {
+  async login(credentials: LoginRequest): Promise<SessionUser> {
     const session = await this.api.invoke(authLogin, { body: credentials });
     this.session.set(session);
     return session.user;
   }
 
   /** Creates the account and signs in straight away. */
-  async register(data: RegisterRequest): Promise<User> {
+  async register(data: RegisterRequest): Promise<SessionUser> {
     await this.api.invoke(authRegister, { body: data });
     return this.login({ email: data.email, password: data.password });
+  }
+
+  /** The user's role in an organization, or null if they are not a member (UX only). */
+  roleIn(orgSlug: string | null): RoleEnum | null {
+    const membership = this.user()?.memberships.find((m) => m.organization_slug === orgSlug);
+    return membership?.role ?? null;
+  }
+
+  /** Re-reads the user (and their memberships) after something changed them. */
+  async reloadUser(): Promise<void> {
+    const session = this.session();
+    if (!session) return;
+    const user = await this.api.invoke(authMe);
+    this.session.set({ ...session, user });
   }
 
   async logout(): Promise<void> {

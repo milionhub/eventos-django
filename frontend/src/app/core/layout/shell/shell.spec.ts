@@ -2,12 +2,12 @@ import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
-import { User } from '../../api/models';
+import { SessionUser } from '../../api/models';
 import { AuthService } from '../../auth/auth.service';
 import { Shell } from './shell';
 
 describe('Shell', () => {
-  const user = signal<User | null>(null);
+  const user = signal<SessionUser | null>(null);
 
   beforeEach(async () => {
     user.set(null);
@@ -59,10 +59,25 @@ describe('Shell', () => {
   });
 
   it("shows the user's initials when signed in", async () => {
-    user.set({ id: 1, email: 'ana@example.com', first_name: 'Ana', last_name: 'García' });
+    user.set({
+      id: 1,
+      email: 'ana@example.com',
+      first_name: 'Ana',
+      last_name: 'García',
+      memberships: [],
+    });
     const element = await render();
 
     expect(element.querySelector('.avatar')?.textContent).toBe('AG');
     expect(element.querySelector('a.sign-in')).toBeNull();
+  });
+
+  it('links to organizations only when signed in', async () => {
+    const link = (element: HTMLElement) => element.querySelector('nav a[href="/org"]');
+    expect(link(await render())).toBeNull();
+
+    user.set({ id: 1, email: 'ana@example.com', first_name: '', last_name: '', memberships: [] });
+
+    expect(link(await render())).toBeTruthy();
   });
 });

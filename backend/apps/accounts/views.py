@@ -10,8 +10,8 @@ from contextlib import suppress
 
 from django.conf import settings
 from django.contrib.auth.models import update_last_login
-from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
-from rest_framework import serializers, status
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
@@ -28,16 +28,14 @@ from apps.accounts.serializers import (
     AuthSessionSerializer,
     LoginSerializer,
     RegisterSerializer,
+    SessionUserSerializer,
     UserSerializer,
 )
-
-ErrorSerializer = inline_serializer(
-    name="Error", fields={"code": serializers.CharField(), "detail": serializers.CharField()}
-)
+from apps.core.schema import ErrorSerializer
 
 
 def _session_response(user: User, access: str, refresh: str) -> Response:
-    response = Response({"access": access, "user": UserSerializer(user).data})
+    response = Response({"access": access, "user": SessionUserSerializer(user).data})
     cookie = settings.REFRESH_COOKIE
     response.set_cookie(
         cookie["key"],
@@ -139,6 +137,6 @@ class LogoutView(APIView):
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(operation_id="auth_me", responses=UserSerializer)
+    @extend_schema(operation_id="auth_me", responses=SessionUserSerializer)
     def get(self, request: Request) -> Response:
-        return Response(UserSerializer(request.user).data)
+        return Response(SessionUserSerializer(request.user).data)

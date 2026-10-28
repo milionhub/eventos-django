@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
-import { guestGuard } from './core/auth/auth.guards';
+import { authGuard, guestGuard, orgRoleGuard } from './core/auth/auth.guards';
+import { ROLES } from './shared/roles';
 
 export const routes: Routes = [
   {
@@ -19,6 +20,31 @@ export const routes: Routes = [
     title: 'Crear cuenta · #4events',
     canActivate: [guestGuard],
     loadComponent: () => import('./features/auth/register/register').then((m) => m.Register),
+  },
+  {
+    path: 'org',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        title: 'Organizaciones · #4events',
+        loadComponent: () =>
+          import('./features/organizer/organizations/organizations').then((m) => m.Organizations),
+      },
+      {
+        path: ':org',
+        title: 'Organización · #4events',
+        canActivate: [orgRoleGuard(ROLES)],
+        loadComponent: () =>
+          import('./features/organizer/organization/organization').then((m) => m.Organization),
+      },
+      {
+        path: ':org/members',
+        title: 'Miembros · #4events',
+        canActivate: [orgRoleGuard(['OWNER'])],
+        loadComponent: () => import('./features/organizer/members/members').then((m) => m.Members),
+      },
+    ],
   },
   {
     path: '**',

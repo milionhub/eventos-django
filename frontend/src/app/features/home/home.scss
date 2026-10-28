@@ -15,13 +15,6 @@
   }
 }
 
-.lead {
-  max-width: 34rem;
-  margin: 20px 0 0;
-  color: var(--mat-sys-on-surface-variant);
-  font: var(--mat-sys-title-medium);
-}
-
 .ticket {
   @include ticket.notched($at: 72%);
   max-width: 420px;

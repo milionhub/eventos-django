@@ -83,8 +83,8 @@
 
 **Backend**
 - [x] Registro, login, refresh y logout con cookie httpOnly; `/auth/me/` (ADR-0003)
-- [ ] Organization + Membership + servicios (crear organización → OWNER, gestión de miembros, RN-04)
-- [ ] `OrganizationScopedMixin` + permisos por rol
+- [x] Organization + Membership + servicios (crear organización → OWNER, gestión de miembros, RN-04)
+- [x] `OrganizationScopedMixin` + permisos por rol
 - [ ] Event + TicketType + EventStaff con sus restricciones
 - [ ] Servicios: crear, editar, publicar (RN-09) y cancelar eventos; categorías (RN-13/14/15); staff
 - [ ] Endpoints públicos de eventos
@@ -94,7 +94,7 @@
 **Frontend**
 - [x] AuthService con signals + interceptor con refresh + guards
 - [x] Login y registro
-- [ ] Mis organizaciones / crear organización / miembros
+- [x] Mis organizaciones / crear organización / miembros
 - [ ] Listado y formulario de eventos, pestañas Datos / Entradas / Staff
 - [ ] Listado y detalle público
 
@@ -107,8 +107,8 @@
 | 0 | Identidad visual `#4events` → [`design.md`](design.md) | ✅ |
 | 1 | Auth backend: registro, login, refresh, logout, `me`, throttling | ✅ |
 | 2 | Auth frontend: AuthService, interceptor, guard, login y registro | ✅ |
-| 3 | Organizaciones backend: modelos, servicios, `OrganizationScopedMixin`, permisos | |
-| 4 | Organizaciones frontend: mis organizaciones, crear, miembros | |
+| 3 | Organizaciones backend: modelos, servicios, `OrganizationScopedMixin`, permisos | ✅ |
+| 4 | Organizaciones frontend: mis organizaciones, crear, miembros | ✅ |
 | 5 | Eventos backend: modelo, servicios y transiciones de estado | |
 | 6 | Categorías y staff backend + endpoints públicos | |
 | 7 | Eventos frontend (organizador): listado, formulario con pestañas, publicar/cancelar | |

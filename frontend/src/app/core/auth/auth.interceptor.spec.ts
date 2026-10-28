@@ -9,7 +9,7 @@ import { AuthService } from './auth.service';
 
 const session = (access: string): AuthSession => ({
   access,
-  user: { id: 1, email: 'ana@example.com', first_name: 'Ana', last_name: '' },
+  user: { id: 1, email: 'ana@example.com', first_name: 'Ana', last_name: '', memberships: [] },
 });
 
 const flushMicrotasks = () => new Promise((resolve) => setTimeout(resolve));

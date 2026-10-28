@@ -1,11 +1,11 @@
 <mat-sidenav-container class="container">
   <mat-sidenav #drawer mode="over" [opened]="false" [disableClose]="false">
     <nav class="drawer-nav" aria-label="Navegación principal">
-      @for (item of navItems; track item.path) {
+      @for (item of navItems(); track item.path) {
         <a
           [routerLink]="item.path"
           routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }"
+          [routerLinkActiveOptions]="{ exact: item.exact }"
           (click)="drawer.close()"
         >
           <mat-icon>{{ item.icon }}</mat-icon>
@@ -28,11 +28,11 @@
 
       @if (!isHandset()) {
         <nav class="desktop-nav" aria-label="Navegación principal">
-          @for (item of navItems; track item.path) {
+          @for (item of navItems(); track item.path) {
             <a
               [routerLink]="item.path"
               routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
+              [routerLinkActiveOptions]="{ exact: item.exact }"
               >{{ item.label }}</a
             >
           }
