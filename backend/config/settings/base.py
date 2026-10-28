@@ -110,6 +110,8 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "login": env("THROTTLE_LOGIN_RATE", default="10/min"),
         "reservations": env("THROTTLE_RESERVATIONS_RATE", default="20/min"),
+        # Generous: a door scans one person every few seconds, but tokens must not be brute-forced.
+        "checkin": env("THROTTLE_CHECKIN_RATE", default="120/min"),
     },
 }
 
@@ -124,6 +126,8 @@ SIMPLE_JWT = {
 # Business settings (requirements.md §3).
 # RN-20: attendees may cancel until this many hours before the event starts.
 CANCELLATION_DEADLINE_HOURS = env.int("CANCELLATION_DEADLINE_HOURS", default=2)
+# RN-29: tickets can be validated from this many hours before the start until the end.
+CHECKIN_OPENS_HOURS_BEFORE = env.int("CHECKIN_OPENS_HOURS_BEFORE", default=3)
 
 REFRESH_COOKIE = {
     "key": "refresh_token",
@@ -146,5 +150,6 @@ SPECTACULAR_SETTINGS = {
         "RoleEnum": "apps.organizations.models.Membership.Role",
         "ReservationStatusEnum": "apps.ticketing.models.Reservation.Status",
         "TicketStatusEnum": "apps.ticketing.models.Ticket.Status",
+        "ScanResultEnum": "apps.checkin.models.CheckInLog.Result",
     },
 }

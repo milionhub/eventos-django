@@ -104,6 +104,79 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/checkin/events/:
+    get:
+      operationId: checkin_events_list
+      tags:
+      - checkin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CheckinEvent'
+          description: ''
+  /api/v1/checkin/events/{event_id}/activity/:
+    get:
+      operationId: checkin_activity
+      description: How many are in and the latest attempts, for the scanner screen.
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - checkin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinActivity'
+          description: ''
+  /api/v1/checkin/events/{event_id}/scan/:
+    post:
+      operationId: checkin_scan
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - checkin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanResult'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanResult'
+          description: ''
+        '404':
+          description: No response body
+        '429':
+          description: No response body
   /api/v1/health/:
     get:
       operationId: health_retrieve
@@ -1125,6 +1198,105 @@ components:
       required:
       - access
       - user
+    CheckInLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        result:
+          allOf:
+          - $ref: '#/components/schemas/ScanResultEnum'
+          readOnly: true
+        checked_at:
+          type: string
+          format: date-time
+          readOnly: true
+        ticket:
+          allOf:
+          - $ref: '#/components/schemas/ScannedTicket'
+          readOnly: true
+          nullable: true
+      required:
+      - checked_at
+      - id
+      - result
+      - ticket
+    CheckinActivity:
+      type: object
+      properties:
+        stats:
+          $ref: '#/components/schemas/CheckinStats'
+        logs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckInLog'
+      required:
+      - logs
+      - stats
+    CheckinEvent:
+      type: object
+      description: An event where the user can validate, with its door window (RN-29).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          readOnly: true
+          title: Título
+        location:
+          type: string
+          readOnly: true
+          title: Ubicación
+        image_url:
+          type: string
+          readOnly: true
+        start_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Inicio
+        end_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Fin
+        organization_name:
+          type: string
+          readOnly: true
+        opens_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_open:
+          type: boolean
+          readOnly: true
+      required:
+      - end_at
+      - id
+      - image_url
+      - is_open
+      - location
+      - opens_at
+      - organization_name
+      - slug
+      - start_at
+      - title
+    CheckinStats:
+      type: object
+      properties:
+        validated:
+          type: integer
+        expected:
+          type: integer
+      required:
+      - expected
+      - validated
     Error:
       type: object
       properties:
@@ -2011,6 +2183,73 @@ components:
         * `OWNER` - Propietario
         * `MANAGER` - Gestor
         * `STAFF` - Personal de acceso
+    ScanRequestRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 64
+      required:
+      - token
+    ScanResult:
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/ScanResultEnum'
+        ticket:
+          allOf:
+          - $ref: '#/components/schemas/ScannedTicket'
+          nullable: true
+        checked_at:
+          type: string
+          format: date-time
+      required:
+      - checked_at
+      - result
+      - ticket
+    ScanResultEnum:
+      enum:
+      - VALID
+      - ALREADY_USED
+      - CANCELLED
+      - NOT_FOUND
+      - WRONG_EVENT
+      - EVENT_NOT_ACTIVE
+      - UNAUTHORIZED
+      type: string
+      description: |-
+        * `VALID` - Válida
+        * `ALREADY_USED` - Ya utilizada
+        * `CANCELLED` - Cancelada
+        * `NOT_FOUND` - No existe
+        * `WRONG_EVENT` - De otro evento
+        * `EVENT_NOT_ACTIVE` - Fuera de horario
+        * `UNAUTHORIZED` - Sin permiso
+    ScannedTicket:
+      type: object
+      description: 'Just what the door needs to check the person: category and name
+        (no email).'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        ticket_type:
+          type: string
+        holder_name:
+          type: string
+          readOnly: true
+        checked_in_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - checked_in_at
+      - holder_name
+      - id
+      - ticket_type
     SessionUser:
       type: object
       description: |-

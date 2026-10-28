@@ -143,13 +143,22 @@
 
 ## FASE 4 — Check-in · 12–18 h
 
-- [ ] CheckInLog + servicio `scan()` con los 7 resultados (RN-32)
-- [ ] Ventana de acceso (RN-29) y permisos (RN-28)
-- [ ] **Test de concurrencia:** 2 escaneos simultáneos → 1 VALID + 1 ALREADY_USED
+- [x] CheckInLog + servicio `scan()` con los 7 resultados (RN-32)
+- [x] Ventana de acceso (RN-29) y permisos (RN-28)
+- [x] **Test de concurrencia:** 2 escaneos simultáneos → 1 VALID + 1 ALREADY_USED
 - [ ] UI: selector de eventos + escáner (`@zxing/ngx-scanner`) + resultado a pantalla completa con vibración
 - [ ] Prueba en un móvil real mediante un túnel HTTPS (cloudflared)
 
 **Cierre:** una entrada se valida desde el móvil y no se puede usar dos veces.
+
+**Bloques de trabajo** (un commit por bloque):
+
+| # | Bloque | Estado |
+|---|---|---|
+| 1 | Validación atómica (backend): `CheckInLog`, `scan()` con UPDATE condicional, 7 resultados, ventana y permisos | ✅ |
+| 2 | Escáner (frontend): eventos validables, cámara con zxing, resultado a pantalla completa, entrada manual | |
+| 3 | Prueba en un móvil real: túnel HTTPS con cloudflared y guía en el README | |
+| 4 | Cierre: escenario completo, ROADMAP y README | |
 
 ---
 

@@ -11,6 +11,12 @@ export type { AuthRefresh$Params as AuthRefresh$Params } from './fn/auth/auth-re
 export { authRefresh as authRefresh } from './fn/auth/auth-refresh';
 export type { AuthRegister$Params as AuthRegister$Params } from './fn/auth/auth-register';
 export { authRegister as authRegister } from './fn/auth/auth-register';
+export type { CheckinEventsList$Params as CheckinEventsList$Params } from './fn/checkin/checkin-events-list';
+export { checkinEventsList as checkinEventsList } from './fn/checkin/checkin-events-list';
+export type { CheckinActivity$Params as CheckinActivity$Params } from './fn/checkin/checkin-activity';
+export { checkinActivity as checkinActivity } from './fn/checkin/checkin-activity';
+export type { CheckinScan$Params as CheckinScan$Params } from './fn/checkin/checkin-scan';
+export { checkinScan as checkinScan } from './fn/checkin/checkin-scan';
 export type { HealthRetrieve$Params as HealthRetrieve$Params } from './fn/health/health-retrieve';
 export { healthRetrieve as healthRetrieve } from './fn/health/health-retrieve';
 export type { MyTicketsList$Params as MyTicketsList$Params } from './fn/my-tickets/my-tickets-list';

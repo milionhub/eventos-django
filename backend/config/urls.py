@@ -15,6 +15,7 @@ api_v1 = [
     path("public/", include(public_events)),
     path("reservations/", include("apps.ticketing.urls")),
     path("me/tickets/", include(my_tickets)),
+    path("checkin/", include("apps.checkin.urls")),
 ]
 
 urlpatterns = [
