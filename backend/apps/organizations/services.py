@@ -4,6 +4,7 @@ from rest_framework import status
 from apps.accounts.models import User
 from apps.core.exceptions import DomainError
 from apps.core.slugs import unique_slug
+from apps.events.models import EventStaff
 from apps.organizations.models import Membership, Organization
 
 Role = Membership.Role
@@ -92,4 +93,8 @@ def change_member_role(*, membership: Membership, role: str) -> Membership:
 def remove_member(*, membership: Membership) -> None:
     if membership.role == Role.OWNER:
         _ensure_another_owner_remains(membership)
+    # Whoever leaves the organization stops working at its events too.
+    EventStaff.objects.filter(
+        user_id=membership.user_id, event__organization_id=membership.organization_id
+    ).delete()
     membership.delete()

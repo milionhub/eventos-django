@@ -85,11 +85,11 @@
 - [x] Registro, login, refresh y logout con cookie httpOnly; `/auth/me/` (ADR-0003)
 - [x] Organization + Membership + servicios (crear organización → OWNER, gestión de miembros, RN-04)
 - [x] `OrganizationScopedMixin` + permisos por rol
-- [ ] Event + TicketType + EventStaff con sus restricciones
-- [ ] Servicios: crear, editar, publicar (RN-09) y cancelar eventos; categorías (RN-13/14/15); staff
-- [ ] Endpoints públicos de eventos
+- [x] Event + TicketType + EventStaff con sus restricciones
+- [x] Servicios: crear, editar, publicar (RN-09) y cancelar eventos; categorías (RN-13/14/15); staff
+- [x] Endpoints públicos de eventos
 - [x] Throttling de login
-- [ ] **Tests:** auth, matriz de permisos y aislamiento entre organizaciones, transiciones de estado
+- [x] **Tests:** auth, matriz de permisos y aislamiento entre organizaciones, transiciones de estado
 
 **Frontend**
 - [x] AuthService con signals + interceptor con refresh + guards
@@ -110,7 +110,7 @@
 | 3 | Organizaciones backend: modelos, servicios, `OrganizationScopedMixin`, permisos | ✅ |
 | 4 | Organizaciones frontend: mis organizaciones, crear, miembros | ✅ |
 | 5 | Eventos backend: modelo, servicios y transiciones de estado | ✅ |
-| 6 | Categorías y staff backend + endpoints públicos | |
+| 6 | Categorías y staff backend + endpoints públicos | ✅ |
 | 7 | Eventos frontend (organizador): listado, formulario con pestañas, publicar/cancelar | |
 | 8 | Público frontend (listado y detalle) + cierre de fase | |
 

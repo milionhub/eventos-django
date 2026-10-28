@@ -77,3 +77,26 @@ class TicketType(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.event} · {self.name}"
+
+    @property
+    def available(self) -> int:
+        return self.capacity - self.reserved_count
+
+
+class EventStaff(models.Model):
+    """A member assigned to validate tickets at one event (RN-28)."""
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="staff")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="staff_assignments"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["event", "user"], name="unique_staff_per_event"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} @ {self.event}"

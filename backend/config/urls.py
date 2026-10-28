@@ -3,11 +3,13 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from apps.core.views import HealthView
+from apps.events.urls import public_urlpatterns as public_events
 
 api_v1 = [
     path("health/", HealthView.as_view(), name="health"),
     path("auth/", include("apps.accounts.urls")),
     path("organizations/", include("apps.organizations.urls")),
+    path("public/", include(public_events)),
 ]
 
 urlpatterns = [

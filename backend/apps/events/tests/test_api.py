@@ -135,9 +135,9 @@ ENDPOINTS = {
 
 EXPECTED = {
     #             OWNER  MANAGER  STAFF  outsider
-    "list":     (200,   200,     403,   404),
+    "list":     (200,   200,     200,   404),  # STAFF: only assigned events
     "create":   (201,   201,     403,   404),
-    "detail":   (200,   200,     403,   404),
+    "detail":   (200,   200,     404,   404),  # STAFF: not assigned here
     "edit":     (200,   200,     403,   404),
     "publish":  (200,   200,     403,   404),
     "cancel":   (200,   200,     403,   404),

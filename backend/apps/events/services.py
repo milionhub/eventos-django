@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Sum
 from django.utils import timezone
 from rest_framework import status
@@ -8,8 +8,8 @@ from rest_framework import status
 from apps.accounts.models import User
 from apps.core.exceptions import DomainError
 from apps.core.slugs import unique_slug
-from apps.events.models import Event
-from apps.organizations.models import Organization
+from apps.events.models import Event, EventStaff, TicketType
+from apps.organizations.models import Membership, Organization
 
 Status = Event.Status
 
@@ -173,3 +173,128 @@ def cancel_event(*, event: Event, now: datetime | None = None) -> Event:
     event.cancelled_at = now
     event.save(update_fields=["status", "cancelled_at", "updated_at"])
     return event
+
+
+# --- Ticket types (RN-12 to RN-15) ------------------------------------------------------
+
+
+class CapacityExceeded(DomainError):
+    code = "capacity_exceeded"
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "La suma de los cupos de las entradas superaría el aforo del evento."
+
+
+class CapacityBelowReserved(DomainError):
+    code = "capacity_below_reserved"
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "El cupo no puede ser menor que las entradas ya reservadas."
+
+
+class DuplicateTicketTypeName(DomainError):
+    code = "duplicate_name"
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "Ya hay una categoría de entrada con ese nombre en este evento."
+
+
+class TicketTypeInUse(DomainError):
+    code = "ticket_type_in_use"
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "No se puede borrar una categoría que tiene reservas."
+
+
+class LastTicketType(DomainError):
+    code = "last_ticket_type"
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "Un evento publicado necesita al menos una categoría de entrada."
+
+
+def _lock_editable_event(event_id: int, now: datetime) -> Event:
+    """Lock the event row: category changes on one event are serialized (RN-13 under load)."""
+    event = Event.objects.select_for_update().get(pk=event_id)
+    if event.status == Status.CANCELLED or _has_finished(event, now):
+        raise EventNotEditable()
+    return event
+
+
+def _save_ticket_type(ticket_type: TicketType) -> TicketType:
+    try:
+        with transaction.atomic():
+            ticket_type.save()
+    except IntegrityError as exc:  # unique (event, name)
+        raise DuplicateTicketTypeName() from exc
+    return ticket_type
+
+
+@transaction.atomic
+def create_ticket_type(
+    *, event: Event, name: str, capacity: int, description: str = "", now: datetime | None = None
+) -> TicketType:
+    event = _lock_editable_event(event.pk, now or timezone.now())
+    if allocated_capacity(event) + capacity > event.capacity:
+        raise CapacityExceeded()
+    return _save_ticket_type(
+        TicketType(event=event, name=name, description=description, capacity=capacity)
+    )
+
+
+@transaction.atomic
+def update_ticket_type(
+    *, ticket_type: TicketType, now: datetime | None = None, **changes
+) -> TicketType:
+    event = _lock_editable_event(ticket_type.event_id, now or timezone.now())
+    ticket_type = TicketType.objects.select_for_update().get(pk=ticket_type.pk)
+    if "capacity" in changes:
+        capacity = changes["capacity"]
+        if capacity < ticket_type.reserved_count:  # RN-14
+            raise CapacityBelowReserved()
+        others = allocated_capacity(event) - ticket_type.capacity
+        if others + capacity > event.capacity:  # RN-13
+            raise CapacityExceeded()
+    for field in ("name", "description", "capacity"):
+        if field in changes:
+            setattr(ticket_type, field, changes[field])
+    return _save_ticket_type(ticket_type)
+
+
+@transaction.atomic
+def delete_ticket_type(*, ticket_type: TicketType, now: datetime | None = None) -> None:
+    event = _lock_editable_event(ticket_type.event_id, now or timezone.now())
+    # RN-15. Today reserved_count is the only trace of reservations; in Phase 3 this also
+    # checks historical (cancelled) reservations, which keep the category referenced.
+    if TicketType.objects.get(pk=ticket_type.pk).reserved_count > 0:
+        raise TicketTypeInUse()
+    if event.status == Status.PUBLISHED and event.ticket_types.count() == 1:
+        raise LastTicketType()
+    ticket_type.delete()
+
+
+# --- Staff (RN-28) ----------------------------------------------------------------------
+
+
+class NotAMember(DomainError):
+    code = "not_a_member"
+    default_detail = "Solo se puede asignar a miembros de la organización."
+
+
+class AlreadyAssigned(DomainError):
+    code = "already_assigned"
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "Esa persona ya está asignada a este evento."
+
+
+def assign_staff(*, event: Event, user_id: int) -> EventStaff:
+    """Assign a member of the event's organization to validate tickets at it."""
+    membership = Membership.objects.filter(
+        organization_id=event.organization_id, user_id=user_id
+    ).first()
+    if membership is None:
+        raise NotAMember()
+    try:
+        with transaction.atomic():
+            return EventStaff.objects.create(event=event, user_id=user_id)
+    except IntegrityError as exc:
+        raise AlreadyAssigned() from exc
+
+
+def unassign_staff(*, assignment: EventStaff) -> None:
+    assignment.delete()

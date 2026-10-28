@@ -1,15 +1,27 @@
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from apps.accounts.serializers import UserSerializer
 from apps.events import services
-from apps.events.models import Event, TicketType
+from apps.events.models import Event, EventStaff, TicketType
+
+# --- Organizer side -----------------------------------------------------------------------
 
 
-class TicketTypeSummarySerializer(serializers.ModelSerializer):
+class TicketTypeSerializer(serializers.ModelSerializer):
+    available = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = TicketType
-        fields = ["id", "name", "capacity", "reserved_count"]
+        fields = ["id", "name", "description", "capacity", "reserved_count", "available"]
         read_only_fields = fields
+
+
+class TicketTypeWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TicketType
+        fields = ["name", "description", "capacity"]
+        extra_kwargs = {"capacity": {"min_value": 1}}
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -39,7 +51,7 @@ class EventSerializer(serializers.ModelSerializer):
 class EventDetailSerializer(EventSerializer):
     """One event for its organizers, with what is needed to manage and publish it."""
 
-    ticket_types = TicketTypeSummarySerializer(many=True, read_only=True)
+    ticket_types = TicketTypeSerializer(many=True, read_only=True)
     allocated_capacity = serializers.SerializerMethodField()
     publish_blockers = serializers.SerializerMethodField()
 
@@ -72,3 +84,78 @@ class EventWriteSerializer(serializers.ModelSerializer):
         model = Event
         fields = ["title", "description", "location", "image_url", "start_at", "end_at", "capacity"]
         extra_kwargs = {"capacity": {"min_value": 1}}
+
+
+class EventStaffSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = EventStaff
+        fields = ["id", "user", "created_at"]
+        read_only_fields = fields
+
+
+class AssignStaffSerializer(serializers.Serializer):
+    user = serializers.IntegerField(help_text="Id de un usuario miembro de la organización.")
+
+
+# --- Public side ----------------------------------------------------------------------------
+
+
+class PublicEventSerializer(serializers.ModelSerializer):
+    organization_name = serializers.CharField(source="organization.name", read_only=True)
+    available = serializers.IntegerField(read_only=True, help_text="Plazas libres en total.")
+
+    class Meta:
+        model = Event
+        fields = [
+            "slug",
+            "title",
+            "location",
+            "image_url",
+            "start_at",
+            "end_at",
+            "organization_name",
+            "available",
+        ]
+        read_only_fields = fields
+
+
+class PublicTicketTypeSerializer(serializers.ModelSerializer):
+    available = serializers.IntegerField(read_only=True)
+    sold_out = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TicketType
+        fields = ["id", "name", "description", "available", "sold_out"]
+        read_only_fields = fields
+
+    def get_sold_out(self, ticket_type: TicketType) -> bool:
+        return ticket_type.available <= 0
+
+
+class PublicEventDetailSerializer(serializers.ModelSerializer):
+    organization_name = serializers.CharField(source="organization.name", read_only=True)
+    is_finished = serializers.BooleanField(read_only=True)
+    available = serializers.SerializerMethodField()
+    ticket_types = PublicTicketTypeSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Event
+        fields = [
+            "slug",
+            "title",
+            "description",
+            "location",
+            "image_url",
+            "start_at",
+            "end_at",
+            "organization_name",
+            "is_finished",
+            "available",
+            "ticket_types",
+        ]
+        read_only_fields = fields
+
+    def get_available(self, event: Event) -> int:
+        return sum(ticket_type.available for ticket_type in event.ticket_types.all())
