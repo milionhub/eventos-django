@@ -105,6 +105,7 @@ REST_FRAMEWORK = {
     # Opt-in per view with `throttle_scope` (RNF-05).
     "DEFAULT_THROTTLE_RATES": {
         "login": env("THROTTLE_LOGIN_RATE", default="10/min"),
+        "reservations": env("THROTTLE_RESERVATIONS_RATE", default="20/min"),
     },
 }
 
@@ -135,5 +136,7 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "EventStatusEnum": "apps.events.models.Event.Status",
         "RoleEnum": "apps.organizations.models.Membership.Role",
+        "ReservationStatusEnum": "apps.ticketing.models.Reservation.Status",
+        "TicketStatusEnum": "apps.ticketing.models.Ticket.Status",
     },
 }

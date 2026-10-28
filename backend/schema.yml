@@ -884,6 +884,41 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicEventDetail'
           description: ''
+  /api/v1/reservations/:
+    post:
+      operationId: reservations_create
+      description: 'Any signed-in user can book (ADR-0005: no guest bookings).'
+      tags:
+      - reservations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReserveRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          description: Demasiadas peticiones.
 components:
   schemas:
     AddMemberRequest:
@@ -1548,6 +1583,100 @@ components:
       required:
       - email
       - password
+    Reservation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReservationStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        event:
+          allOf:
+          - $ref: '#/components/schemas/ReservationEvent'
+          readOnly: true
+        ticket_type:
+          allOf:
+          - $ref: '#/components/schemas/ReservationTicketType'
+          readOnly: true
+        ticket:
+          allOf:
+          - $ref: '#/components/schemas/TicketSummary'
+          readOnly: true
+      required:
+      - created_at
+      - event
+      - id
+      - status
+      - ticket
+      - ticket_type
+    ReservationEvent:
+      type: object
+      properties:
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          readOnly: true
+          title: Título
+        location:
+          type: string
+          readOnly: true
+          title: Ubicación
+        start_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Inicio
+        end_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Fin
+      required:
+      - end_at
+      - location
+      - slug
+      - start_at
+      - title
+    ReservationStatusEnum:
+      enum:
+      - CONFIRMED
+      - CANCELLED
+      type: string
+      description: |-
+        * `CONFIRMED` - Confirmada
+        * `CANCELLED` - Cancelada
+    ReservationTicketType:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nombre
+      required:
+      - id
+      - name
+    ReserveRequest:
+      type: object
+      properties:
+        ticket_type:
+          type: integer
+          description: Id de la categoría de entrada.
+      required:
+      - ticket_type
     RoleEnum:
       enum:
       - OWNER
@@ -1591,6 +1720,32 @@ components:
       - id
       - last_name
       - memberships
+    TicketStatusEnum:
+      enum:
+      - VALID
+      - USED
+      - CANCELLED
+      type: string
+      description: |-
+        * `VALID` - Válida
+        * `USED` - Utilizada
+        * `CANCELLED` - Cancelada
+    TicketSummary:
+      type: object
+      description: 'The ticket without its token: the token only travels in the ticket
+        detail and QR.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TicketStatusEnum'
+          readOnly: true
+      required:
+      - id
+      - status
     TicketType:
       type: object
       properties:

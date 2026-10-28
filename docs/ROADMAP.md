@@ -118,16 +118,26 @@
 
 ## FASE 3 — Reservas y entradas · 14–20 h
 
-- [ ] Reservation + Ticket (UUID, token, índice único parcial)
-- [ ] Servicio `reserve()` con UPDATE condicional (ADR-0004)
+- [x] Reservation + Ticket (UUID, token, índice único parcial)
+- [x] Servicio `reserve()` con UPDATE condicional (ADR-0004)
 - [ ] Servicio `cancel_reservation()` (RN-20 a RN-24) y cascada al cancelar un evento (RN-10)
 - [ ] Endpoints del asistente + QR SVG (segno)
-- [ ] **Test de concurrencia:** 50 reservas sobre un cupo de 10 → 10 confirmadas
+- [x] **Test de concurrencia:** 50 reservas sobre un cupo de 10 → 10 confirmadas
 - [ ] Test de consistencia de `reserved_count`
 - [ ] UI: botón de reserva en el detalle, Mis entradas, pantalla de entrada con QR
-- [ ] Throttling de reservas
+- [x] Throttling de reservas
 
 **Cierre:** un asistente reserva desde el móvil y ve su QR; nunca se supera el cupo.
+
+**Bloques de trabajo** (un commit por bloque):
+
+| # | Bloque | Estado |
+|---|---|---|
+| 1 | Reserva atómica (backend): `Reservation` + `Ticket`, `reserve()` con UPDATE condicional, test 50 → 10 | ✅ |
+| 2 | Cancelaciones (backend): asistente y organizador, cascada al cancelar evento (RN-10), RN-15 histórico | |
+| 3 | Mis entradas y QR (backend): `me/tickets/`, detalle con token, `qr.svg` con segno | |
+| 4 | Reservar y Mis entradas (frontend): botón de reserva, listado, entrada con QR | |
+| 5 | Cierre: recorrido en móvil, ROADMAP y README (concurrencia) | |
 
 ---
 
