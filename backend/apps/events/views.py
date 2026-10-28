@@ -137,7 +137,7 @@ class EventCancelView(EventScopedMixin, APIView):
         responses={200: EventDetailSerializer, 409: ErrorSerializer},
     )
     def post(self, request: Request, org_slug: str, event_id: int) -> Response:
-        event = services.cancel_event(event=self.get_event())
+        event = services.cancel_event(event=self.get_event(), by=request.user)
         return Response(EventDetailSerializer(event).data)
 
 

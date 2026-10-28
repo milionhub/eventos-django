@@ -117,6 +117,10 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
 }
+# Business settings (requirements.md §3).
+# RN-20: attendees may cancel until this many hours before the event starts.
+CANCELLATION_DEADLINE_HOURS = env.int("CANCELLATION_DEADLINE_HOURS", default=2)
+
 REFRESH_COOKIE = {
     "key": "refresh_token",
     "path": "/api/v1/auth/",  # only sent to the auth endpoints

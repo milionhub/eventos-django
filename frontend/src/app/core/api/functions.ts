@@ -61,3 +61,5 @@ export type { PublicEventsRetrieve$Params as PublicEventsRetrieve$Params } from 
 export { publicEventsRetrieve as publicEventsRetrieve } from './fn/public/public-events-retrieve';
 export type { ReservationsCreate$Params as ReservationsCreate$Params } from './fn/reservations/reservations-create';
 export { reservationsCreate as reservationsCreate } from './fn/reservations/reservations-create';
+export type { ReservationsCancel$Params as ReservationsCancel$Params } from './fn/reservations/reservations-cancel';
+export { reservationsCancel as reservationsCancel } from './fn/reservations/reservations-cancel';

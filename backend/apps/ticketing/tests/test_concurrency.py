@@ -12,8 +12,16 @@ import pytest
 from django.db import connection
 
 from apps.accounts.tests.factories import UserFactory
+from apps.events.models import Event
+from apps.events.services import cancel_event
 from apps.ticketing.models import Reservation
-from apps.ticketing.services import AlreadyReserved, SoldOut, reserve
+from apps.ticketing.services import (
+    AlreadyCancelled,
+    AlreadyReserved,
+    SoldOut,
+    cancel_reservation,
+    reserve,
+)
 from apps.ticketing.tests.factories import assert_counters_match_reservations, bookable_ticket_type
 
 pytestmark = pytest.mark.django_db(transaction=True)
@@ -64,4 +72,65 @@ def test_a_double_click_books_once_and_does_not_leak_seats():
     ticket_type.refresh_from_db()
     assert outcomes == {"confirmed": 1, "already_reserved": 4}
     assert ticket_type.reserved_count == 1
+    assert_counters_match_reservations()
+
+
+# --- cancellations under concurrency --------------------------------------------------------
+
+
+def run_threads(functions: list) -> list:
+    """Run every function at the same time; return what each returned or raised."""
+    barrier = threading.Barrier(len(functions))
+
+    def run(function):
+        try:
+            barrier.wait()
+            return function()
+        except Exception as exc:  # collected for the assertions, not swallowed
+            return exc
+        finally:
+            connection.close()
+
+    with ThreadPoolExecutor(max_workers=len(functions)) as pool:
+        return list(pool.map(run, functions))
+
+
+def test_cancelling_the_same_reservation_at_once_frees_one_seat():
+    ticket_type = bookable_ticket_type(capacity=10)
+    reservation = reserve(user=UserFactory(), ticket_type_id=ticket_type.pk)
+
+    results = run_threads(
+        [lambda: cancel_reservation(reservation=reservation, cancelled_by=reservation.user)] * 5
+    )
+
+    assert sum(isinstance(r, Reservation) for r in results) == 1
+    assert sum(isinstance(r, AlreadyCancelled) for r in results) == 4
+    ticket_type.refresh_from_db()
+    assert ticket_type.reserved_count == 0  # not -4
+    assert_counters_match_reservations()
+
+
+def test_bookings_racing_an_event_cancellation_never_survive_it():
+    ticket_type = bookable_ticket_type(capacity=50)
+    users = UserFactory.create_batch(20)
+
+    bookings = [lambda u=u: reserve(user=u, ticket_type_id=ticket_type.pk) for u in users]
+    results = run_threads([*bookings, lambda: cancel_event(event=ticket_type.event)])
+
+    assert isinstance(results[-1], Event)  # the cancellation itself succeeded
+    assert not Reservation.objects.filter(status=Reservation.Status.CONFIRMED).exists()
+    assert_counters_match_reservations()  # all back to 0
+
+
+def test_counters_stay_consistent_while_people_book_and_cancel_at_once():
+    ticket_type = bookable_ticket_type(capacity=10)
+    existing = [reserve(user=u, ticket_type_id=ticket_type.pk) for u in UserFactory.create_batch(5)]
+    newcomers = UserFactory.create_batch(15)
+
+    cancels = [lambda r=r: cancel_reservation(reservation=r, cancelled_by=r.user) for r in existing]
+    bookings = [lambda u=u: reserve(user=u, ticket_type_id=ticket_type.pk) for u in newcomers]
+    run_threads([*cancels, *bookings])
+
+    ticket_type.refresh_from_db()
+    assert ticket_type.reserved_count <= ticket_type.capacity
     assert_counters_match_reservations()

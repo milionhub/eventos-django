@@ -15,8 +15,9 @@ the increment is rolled back too.
 """
 
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 
+from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.utils import timezone
@@ -99,4 +100,81 @@ def reserve(*, user: User, ticket_type_id: int, now: datetime | None = None) -> 
         raise AlreadyReserved() from exc
 
     Ticket.objects.create(reservation=reservation, token=secrets.token_urlsafe(32))
+    return reservation
+
+
+# --- Cancellations (requirements.md §3.6) ------------------------------------------------
+
+
+class AlreadyCancelled(DomainError):
+    code = "already_cancelled"
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "Esta reserva ya está cancelada."
+
+
+class TicketAlreadyUsed(DomainError):
+    code = "ticket_used"
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "La entrada ya se ha utilizado y no se puede cancelar."
+
+
+class CancellationWindowClosed(DomainError):
+    code = "cancellation_closed"
+    status_code = status.HTTP_409_CONFLICT
+    default_detail = "El plazo para cancelar esta reserva ha terminado."
+
+
+def cancellation_deadline(event: Event) -> datetime:
+    """RN-20: attendees can cancel until this moment."""
+    return event.start_at - timedelta(hours=settings.CANCELLATION_DEADLINE_HOURS)
+
+
+@transaction.atomic
+def cancel_reservation(
+    *,
+    reservation: Reservation,
+    cancelled_by: User,
+    as_organizer: bool = False,
+    now: datetime | None = None,
+) -> Reservation:
+    """Cancel a reservation and its ticket, giving the seat back (RN-20 to RN-24).
+
+    `as_organizer` is decided by the caller after checking the role (RN-21): organizers
+    may cancel until the event ends; attendees only their own, until the deadline.
+    """
+    now = now or timezone.now()
+    # Lock the reservation: two cancellations at once must not free the seat twice.
+    reservation = (
+        Reservation.objects.select_for_update().select_related("event").get(pk=reservation.pk)
+    )
+    if reservation.status == Reservation.Status.CANCELLED:
+        raise AlreadyCancelled()
+
+    event = reservation.event
+    if as_organizer:
+        if event.end_at <= now:
+            raise CancellationWindowClosed("El evento ya ha terminado.")
+    else:
+        if cancelled_by.pk != reservation.user_id:
+            raise ValueError("Attendees can only cancel their own reservations.")
+        if now > cancellation_deadline(event):
+            raise CancellationWindowClosed(
+                f"Solo se puede cancelar hasta {settings.CANCELLATION_DEADLINE_HOURS} h "
+                "antes del inicio."
+            )
+
+    ticket = Ticket.objects.select_for_update().get(reservation=reservation)
+    if ticket.status == Ticket.Status.USED:  # RN-22
+        raise TicketAlreadyUsed()
+
+    reservation.status = Reservation.Status.CANCELLED
+    reservation.cancelled_at = now
+    reservation.cancelled_by = cancelled_by
+    reservation.save(update_fields=["status", "cancelled_at", "cancelled_by", "updated_at"])
+    ticket.status = Ticket.Status.CANCELLED
+    ticket.save(update_fields=["status"])
+    # RN-23: the seat goes back with the same kind of atomic UPDATE that took it.
+    TicketType.objects.filter(pk=reservation.ticket_type_id).update(
+        reserved_count=F("reserved_count") - 1
+    )
     return reservation

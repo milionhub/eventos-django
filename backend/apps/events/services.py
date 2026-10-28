@@ -48,6 +48,19 @@ class EventNotPublishable(DomainError):
     default_detail = "El evento no cumple los requisitos para publicarse."
 
 
+def _lock_event_rows():
+    """Events to lock with FOR NO KEY UPDATE, not plain FOR UPDATE.
+
+    Inserting a reservation (or a category) checks its foreign key to the event, and that
+    check takes a FOR KEY SHARE lock on the event row. FOR UPDATE conflicts with it, so a
+    booking holding a category's row lock and an event change waiting for that same row
+    would wait for each other forever: a deadlock (caught by test_concurrency). We never
+    change an event's primary key, so the weaker NO KEY lock is enough: it still makes
+    event changes wait for each other, but lets foreign key checks through.
+    """
+    return Event.objects.select_for_update(no_key=True)
+
+
 def _has_finished(event: Event, now: datetime) -> bool:
     # RN-08: only a published event "finishes"; a draft with past dates can still be fixed.
     return event.status == Status.PUBLISHED and event.end_at < now
@@ -119,7 +132,7 @@ def update_event(*, event: Event, now: datetime | None = None, **changes) -> Eve
     if unknown:
         raise ValueError(f"Campos no editables: {sorted(unknown)}")
 
-    event = Event.objects.select_for_update().get(pk=event.pk)
+    event = _lock_event_rows().get(pk=event.pk)
     if event.status == Status.CANCELLED or _has_finished(event, now):
         raise EventNotEditable()
 
@@ -145,7 +158,7 @@ def update_event(*, event: Event, now: datetime | None = None, **changes) -> Eve
 def publish_event(*, event: Event, now: datetime | None = None) -> Event:
     """DRAFT → PUBLISHED (RN-07, RN-09). Row-locked so two clicks cannot race."""
     now = now or timezone.now()
-    event = Event.objects.select_for_update().get(pk=event.pk)
+    event = _lock_event_rows().get(pk=event.pk)
     if event.status != Status.DRAFT:
         raise InvalidTransition("Solo se pueden publicar eventos en borrador.")
     blockers = publish_blockers(event, now=now)
@@ -158,20 +171,45 @@ def publish_event(*, event: Event, now: datetime | None = None) -> Event:
 
 
 @transaction.atomic
-def cancel_event(*, event: Event, now: datetime | None = None) -> Event:
-    """DRAFT or PUBLISHED → CANCELLED. There is no way back (RN-07).
+def cancel_event(*, event: Event, by: User | None = None, now: datetime | None = None) -> Event:
+    """DRAFT or PUBLISHED → CANCELLED, with no way back (RN-07). Cancels every reservation
+    and ticket not used yet and gives their seats back (RN-10).
 
-    RN-10 (cancelling its reservations and tickets) is added with ticketing in Phase 3.
+    Against concurrent bookings: the categories' rows are locked *before* changing anything.
+    `reserve()` increments a category with an UPDATE that takes the same row lock, so:
+    - a booking that got there first makes us wait, commits, and is then cancelled below;
+    - a booking that comes after waits for us, then re-reads the event, sees it cancelled
+      and rolls its seat back.
+    Either way no confirmed reservation survives on a cancelled event.
     """
     now = now or timezone.now()
-    event = Event.objects.select_for_update().get(pk=event.pk)
+    event = _lock_event_rows().get(pk=event.pk)
     if event.status == Status.CANCELLED:
         raise InvalidTransition("El evento ya está cancelado.")
     if _has_finished(event, now):
         raise InvalidTransition("No se puede cancelar un evento que ya ha terminado.")
+    ticket_types = list(TicketType.objects.select_for_update().filter(event=event))
+
     event.status = Status.CANCELLED
     event.cancelled_at = now
     event.save(update_fields=["status", "cancelled_at", "updated_at"])
+
+    # Imported here: ticketing builds on events, not the other way round.
+    from apps.ticketing.models import Reservation, Ticket
+
+    to_cancel = Reservation.objects.filter(
+        event=event, status=Reservation.Status.CONFIRMED
+    ).exclude(ticket__status=Ticket.Status.USED)  # a used ticket stays as it was (RN-10)
+    Ticket.objects.filter(reservation__in=to_cancel).update(status=Ticket.Status.CANCELLED)
+    to_cancel.update(
+        status=Reservation.Status.CANCELLED, cancelled_at=now, cancelled_by=by, updated_at=now
+    )
+    # Seats left taken are exactly the confirmed reservations that remain (ADR-0004).
+    for ticket_type in ticket_types:
+        ticket_type.reserved_count = Reservation.objects.filter(
+            ticket_type=ticket_type, status=Reservation.Status.CONFIRMED
+        ).count()
+        ticket_type.save(update_fields=["reserved_count", "updated_at"])
     return event
 
 
@@ -210,7 +248,7 @@ class LastTicketType(DomainError):
 
 def _lock_editable_event(event_id: int, now: datetime) -> Event:
     """Lock the event row: category changes on one event are serialized (RN-13 under load)."""
-    event = Event.objects.select_for_update().get(pk=event_id)
+    event = _lock_event_rows().get(pk=event_id)
     if event.status == Status.CANCELLED or _has_finished(event, now):
         raise EventNotEditable()
     return event
@@ -259,9 +297,13 @@ def update_ticket_type(
 @transaction.atomic
 def delete_ticket_type(*, ticket_type: TicketType, now: datetime | None = None) -> None:
     event = _lock_editable_event(ticket_type.event_id, now or timezone.now())
-    # RN-15. Today reserved_count is the only trace of reservations; in Phase 3 this also
-    # checks historical (cancelled) reservations, which keep the category referenced.
-    if TicketType.objects.get(pk=ticket_type.pk).reserved_count > 0:
+    # RN-15: any reservation, even a cancelled one, keeps the category in the history.
+    from apps.ticketing.models import Reservation
+
+    if (
+        TicketType.objects.get(pk=ticket_type.pk).reserved_count > 0
+        or Reservation.objects.filter(ticket_type=ticket_type).exists()
+    ):
         raise TicketTypeInUse()
     if event.status == Status.PUBLISHED and event.ticket_types.count() == 1:
         raise LastTicketType()

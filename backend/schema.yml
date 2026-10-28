@@ -919,6 +919,42 @@ paths:
           description: ''
         '429':
           description: Demasiadas peticiones.
+  /api/v1/reservations/{reservation_id}/cancel/:
+    post:
+      operationId: reservations_cancel
+      description: |-
+        The attendee cancels their own reservation (RN-20). Organizers cancel from the
+        attendee list (Phase 5), with their own window (RN-21).
+      parameters:
+      - in: path
+        name: reservation_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - reservations
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
 components:
   schemas:
     AddMemberRequest:
