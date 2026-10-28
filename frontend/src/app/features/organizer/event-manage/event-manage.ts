@@ -9,6 +9,7 @@ import {
   numberAttribute,
   resource,
   signal,
+  viewChild,
 } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +26,8 @@ import {
   eventsCancel,
   eventsPublish,
   eventsRetrieve,
+  eventsImageDestroy,
+  eventsImageUpdate,
   eventsUpdate,
   membersList,
   staffCreate,
@@ -34,12 +37,12 @@ import {
   ticketTypesDestroy,
   ticketTypesUpdate,
 } from '../../../core/api/functions';
-import { EventStaff, EventWriteRequest, TicketType } from '../../../core/api/models';
+import { EventStaff, TicketType } from '../../../core/api/models';
 import { errorText } from '../../../shared/api-errors';
 import { CapitalizePipe } from '../../../shared/capitalize.pipe';
 import { eventStatusLabel } from '../../../shared/events';
 import { initials, ROLE_LABELS } from '../../../shared/roles';
-import { EventForm } from '../event-form/event-form';
+import { EventForm, EventFormValue } from '../event-form/event-form';
 
 const TABS = ['datos', 'entradas', 'staff'];
 const STAFF_TAB = 2;
@@ -115,6 +118,8 @@ export class EventManage {
     return !!event && event.status !== 'CANCELLED' && !event.is_finished;
   });
 
+  private readonly eventForm = viewChild(EventForm);
+
   protected readonly notice = signal<Notice | null>(null);
   /** Key of the action in progress, to disable just its button. */
   protected readonly busy = signal<string | null>(null);
@@ -148,10 +153,18 @@ export class EventManage {
 
   // --- event ---------------------------------------------------------------------------
 
-  protected saveData(body: EventWriteRequest): Promise<boolean> {
-    return this.run('data', 'Cambios guardados.', () =>
-      this.api.invoke(eventsUpdate, { ...this.ids(), body }),
-    );
+  /** The event data first, then its image if it changed (separate multipart endpoint). */
+  protected async saveData({ data, image }: EventFormValue): Promise<boolean> {
+    const ok = await this.run('data', 'Cambios guardados.', async () => {
+      await this.api.invoke(eventsUpdate, { ...this.ids(), body: data });
+      if (image.kind === 'set') {
+        await this.api.invoke(eventsImageUpdate, { ...this.ids(), body: { image: image.blob } });
+      } else if (image.kind === 'remove') {
+        await this.api.invoke(eventsImageDestroy, this.ids());
+      }
+    });
+    if (ok) this.eventForm()?.saved();
+    return ok;
   }
 
   protected publish(): Promise<boolean> {

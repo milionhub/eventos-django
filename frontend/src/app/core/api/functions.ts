@@ -45,6 +45,10 @@ export type { EventsUpdate$Params as EventsUpdate$Params } from './fn/events/eve
 export { eventsUpdate as eventsUpdate } from './fn/events/events-update';
 export type { EventsCancel$Params as EventsCancel$Params } from './fn/events/events-cancel';
 export { eventsCancel as eventsCancel } from './fn/events/events-cancel';
+export type { EventsImageUpdate$Params as EventsImageUpdate$Params } from './fn/events/events-image-update';
+export { eventsImageUpdate as eventsImageUpdate } from './fn/events/events-image-update';
+export type { EventsImageDestroy$Params as EventsImageDestroy$Params } from './fn/events/events-image-destroy';
+export { eventsImageDestroy as eventsImageDestroy } from './fn/events/events-image-destroy';
 export type { EventsPublish$Params as EventsPublish$Params } from './fn/events/events-publish';
 export { eventsPublish as eventsPublish } from './fn/events/events-publish';
 export type { StaffList$Params as StaffList$Params } from './fn/events/staff-list';

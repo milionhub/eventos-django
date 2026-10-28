@@ -3,21 +3,18 @@ import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterLink } from '@angular/router';
 
 import { Api } from '../../../core/api/api';
-import { eventsCreate } from '../../../core/api/functions';
-import { EventWriteRequest } from '../../../core/api/models';
+import { eventsCreate, eventsImageUpdate } from '../../../core/api/functions';
 import { AuthService } from '../../../core/auth/auth.service';
 import { errorText } from '../../../shared/api-errors';
 import { EventTicket, EventTicketData } from '../../../shared/event-ticket/event-ticket';
-import { fromLocalInput } from '../../../shared/events';
-import { EventForm } from '../event-form/event-form';
+import { EventForm, EventFormValue } from '../event-form/event-form';
 
-type Draft = Partial<{
+interface Draft {
   title: string;
   location: string;
   start_at: string;
-  image_url: string;
   capacity: number;
-}>;
+}
 
 /** New events start as drafts; categories are added right after, in the "Entradas" tab. */
 @Component({
@@ -36,7 +33,8 @@ export class EventCreate {
 
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
-  protected readonly draft = signal<Draft>({});
+  protected readonly draft = signal<Draft>({ title: '', location: '', start_at: '', capacity: 0 });
+  protected readonly imageUrl = signal('');
 
   /** The card the public will see, built from what is being typed. */
   protected readonly preview = computed<EventTicketData>(() => {
@@ -44,27 +42,32 @@ export class EventCreate {
     const organization = this.auth
       .user()
       ?.memberships.find((m) => m.organization_slug === this.org());
-    let startAt = '';
-    try {
-      startAt = draft.start_at ? fromLocalInput(draft.start_at) : '';
-    } catch {
-      // half-typed date: keep the placeholder
-    }
     return {
-      title: draft.title ?? '',
-      location: draft.location ?? '',
-      start_at: startAt,
-      image_url: /^https?:\/\/\S+$/.test(draft.image_url ?? '') ? draft.image_url! : '',
+      title: draft.title,
+      location: draft.location,
+      start_at: draft.start_at,
+      image_url: this.imageUrl(),
       organization_name: organization?.organization_name ?? '',
-      available: Math.max(0, draft.capacity ?? 0),
+      available: Math.max(0, draft.capacity),
     };
   });
 
-  protected async create(body: EventWriteRequest): Promise<void> {
+  protected async create({ data, image }: EventFormValue): Promise<void> {
     this.saving.set(true);
     this.error.set(null);
     try {
-      const event = await this.api.invoke(eventsCreate, { org_slug: this.org(), body });
+      const event = await this.api.invoke(eventsCreate, { org_slug: this.org(), body: data });
+      if (image.kind === 'set') {
+        try {
+          await this.api.invoke(eventsImageUpdate, {
+            org_slug: this.org(),
+            event_id: event.id,
+            body: { image: image.blob },
+          });
+        } catch {
+          // The event exists already: open it anyway; the image can be added from "Datos".
+        }
+      }
       await this.router.navigate(['/org', this.org(), 'events', event.id], {
         queryParams: { tab: 'entradas' },
       });

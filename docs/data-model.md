@@ -82,7 +82,7 @@ erDiagram
 | slug | Slug(220) | **único global**; URL pública `/events/<slug>` |
 | description | Text | |
 | location | Char(255) | texto libre |
-| image_url | URL | opcional (sin subida de ficheros en el MVP) |
+| image | Image | opcional; subida validada y re-codificada a WebP ([ADR-0008](adr/0008-subida-de-imagenes.md)). La API la expone como `image_url` |
 | start_at / end_at | DateTime (UTC) | |
 | capacity | PositiveInteger | aforo total |
 | status | Choices | `DRAFT` / `PUBLISHED` / `CANCELLED` |

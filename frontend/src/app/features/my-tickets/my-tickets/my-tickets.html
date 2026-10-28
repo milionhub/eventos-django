@@ -18,7 +18,7 @@
         @for (ticket of upcoming(); track ticket.id) {
           <li>
             <a class="row surface-card" [routerLink]="['/me/tickets', ticket.id]">
-              <app-date-badge [date]="ticket.event.start_at" />
+              <app-event-thumb [date]="ticket.event.start_at" [imageUrl]="ticket.event.image_url" />
               <div class="info">
                 <h3>{{ ticket.event.title }}</h3>
                 <p>
@@ -51,7 +51,7 @@
         @for (ticket of history(); track ticket.id) {
           <li>
             <a class="row surface-card past" [routerLink]="['/me/tickets', ticket.id]">
-              <app-date-badge [date]="ticket.event.start_at" />
+              <app-event-thumb [date]="ticket.event.start_at" [imageUrl]="ticket.event.image_url" />
               <div class="info">
                 <h3>{{ ticket.event.title }}</h3>
                 <p>{{ ticket.ticket_type.name }} · {{ ticket.event.location }}</p>

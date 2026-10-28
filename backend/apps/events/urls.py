@@ -8,6 +8,7 @@ urlpatterns = [
     path("<int:event_id>/", views.EventDetailView.as_view(), name="event"),
     path("<int:event_id>/publish/", views.EventPublishView.as_view(), name="event-publish"),
     path("<int:event_id>/cancel/", views.EventCancelView.as_view(), name="event-cancel"),
+    path("<int:event_id>/image/", views.EventImageView.as_view(), name="event-image"),
     path(
         "<int:event_id>/ticket-types/",
         views.TicketTypeListView.as_view(),

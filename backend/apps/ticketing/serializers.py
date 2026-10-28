@@ -3,6 +3,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.events.models import Event, TicketType
+from apps.events.serializers import ImageUrlField
 from apps.ticketing import services
 from apps.ticketing.models import Reservation, Ticket
 
@@ -50,10 +51,20 @@ class ReservationSerializer(serializers.ModelSerializer):
 
 class MyTicketEventSerializer(serializers.ModelSerializer):
     organization_name = serializers.CharField(source="organization.name", read_only=True)
+    image_url = ImageUrlField()
 
     class Meta:
         model = Event
-        fields = ["slug", "title", "location", "start_at", "end_at", "status", "organization_name"]
+        fields = [
+            "slug",
+            "title",
+            "location",
+            "image_url",
+            "start_at",
+            "end_at",
+            "status",
+            "organization_name",
+        ]
         read_only_fields = fields
 
 

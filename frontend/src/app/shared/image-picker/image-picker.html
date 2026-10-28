@@ -1,0 +1,62 @@
+<input
+  #fileInput
+  type="file"
+  accept="image/jpeg,image/png,image/webp"
+  hidden
+  (change)="choose(fileInput.files); fileInput.value = ''"
+/>
+
+@if (shownUrl(); as src) {
+  <div class="frame">
+    <img
+      #image
+      [src]="src"
+      alt="Imagen del evento"
+      [style.object-position]="objectPosition()"
+      (load)="onLoad(image)"
+    />
+    @if (!disabled()) {
+      <div class="actions">
+        <button mat-flat-button type="button" class="on-image" (click)="fileInput.click()">
+          <mat-icon>swap_horiz</mat-icon> Cambiar
+        </button>
+        <button mat-flat-button type="button" class="on-image" (click)="remove()">
+          <mat-icon>delete</mat-icon> Quitar
+        </button>
+      </div>
+    }
+  </div>
+  @if (localUrl()) {
+    <label class="focus">
+      <mat-icon>{{ axis() === 'vertical' ? 'swap_vert' : 'swap_horiz' }}</mat-icon>
+      <span>Encuadre</span>
+      <input
+        type="range"
+        min="0"
+        max="100"
+        [value]="focus()"
+        [attr.aria-label]="'Encuadre ' + (axis() === 'vertical' ? 'vertical' : 'horizontal')"
+        (input)="focus.set(+$any($event.target).value)"
+      />
+    </label>
+  }
+} @else {
+  <button
+    type="button"
+    class="dropzone"
+    [class.dragging]="dragging()"
+    [disabled]="disabled()"
+    (click)="fileInput.click()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="dragging.set(false)"
+    (drop)="onDrop($event)"
+  >
+    <mat-icon>add_photo_alternate</mat-icon>
+    <strong>Arrastra una imagen o haz clic para elegirla</strong>
+    <span>JPG, PNG o WebP · hasta 5 MB · se recorta a formato 16:9</span>
+  </button>
+}
+
+@if (error(); as message) {
+  <p class="notice error" role="alert"><mat-icon>error</mat-icon> {{ message }}</p>
+}

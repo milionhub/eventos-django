@@ -9,7 +9,6 @@ export interface PatchedEventWriteRequest {
   capacity?: number;
   description?: string;
   end_at?: string;
-  image_url?: (string | string);
   location?: string;
   start_at?: string;
   title?: string;

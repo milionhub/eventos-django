@@ -7,6 +7,7 @@ export type { AuthSession } from './models/auth-session';
 export type { Error } from './models/error';
 export type { Event } from './models/event';
 export type { EventDetail } from './models/event-detail';
+export type { EventImageRequest } from './models/event-image-request';
 export type { EventStaff } from './models/event-staff';
 export type { EventStatusEnum } from './models/event-status-enum';
 export type { EventWriteRequest } from './models/event-write-request';

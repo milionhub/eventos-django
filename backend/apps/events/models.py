@@ -19,7 +19,8 @@ class Event(TimeStampedModel):
     slug = models.SlugField(max_length=220, unique=True)
     description = models.TextField("descripción", blank=True)
     location = models.CharField("ubicación", max_length=255)
-    image_url = models.URLField("imagen", blank=True)  # no file uploads in the MVP
+    # Uploaded and re-encoded by services.set_event_image (ADR-0008). Exposed as image_url.
+    image = models.ImageField("imagen", upload_to="events/", blank=True)
     start_at = models.DateTimeField("inicio")
     end_at = models.DateTimeField("fin")
     capacity = models.PositiveIntegerField("aforo")

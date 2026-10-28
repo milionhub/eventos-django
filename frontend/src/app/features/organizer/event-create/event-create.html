@@ -19,6 +19,7 @@
       [cancelLink]="['/org', org(), 'events']"
       [busy]="saving()"
       (changes)="draft.set($event)"
+      (imagePreview)="imageUrl.set($event)"
       (save)="create($event)"
     />
   </section>

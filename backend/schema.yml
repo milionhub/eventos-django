@@ -461,6 +461,83 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/organizations/{org_slug}/events/{event_id}/image/:
+    put:
+      operationId: events_image_update
+      description: Upload or remove the event's image (ADR-0008). The only multipart
+        endpoint.
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventImageRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetail'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+    delete:
+      operationId: events_image_destroy
+      description: Upload or remove the event's image (ADR-0008). The only multipart
+        endpoint.
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - events
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetail'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
   /api/v1/organizations/{org_slug}/events/{event_id}/publish/:
     post:
       operationId: events_publish
@@ -1079,9 +1156,7 @@ components:
           title: Ubicación
         image_url:
           type: string
-          format: uri
           readOnly: true
-          title: Imagen
         start_at:
           type: string
           format: date-time
@@ -1148,9 +1223,7 @@ components:
           title: Ubicación
         image_url:
           type: string
-          format: uri
           readOnly: true
-          title: Imagen
         start_at:
           type: string
           format: date-time
@@ -1221,6 +1294,15 @@ components:
       - status
       - ticket_types
       - title
+    EventImageRequest:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
+          description: JPG, PNG o WebP de hasta 5 MB.
+      required:
+      - image
     EventStaff:
       type: object
       properties:
@@ -1266,14 +1348,6 @@ components:
           minLength: 1
           title: Ubicación
           maxLength: 255
-        image_url:
-          title: Imagen
-          oneOf:
-          - type: string
-            format: uri
-            maxLength: 200
-          - type: string
-            maxLength: 0
         start_at:
           type: string
           format: date-time
@@ -1483,6 +1557,9 @@ components:
           type: string
           readOnly: true
           title: Ubicación
+        image_url:
+          type: string
+          readOnly: true
         start_at:
           type: string
           format: date-time
@@ -1502,6 +1579,7 @@ components:
           readOnly: true
       required:
       - end_at
+      - image_url
       - location
       - organization_name
       - slug
@@ -1640,14 +1718,6 @@ components:
           minLength: 1
           title: Ubicación
           maxLength: 255
-        image_url:
-          title: Imagen
-          oneOf:
-          - type: string
-            format: uri
-            maxLength: 200
-          - type: string
-            maxLength: 0
         start_at:
           type: string
           format: date-time
@@ -1706,9 +1776,7 @@ components:
           title: Ubicación
         image_url:
           type: string
-          format: uri
           readOnly: true
-          title: Imagen
         start_at:
           type: string
           format: date-time
@@ -1756,9 +1824,7 @@ components:
           title: Ubicación
         image_url:
           type: string
-          format: uri
           readOnly: true
-          title: Imagen
         start_at:
           type: string
           format: date-time

@@ -62,6 +62,8 @@ Las tarjetas que representan eventos o entradas tienen forma de entrada física:
 - Acciones en una barra fija al final (`.form-actions`), con aviso de cambios sin guardar.
 - Formularios cortos dentro de una página (añadir miembro, nueva categoría): cabecera con icono en una pastilla coral, título y una línea de ayuda.
 - Crear un evento muestra al lado la **vista previa** de la tarjeta pública (`app-event-ticket`), la misma que ve el público.
+- **Fechas:** calendario de Material para el día (campo de solo lectura: se elige en el calendario, nunca se escribe) y selector de hora en pasos de 15 min (sí se puede escribir, «20:30»). Día y hora son controles separados; botones de duración rápida para el fin.
+- **Imágenes:** `app-image-picker`: zona para arrastrar o elegir, vista previa en formato cartel 16:9 y control de encuadre. Recorta en el navegador; el backend valida y re-codifica igualmente ([ADR-0008](adr/0008-subida-de-imagenes.md)).
 
 ## Clases globales
 - `.display`: titular tipo cartel.

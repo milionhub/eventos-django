@@ -19,6 +19,7 @@ const ticket = (id: string, status: TicketStatusEnum, inDays: number): MyTicket 
     event: {
       slug: `evento-${id}`,
       title: `Evento ${id}`,
+      image_url: '',
       location: 'Barcelona',
       start_at: start.toISOString(),
       end_at: new Date(start.getTime() + 3600 * 1000).toISOString(),

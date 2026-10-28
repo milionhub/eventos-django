@@ -1,7 +1,14 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
 import { Api } from '../api/api';
-import { authLogin, authLogout, authMe, authRefresh, authRegister } from '../api/functions';
+// Imported one by one, not from the functions.ts index: every generated function sets
+// `fn.PATH`, a side effect the bundler cannot drop, so the index would pull the whole API
+// into the initial bundle.
+import { authLogin } from '../api/fn/auth/auth-login';
+import { authLogout } from '../api/fn/auth/auth-logout';
+import { authMe } from '../api/fn/auth/auth-me';
+import { authRefresh } from '../api/fn/auth/auth-refresh';
+import { authRegister } from '../api/fn/auth/auth-register';
 import { AuthSession, LoginRequest, RegisterRequest, RoleEnum, SessionUser } from '../api/models';
 
 /**

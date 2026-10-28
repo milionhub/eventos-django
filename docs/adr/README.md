@@ -12,3 +12,4 @@ Si una decisión cambia, no se edita el ADR: se crea uno nuevo que lo sustituye 
 | [0005](0005-reservas-con-cuenta.md) | Reservas solo con cuenta, 1 entrada por reserva | Aceptado |
 | [0006](0006-sin-despliegue-obligatorio.md) | Demo local con Docker; despliegue público opcional | Aceptado |
 | [0007](0007-cliente-api-generado.md) | Cliente Angular generado a partir de OpenAPI | Aceptado |
+| [0008](0008-subida-de-imagenes.md) | Imagen del evento: subida validada y re-codificada | Aceptado |

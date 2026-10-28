@@ -23,6 +23,7 @@ const detail = (status: TicketStatusEnum, can_cancel = true): MyTicketDetail => 
   event: {
     slug: 'indie',
     title: 'Indie Norte Fest',
+    image_url: '',
     location: 'Bilbao',
     start_at: '2026-12-12T16:00:00Z',
     end_at: '2026-12-13T00:00:00Z',

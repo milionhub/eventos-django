@@ -115,8 +115,11 @@
   text-transform: uppercase;
 }
 
+// The seats always fit on one line; a long organization name is the one that gets cut.
 .seats {
+  flex: none;
   color: var(--app-accent);
+  white-space: nowrap;
 
   &.sold-out {
     color: var(--mat-sys-on-surface-variant);
@@ -124,6 +127,7 @@
 }
 
 .by {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

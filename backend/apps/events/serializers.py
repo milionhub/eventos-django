@@ -1,9 +1,22 @@
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.accounts.serializers import UserSerializer
 from apps.events import services
 from apps.events.models import Event, EventStaff, TicketType
+
+
+@extend_schema_field(OpenApiTypes.STR)
+class ImageUrlField(serializers.Field):
+    """The uploaded image as a `/media/...` path, or "" when there is none (ADR-0008)."""
+
+    def __init__(self, **kwargs):
+        super().__init__(source="image", read_only=True, **kwargs)
+
+    def to_representation(self, value) -> str:
+        return value.url if value else ""
+
 
 # --- Organizer side -----------------------------------------------------------------------
 
@@ -27,6 +40,7 @@ class TicketTypeWriteSerializer(serializers.ModelSerializer):
 class EventSerializer(serializers.ModelSerializer):
     """An event in the organizer's list."""
 
+    image_url = ImageUrlField()
     is_finished = serializers.BooleanField(read_only=True)
 
     class Meta:
@@ -82,7 +96,7 @@ class EventWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ["title", "description", "location", "image_url", "start_at", "end_at", "capacity"]
+        fields = ["title", "description", "location", "start_at", "end_at", "capacity"]
         extra_kwargs = {"capacity": {"min_value": 1}}
 
 
@@ -103,6 +117,7 @@ class AssignStaffSerializer(serializers.Serializer):
 
 
 class PublicEventSerializer(serializers.ModelSerializer):
+    image_url = ImageUrlField()
     organization_name = serializers.CharField(source="organization.name", read_only=True)
     available = serializers.IntegerField(read_only=True, help_text="Plazas libres en total.")
 
@@ -135,6 +150,7 @@ class PublicTicketTypeSerializer(serializers.ModelSerializer):
 
 
 class PublicEventDetailSerializer(serializers.ModelSerializer):
+    image_url = ImageUrlField()
     organization_name = serializers.CharField(source="organization.name", read_only=True)
     is_finished = serializers.BooleanField(read_only=True)
     available = serializers.SerializerMethodField()
@@ -159,3 +175,7 @@ class PublicEventDetailSerializer(serializers.ModelSerializer):
 
     def get_available(self, event: Event) -> int:
         return sum(ticket_type.available for ticket_type in event.ticket_types.all())
+
+
+class EventImageSerializer(serializers.Serializer):
+    image = serializers.FileField(help_text="JPG, PNG o WebP de hasta 5 MB.")

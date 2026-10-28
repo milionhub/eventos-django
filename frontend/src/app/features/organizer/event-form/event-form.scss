@@ -6,10 +6,37 @@
   margin: 0 0 16px;
 }
 
-.image-preview {
-  width: 100%;
-  max-height: 180px;
-  margin-bottom: 8px;
-  border-radius: var(--app-radius-sm);
-  object-fit: cover;
+// The date input is read-only: make clear it opens the calendar.
+input[readonly] {
+  cursor: pointer;
+}
+
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-large);
+}
+
+.quick-chip {
+  padding: 6px 14px;
+  border: var(--app-border);
+  border-radius: 999px;
+  background: none;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-label-large);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--app-accent);
+    color: var(--app-accent);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 }

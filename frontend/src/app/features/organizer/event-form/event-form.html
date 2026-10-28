@@ -35,28 +35,83 @@
       <p>En tu hora local. Un evento publicado solo puede moverse a fechas futuras.</p>
     </header>
     <div class="fields">
+      <!-- The day inputs are read-only on purpose: picked in the calendar, "12/11" can
+           never be read as 11 December. -->
       <mat-form-field appearance="outline">
-        <mat-label>Empieza</mat-label>
-        <mat-icon matPrefix>event</mat-icon>
-        <input matInput type="datetime-local" formControlName="start_at" />
-        @if (form.controls.start_at.hasError('required')) {
-          <mat-error>Indica cuándo empieza.</mat-error>
+        <mat-label>Día de inicio</mat-label>
+        <input
+          matInput
+          readonly
+          [matDatepicker]="startDate"
+          [min]="today"
+          formControlName="startDate"
+          (click)="startDate.open()"
+        />
+        <mat-datepicker-toggle matIconPrefix [for]="startDate" />
+        <mat-datepicker #startDate />
+        @if (form.controls.startDate.hasError('required')) {
+          <mat-error>Elige el día.</mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Termina</mat-label>
-        <mat-icon matPrefix>event_available</mat-icon>
-        <input matInput type="datetime-local" formControlName="end_at" />
+        <mat-label>Hora de inicio</mat-label>
+        <input matInput [matTimepicker]="startTime" formControlName="startTime" />
+        <mat-timepicker-toggle matIconPrefix [for]="startTime" />
+        <mat-timepicker #startTime interval="15m" />
+        <mat-hint>Escríbela (20:30) o elígela.</mat-hint>
+        @if (form.controls.startTime.hasError('required')) {
+          <mat-error>Indica la hora.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Día de fin</mat-label>
+        <input
+          matInput
+          readonly
+          [matDatepicker]="endDate"
+          [min]="form.controls.startDate.value ?? today"
+          formControlName="endDate"
+          (click)="endDate.open()"
+        />
+        <mat-datepicker-toggle matIconPrefix [for]="endDate" />
+        <mat-datepicker #endDate />
+        @if (form.controls.endDate.hasError('required')) {
+          <mat-error>Elige cuándo termina.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Hora de fin</mat-label>
+        <input matInput [matTimepicker]="endTime" formControlName="endTime" />
+        <mat-timepicker-toggle matIconPrefix [for]="endTime" />
+        <mat-timepicker #endTime interval="15m" />
         @if (duration(); as d) {
           <mat-hint>Dura {{ d }}</mat-hint>
         }
-        @if (form.controls.end_at.hasError('required')) {
-          <mat-error>Indica cuándo termina.</mat-error>
+        @if (form.controls.endTime.hasError('required')) {
+          <mat-error>Indica la hora.</mat-error>
         }
       </mat-form-field>
 
-      @if (form.hasError('endBeforeStart') && form.controls.end_at.touched) {
+      @if (!readonly()) {
+        <div class="quick wide" role="group" aria-label="Duración rápida">
+          <span>Duración:</span>
+          @for (hours of quickDurations; track hours) {
+            <button
+              type="button"
+              class="quick-chip"
+              [disabled]="!start()"
+              (click)="endAfter(hours)"
+            >
+              {{ hours }} h
+            </button>
+          }
+        </div>
+      }
+
+      @if (form.hasError('endBeforeStart')) {
         <p class="notice error wide" role="alert">
           <mat-icon>error</mat-icon> El fin debe ser posterior al inicio.
         </p>
@@ -68,7 +123,10 @@
     <header>
       <span class="step">03</span>
       <h2>Aforo e imagen</h2>
-      <p>El aforo total se reparte después entre las categorías de entrada.</p>
+      <p>
+        El aforo total se reparte después entre las categorías de entrada. La imagen es la portada
+        del evento.
+      </p>
     </header>
     <div class="fields">
       <mat-form-field appearance="outline">
@@ -81,19 +139,12 @@
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Imagen (opcional)</mat-label>
-        <mat-icon matPrefix>image</mat-icon>
-        <input matInput type="url" formControlName="image_url" placeholder="https://…" />
-        <mat-hint>Enlace a una imagen horizontal.</mat-hint>
-        @if (form.controls.image_url.hasError('pattern')) {
-          <mat-error>Debe ser una dirección http(s).</mat-error>
-        }
-      </mat-form-field>
-
-      @if (imagePreview(); as src) {
-        <img class="image-preview wide" [src]="src" alt="Vista previa de la imagen" />
-      }
+      <app-image-picker
+        class="wide"
+        [currentUrl]="event()?.image_url ?? ''"
+        [disabled]="readonly()"
+        (preview)="imageChanged($event)"
+      />
     </div>
   </section>
 

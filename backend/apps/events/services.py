@@ -1,8 +1,12 @@
+import io
+import uuid
 from datetime import datetime
 
+from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
 from django.db.models import Sum
 from django.utils import timezone
+from PIL import Image, ImageOps, UnidentifiedImageError
 from rest_framework import status
 
 from apps.accounts.models import User
@@ -94,7 +98,6 @@ def create_event(
     end_at: datetime,
     capacity: int,
     description: str = "",
-    image_url: str = "",
 ) -> Event:
     """New events always start as drafts (RN-07)."""
     if end_at <= start_at:
@@ -106,22 +109,13 @@ def create_event(
         slug=unique_slug(Event, title, max_length=220),
         description=description,
         location=location,
-        image_url=image_url,
         start_at=start_at,
         end_at=end_at,
         capacity=capacity,
     )
 
 
-EDITABLE_FIELDS = {
-    "title",
-    "description",
-    "location",
-    "image_url",
-    "start_at",
-    "end_at",
-    "capacity",
-}
+EDITABLE_FIELDS = {"title", "description", "location", "start_at", "end_at", "capacity"}
 
 
 @transaction.atomic
@@ -340,3 +334,76 @@ def assign_staff(*, event: Event, user_id: int) -> EventStaff:
 
 def unassign_staff(*, assignment: EventStaff) -> None:
     assignment.delete()
+
+
+# --- Event image (ADR-0008) ------------------------------------------------------------------
+
+
+MAX_IMAGE_BYTES = 5 * 1024 * 1024
+MAX_IMAGE_WIDTH = 1600
+ALLOWED_IMAGE_FORMATS = {"JPEG", "PNG", "WEBP"}
+
+
+class InvalidImage(DomainError):
+    code = "invalid_image"
+    default_detail = "El archivo no es una imagen JPG, PNG o WebP válida."
+
+
+class ImageTooLarge(DomainError):
+    code = "image_too_large"
+    default_detail = "La imagen no puede pesar más de 5 MB."
+
+
+def _reencode(upload) -> ContentFile:
+    """Check the upload really is an allowed image and rebuild it from its pixels as WebP.
+
+    Re-encoding drops EXIF (a phone photo's GPS position), colour profiles and anything
+    hidden in the file. Pillow refuses images over its decompression-bomb pixel limit.
+    """
+    try:
+        with Image.open(upload) as probe:
+            image_format = probe.format
+            probe.verify()  # structure check; the image cannot be used after this
+        upload.seek(0)
+        with Image.open(upload) as image:
+            image.load()
+            image = ImageOps.exif_transpose(image)  # keep phone photos upright
+            image = image.convert("RGB")
+    except (UnidentifiedImageError, OSError, Image.DecompressionBombError, ValueError) as exc:
+        raise InvalidImage() from exc
+    if image_format not in ALLOWED_IMAGE_FORMATS:
+        raise InvalidImage()
+
+    if image.width > MAX_IMAGE_WIDTH:
+        height = round(image.height * MAX_IMAGE_WIDTH / image.width)
+        image = image.resize((MAX_IMAGE_WIDTH, height), Image.Resampling.LANCZOS)
+    buffer = io.BytesIO()
+    image.save(buffer, format="WEBP", quality=82)
+    return ContentFile(buffer.getvalue(), name=f"{uuid.uuid4().hex}.webp")
+
+
+@transaction.atomic
+def set_event_image(*, event: Event, upload, now: datetime | None = None) -> Event:
+    """Replace the event's image with a validated, re-encoded copy of `upload`."""
+    event = _lock_editable_event(event.pk, now or timezone.now())
+    if upload.size > MAX_IMAGE_BYTES:
+        raise ImageTooLarge()
+    content = _reencode(upload)
+    previous = event.image.name
+    event.image.save(content.name, content, save=False)
+    event.save(update_fields=["image", "updated_at"])
+    if previous:
+        # Delete the old file only once the new one is committed.
+        transaction.on_commit(lambda: event.image.storage.delete(previous))
+    return event
+
+
+@transaction.atomic
+def remove_event_image(*, event: Event, now: datetime | None = None) -> Event:
+    event = _lock_editable_event(event.pk, now or timezone.now())
+    previous = event.image.name
+    event.image = ""
+    event.save(update_fields=["image", "updated_at"])
+    if previous:
+        transaction.on_commit(lambda: event.image.storage.delete(previous))
+    return event

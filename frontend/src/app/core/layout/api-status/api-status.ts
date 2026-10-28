@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, resource } from '@angular/core';
 
 import { Api } from '../../api/api';
-import { healthRetrieve } from '../../api/functions';
+import { healthRetrieve } from '../../api/fn/health/health-retrieve'; // not the index: see AuthService
 import { Health } from '../../api/models';
 
 type HealthStatus = 'loading' | 'ok' | 'database-down' | 'api-down';

@@ -4,6 +4,7 @@
 import { EventStatusEnum } from '../models/event-status-enum';
 export interface MyTicketEvent {
   end_at: string;
+  image_url: string;
   location: string;
   organization_name: string;
   slug: string;

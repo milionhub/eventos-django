@@ -7,6 +7,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 from rest_framework import generics, serializers, status
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -18,6 +19,7 @@ from apps.events.models import Event
 from apps.events.serializers import (
     AssignStaffSerializer,
     EventDetailSerializer,
+    EventImageSerializer,
     EventSerializer,
     EventStaffSerializer,
     EventWriteSerializer,
@@ -138,6 +140,36 @@ class EventCancelView(EventScopedMixin, APIView):
     )
     def post(self, request: Request, org_slug: str, event_id: int) -> Response:
         event = services.cancel_event(event=self.get_event(), by=request.user)
+        return Response(EventDetailSerializer(event).data)
+
+
+@extend_schema(tags=["events"])
+class EventImageView(EventScopedMixin, APIView):
+    """Upload or remove the event's image (ADR-0008). The only multipart endpoint."""
+
+    permission_classes = [IsAuthenticated]
+    roles_by_method = {"PUT": ORGANIZERS, "DELETE": ORGANIZERS}
+    parser_classes = [MultiPartParser]
+
+    @extend_schema(
+        operation_id="events_image_update",
+        request={"multipart/form-data": EventImageSerializer},
+        responses={200: EventDetailSerializer, 400: ErrorSerializer, 409: ErrorSerializer},
+    )
+    def put(self, request: Request, org_slug: str, event_id: int) -> Response:
+        serializer = EventImageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        event = services.set_event_image(
+            event=self.get_event(), upload=serializer.validated_data["image"]
+        )
+        return Response(EventDetailSerializer(event).data)
+
+    @extend_schema(
+        operation_id="events_image_destroy",
+        responses={200: EventDetailSerializer, 409: ErrorSerializer},
+    )
+    def delete(self, request: Request, org_slug: str, event_id: int) -> Response:
+        event = services.remove_event_image(event=self.get_event())
         return Response(EventDetailSerializer(event).data)
 
 

@@ -45,6 +45,7 @@ def test_my_tickets_lists_only_mine_without_tokens():
     data = response.json()
     assert [t["id"] for t in data] == [str(mine.pk)]
     assert data[0]["event"]["title"] == mine.reservation.event.title
+    assert data[0]["event"]["image_url"] == ""  # no image uploaded for this event
     assert data[0]["ticket_type"]["name"] == "General"
     assert data[0]["reservation"]["status"] == "CONFIRMED"
     assert "token" not in data[0]

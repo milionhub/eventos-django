@@ -1,0 +1,97 @@
+:host {
+  display: block;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  padding: 16px;
+  border: 2px dashed var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: none;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-medium);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 150ms,
+    background-color 150ms;
+
+  mat-icon {
+    width: 40px;
+    height: 40px;
+    color: var(--app-accent);
+    font-size: 40px;
+  }
+
+  strong {
+    color: var(--mat-sys-on-surface);
+  }
+
+  span {
+    font: var(--mat-sys-body-small);
+  }
+
+  &:hover:not(:disabled),
+  &.dragging {
+    border-color: var(--app-accent);
+    background: color-mix(in srgb, var(--app-accent) 8%, transparent);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.frame {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container-highest);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.actions {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+// Readable on top of any photo.
+.on-image {
+  --mat-button-filled-container-color: rgb(15 13 21 / 72%);
+  --mat-button-filled-label-text-color: #fff;
+  backdrop-filter: blur(6px);
+}
+
+.focus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-label-large);
+
+  input {
+    flex: 1;
+    accent-color: var(--app-accent);
+  }
+}
+
+.notice {
+  margin: 12px 0 0;
+}

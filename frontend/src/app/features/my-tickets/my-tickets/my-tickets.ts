@@ -8,7 +8,7 @@ import { RouterLink } from '@angular/router';
 import { Api } from '../../../core/api/api';
 import { myTicketsList } from '../../../core/api/functions';
 import { CapitalizePipe } from '../../../shared/capitalize.pipe';
-import { DateBadge } from '../../../shared/date-badge';
+import { EventThumb } from '../../../shared/event-thumb';
 import { isUpcoming, TICKET_STATUS_LABELS } from '../../../shared/tickets';
 
 /** "My tickets" (R2 step 5, R3): upcoming ones first, the rest as history. */
@@ -21,7 +21,7 @@ import { isUpcoming, TICKET_STATUS_LABELS } from '../../../shared/tickets';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    DateBadge,
+    EventThumb,
   ],
   templateUrl: './my-tickets.html',
   styleUrl: './my-tickets.scss',

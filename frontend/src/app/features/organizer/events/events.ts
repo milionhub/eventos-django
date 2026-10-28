@@ -10,7 +10,7 @@ import { eventsList } from '../../../core/api/functions';
 import { EventStatusEnum } from '../../../core/api/models';
 import { AuthService } from '../../../core/auth/auth.service';
 import { CapitalizePipe } from '../../../shared/capitalize.pipe';
-import { DateBadge } from '../../../shared/date-badge';
+import { EventThumb } from '../../../shared/event-thumb';
 import { eventStatusLabel } from '../../../shared/events';
 
 /** Must match the backend's PAGE_SIZE. */
@@ -33,7 +33,7 @@ const FILTERS: { status: EventStatusEnum | null; label: string }[] = [
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    DateBadge,
+    EventThumb,
   ],
   templateUrl: './events.html',
   styleUrl: './events.scss',
