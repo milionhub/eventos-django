@@ -44,7 +44,7 @@
 - [x] Wireframes → `wireframes.md`
 - [x] Decisiones técnicas → `adr/0001`–`0007`
 - [x] Reglas para la IA → `CLAUDE.md`
-- [ ] **Revisión y validación por el propietario**
+- [x] **Revisión y validación por el propietario**
 
 **Cierre:** documentos revisados y aprobados.
 
@@ -53,27 +53,27 @@
 ## FASE 1 — Cimientos · 10–15 h
 
 **Repositorio y tooling**
-- [ ] `git init`, `.gitignore`, `.editorconfig`, `.env.example`
-- [ ] `compose.yaml` con PostgreSQL (y perfil `demo` vacío para más adelante)
-- [ ] pre-commit (ruff, prettier)
+- [x] `git init`, `.gitignore`, `.editorconfig`, `.env.example`
+- [x] `compose.yaml` con PostgreSQL (el perfil `demo` se añade en la Fase 7)
+- [x] pre-commit (ruff, prettier)
 
 **Backend**
-- [ ] Proyecto Django con uv, settings divididos (base/dev/test/prod)
-- [ ] `accounts.User` propio **antes de la primera migración** (ADR-0002)
-- [ ] DRF + drf-spectacular + `/api/docs/`
-- [ ] App `core`: `TimeStampedModel`, `DomainError` + exception handler, `/api/v1/health/`
-- [ ] Apps vacías: organizations, events, ticketing, checkin
-- [ ] pytest + factory-boy + primer test
+- [x] Proyecto Django con uv, settings divididos (base/dev/test/prod)
+- [x] `accounts.User` propio **antes de la primera migración** (ADR-0002)
+- [x] DRF + drf-spectacular + `/api/docs/`
+- [x] App `core`: `TimeStampedModel`, `DomainError` + exception handler, `/api/v1/health/`
+- [x] Apps vacías: organizations, events, ticketing, checkin
+- [x] pytest + factory-boy + primer test
 
 **Frontend**
-- [ ] Proyecto Angular (standalone, routing, SCSS) + Angular Material
-- [ ] Proxy `/api` → Django
-- [ ] Layout responsive (shell + navbar)
-- [ ] Generación del cliente API (`npm run api:generate`) + llamada a health
-- [ ] ESLint + Prettier + primer test
+- [x] Proyecto Angular (standalone, routing, SCSS) + Angular Material
+- [x] Proxy `/api` → Django
+- [x] Layout responsive (shell + navbar)
+- [x] Generación del cliente API (`npm run api:generate`) + llamada a health
+- [x] ESLint + Prettier + primer test
 
 **CI**
-- [ ] GitHub Actions: backend (ruff + pytest con PostgreSQL) y frontend (lint + test + build)
+- [ ] GitHub Actions: backend (ruff + pytest con PostgreSQL) y frontend (lint + test + build) — workflows escritos; falta verlos en verde en GitHub
 
 **Cierre:** `docker compose up db` + backend + frontend en local; Angular muestra el estado de `/health/`; CI en verde.
 
@@ -195,5 +195,5 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 
 ## Estado actual
 
-**Fase activa:** 0 — pendiente de revisión.
-**Siguiente paso:** el propietario revisa `docs/` → arrancamos la Fase 1.
+**Fase activa:** 1 — a falta de ver la CI en verde en GitHub.
+**Siguiente paso:** push a [GitHub](https://github.com/milionhub/eventos-django) y comprobar la CI en verde → Fase 2 (auth, organizaciones y eventos).

@@ -1,0 +1,66 @@
+name: backend
+
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+  pull_request:
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      # Same engine as development: concurrency tests must never run on SQLite.
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: eventos
+          POSTGRES_USER: eventos
+          POSTGRES_PASSWORD: eventos
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U eventos -d eventos"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DJANGO_SECRET_KEY: ci-only-not-a-secret
+      DATABASE_URL: postgres://eventos:eventos@localhost:5432/eventos
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Check formatting
+        run: uv run ruff format --check .
+
+      - name: Test
+        run: uv run pytest
+
+      # ADR-0007: the committed schema must match the code.
+      - name: Check OpenAPI schema is up to date
+        run: |
+          uv run python manage.py spectacular --file schema.yml --validate --fail-on-warn
+          git diff --exit-code schema.yml || {
+            echo "::error::schema.yml is outdated. Run 'npm run api:generate' in frontend/ and commit the result."
+            exit 1
+          }
