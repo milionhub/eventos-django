@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Coral ticket with side notches and a hash mark: the #4events logo. -->
+  <path fill="#ff5a4e" d="M10 8h44a6 6 0 0 1 6 6v10a8 8 0 0 0 0 16v10a6 6 0 0 1-6 6H10a6 6 0 0 1-6-6V40a8 8 0 0 0 0-16V14a6 6 0 0 1 6-6Z"/>
+  <path fill="none" stroke="#1f0603" stroke-width="5" stroke-linecap="round" d="M27 19l-4 26M41 19l-4 26M19 27h28M17 37h28"/>
+</svg>

@@ -3,12 +3,12 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    title: 'eventos',
+    title: '#4events',
     loadComponent: () => import('./features/home/home').then((m) => m.Home),
   },
   {
     path: '**',
-    title: 'No encontrado · eventos',
+    title: 'No encontrado · #4events',
     loadComponent: () => import('./features/not-found/not-found').then((m) => m.NotFound),
   },
 ];

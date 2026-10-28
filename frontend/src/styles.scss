@@ -1,39 +1,111 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
+// Visual identity: see docs/design.md.
 @use '@angular/material' as mat;
+@use './styles/theme-colors' as brand;
 
 html {
   height: 100%;
+  // Dark by default. ThemeService (and the inline script in index.html) switch it.
+  color-scheme: dark;
+
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        primary: brand.$primary-palette,
+        tertiary: brand.$tertiary-palette,
       ),
-      typography: Roboto,
+      typography: (
+        plain-family: (
+          'Inter',
+          sans-serif,
+        ),
+        brand-family: (
+          'Bricolage Grotesque',
+          sans-serif,
+        ),
+        bold-weight: 700,
+        medium-weight: 600,
+        regular-weight: 400,
+      ),
       density: 0,
     )
   );
+
+  // The generated dark primary (tone 80) is a washed-out pink: use the brand coral instead.
+  // Dark text on coral keeps contrast above WCAG AA.
+  // The neutral-variant palette is derived from the coral and tints secondary text and borders
+  // pink, so those roles take the neutral (ink) palette instead.
+  @include mat.theme-overrides(
+    (
+      primary: light-dark(#b52420, #ff5a4e),
+      on-primary: light-dark(#ffffff, #1f0603),
+      on-surface-variant: light-dark(#48454f, #cac4d0),
+      outline: light-dark(#797580, #938f99),
+      outline-variant: light-dark(#cac4d0, #36333c),
+    )
+  );
+
+  // Brand tokens shared by every component.
+  --app-accent: light-dark(#c8302a, #ff5a4e);
+  --app-font-display: 'Bricolage Grotesque', sans-serif;
+  --app-radius: 16px;
+  --app-radius-sm: 8px;
+  --app-border: 1px solid var(--mat-sys-outline-variant);
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
   margin: 0;
-  height: 100%;
+  min-height: 100%;
+  // A soft coral glow behind the header, the "stage light" of the brand.
+  background:
+    radial-gradient(
+      1000px 360px at 50% -160px,
+      color-mix(in srgb, var(--app-accent) 24%, transparent),
+      transparent
+    ),
+    var(--mat-sys-surface);
+  background-attachment: fixed;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-large);
+  -webkit-font-smoothing: antialiased;
 }
-/* You can add global styles to this file, and also import other style files */
+
+h1,
+h2,
+h3 {
+  font-family: var(--app-font-display);
+  letter-spacing: -0.02em;
+}
+
+// Poster-style headline: heavy, uppercase, tight.
+.display {
+  margin: 0;
+  font-family: var(--app-font-display);
+  font-size: clamp(2.75rem, 9vw, 5.5rem);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+// Small uppercase label above headings.
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--app-accent);
+  font: var(--mat-sys-label-large);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+:focus-visible {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -11,19 +11,34 @@ describe('Shell', () => {
     }).compileComponents();
   });
 
-  it('renders the brand linking to home', async () => {
+  async function render(): Promise<HTMLElement> {
     const fixture = TestBed.createComponent(Shell);
     await fixture.whenStable();
-    const brand = (fixture.nativeElement as HTMLElement).querySelector('a.brand');
+    return fixture.nativeElement;
+  }
 
-    expect(brand?.textContent).toContain('eventos');
+  it('renders the brand linking to home', async () => {
+    const brand = (await render()).querySelector('a.brand');
+
+    expect(brand?.textContent).toContain('#4events');
     expect(brand?.getAttribute('href')).toBe('/');
   });
 
   it('renders a main landmark for the routed content', async () => {
+    expect((await render()).querySelector('main router-outlet')).toBeTruthy();
+  });
+
+  it('toggles the theme from the header', async () => {
     const fixture = TestBed.createComponent(Shell);
     await fixture.whenStable();
+    const toggle = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+      'button.theme-toggle',
+    )!;
+    const before = toggle.getAttribute('aria-label');
 
-    expect((fixture.nativeElement as HTMLElement).querySelector('main router-outlet')).toBeTruthy();
+    toggle.click();
+    await fixture.whenStable();
+
+    expect(toggle.getAttribute('aria-label')).not.toBe(before);
   });
 });

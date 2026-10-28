@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, resource } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 
 import { Api } from '../../core/api/api';
 import { healthRetrieve } from '../../core/api/functions';
@@ -10,33 +11,9 @@ type HealthStatus = 'loading' | 'ok' | 'database-down' | 'api-down';
 /** Placeholder landing page. Becomes the public events list in Phase 2. */
 @Component({
   selector: 'app-home',
-  template: `
-    <h1>Próximos eventos</h1>
-    <p>Aquí aparecerán los eventos publicados.</p>
-
-    <p class="health" role="status" [attr.data-status]="status()">
-      @switch (status()) {
-        @case ('loading') {
-          Comprobando el estado del servidor…
-        }
-        @case ('ok') {
-          API y base de datos operativas.
-        }
-        @case ('database-down') {
-          La API responde, pero la base de datos no está disponible.
-        }
-        @case ('api-down') {
-          No se puede conectar con la API.
-        }
-      }
-    </p>
-  `,
-  styles: `
-    .health {
-      color: var(--mat-sys-on-surface-variant);
-      font: var(--mat-sys-body-small);
-    }
-  `,
+  imports: [MatIconModule],
+  templateUrl: './home.html',
+  styleUrl: './home.scss',
 })
 export class Home {
   private readonly api = inject(Api);

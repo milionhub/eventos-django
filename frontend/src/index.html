@@ -2,15 +2,25 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <title>eventos</title>
+    <title>#4events</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#005cbb" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <meta name="description" content="Descubre eventos, reserva tu plaza y entra con tu QR." />
+    <meta name="theme-color" content="#14121a" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <!-- Apply the saved theme before Angular boots to avoid a flash of the wrong colors. -->
+    <script>
+      try {
+        var theme = localStorage.getItem('theme');
+        if (theme === 'light' || theme === 'dark') {
+          document.documentElement.style.colorScheme = theme;
+        }
+      } catch (e) {}
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Inter:wght@400..600&display=swap"
       rel="stylesheet"
     />
     <link

@@ -1,0 +1,16 @@
+// The brand motif: a perforated ticket. Use with `@use 'ticket'` from component styles
+// (stylePreprocessorOptions.includePaths points to src/styles).
+
+// Cuts two semicircular notches on the left and right edges at `$at` (from the top),
+// like the tear line of a physical ticket. Pair it with `tear-line` on a child element.
+@mixin notched($notch: 12px, $at: 70%) {
+  mask:
+    radial-gradient(circle $notch at 0 $at, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle $notch at 100% $at, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+
+// Dashed perforation between the notches.
+@mixin tear-line($inset: 16px) {
+  margin: 0 $inset;
+  border-top: 2px dashed var(--mat-sys-outline-variant);
+}

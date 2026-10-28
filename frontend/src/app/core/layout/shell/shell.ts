@@ -3,11 +3,11 @@ import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { map } from 'rxjs';
+
+import { ThemeService } from '../../theme/theme.service';
 
 interface NavItem {
   label: string;
@@ -15,16 +15,14 @@ interface NavItem {
   path: string;
 }
 
-/** App frame: top toolbar on every size, links inline on desktop and in a drawer on mobile. */
+/** App frame: sticky header, links inline on desktop and in a drawer on mobile, and a footer. */
 @Component({
   selector: 'app-shell',
   imports: [
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    MatToolbarModule,
     MatSidenavModule,
-    MatListModule,
     MatButtonModule,
     MatIconModule,
   ],
@@ -41,4 +39,11 @@ export class Shell {
       .pipe(map((result) => result.matches)),
     { initialValue: false },
   );
+
+  private readonly themeService = inject(ThemeService);
+  protected readonly theme = this.themeService.theme;
+
+  protected toggleTheme(): void {
+    this.themeService.toggle();
+  }
 }

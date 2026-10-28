@@ -60,4 +60,5 @@ La CI falla si alguno de los dos queda desactualizado.
 - [Modelo de datos](docs/data-model.md)
 - [Arquitectura y API](docs/architecture.md)
 - [Wireframes](docs/wireframes.md)
+- [Identidad visual](docs/design.md)
 - [Decisiones de arquitectura (ADR)](docs/adr/README.md)

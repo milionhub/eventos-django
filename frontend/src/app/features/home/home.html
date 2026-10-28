@@ -1,0 +1,36 @@
+<section class="hero">
+  <p class="eyebrow">Conciertos · Charlas · Festivales</p>
+  <h1 class="display">Próximos <br />eventos<span class="cursor" aria-hidden="true">_</span></h1>
+  <p class="lead">Reserva tu plaza en segundos y entra con el QR desde el móvil.</p>
+</section>
+
+<article class="ticket">
+  <div class="ticket-main">
+    <mat-icon class="ticket-icon">confirmation_number</mat-icon>
+    <h2>Aún no hay eventos publicados</h2>
+    <p>Cuando los organizadores publiquen sus eventos, aparecerán aquí.</p>
+  </div>
+  <div class="ticket-tear" aria-hidden="true"></div>
+  <div class="ticket-stub" aria-hidden="true">
+    <span>Entrada</span>
+    <span>Nº 0000</span>
+  </div>
+</article>
+
+<p class="health" role="status" [attr.data-status]="status()">
+  <span class="dot"></span>
+  @switch (status()) {
+    @case ('loading') {
+      Comprobando el estado del servidor…
+    }
+    @case ('ok') {
+      API y base de datos operativas
+    }
+    @case ('database-down') {
+      La API responde, pero la base de datos no está disponible
+    }
+    @case ('api-down') {
+      No se puede conectar con la API
+    }
+  }
+</p>
