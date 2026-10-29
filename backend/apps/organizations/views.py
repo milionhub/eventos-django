@@ -104,11 +104,10 @@ class MemberDetailView(OrganizationScopedMixin, APIView):
         responses={200: MemberSerializer, 409: ErrorSerializer},
     )
     def patch(self, request: Request, org_slug: str, member_id: int) -> Response:
+        membership = self.get_membership(member_id)  # 404 before looking at the body
         serializer = ChangeRoleSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        membership = services.change_member_role(
-            membership=self.get_membership(member_id), **serializer.validated_data
-        )
+        membership = services.change_member_role(membership=membership, **serializer.validated_data)
         return Response(MemberSerializer(membership).data)
 
     @extend_schema(

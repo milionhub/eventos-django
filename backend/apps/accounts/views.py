@@ -58,11 +58,18 @@ def _delete_refresh_cookie(response: Response) -> Response:
 class RegisterView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "register"  # account spam
 
     @extend_schema(
         operation_id="auth_register",
         request=RegisterSerializer,
-        responses={201: UserSerializer, 400: OpenApiResponse(), 409: ErrorSerializer},
+        responses={
+            201: UserSerializer,
+            400: OpenApiResponse(),
+            409: ErrorSerializer,
+            429: OpenApiResponse(),
+        },
     )
     def post(self, request: Request) -> Response:
         serializer = RegisterSerializer(data=request.data)
@@ -94,11 +101,13 @@ class LoginView(APIView):
 class RefreshView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "refresh"  # generous: every page load and tab refreshes once
 
     @extend_schema(
         operation_id="auth_refresh",
         request=None,
-        responses={200: AuthSessionSerializer, 401: ErrorSerializer},
+        responses={200: AuthSessionSerializer, 401: ErrorSerializer, 429: OpenApiResponse()},
     )
     def post(self, request: Request) -> Response:
         token = request.COOKIES.get(settings.REFRESH_COOKIE["key"])

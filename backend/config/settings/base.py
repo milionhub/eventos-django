@@ -48,6 +48,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apps.core.middleware.ApiContentSecurityPolicyMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -109,10 +110,16 @@ REST_FRAMEWORK = {
     # Opt-in per view with `throttle_scope` (RNF-05).
     "DEFAULT_THROTTLE_RATES": {
         "login": env("THROTTLE_LOGIN_RATE", default="10/min"),
+        "register": env("THROTTLE_REGISTER_RATE", default="20/hour"),
+        "refresh": env("THROTTLE_REFRESH_RATE", default="30/min"),
         "reservations": env("THROTTLE_RESERVATIONS_RATE", default="20/min"),
         # Generous: a door scans one person every few seconds, but tokens must not be brute-forced.
         "checkin": env("THROTTLE_CHECKIN_RATE", default="120/min"),
     },
+    # Throttles count per client IP. X-Forwarded-For is written by the client, so it is only
+    # trusted when there are proxies in front that append to it: 0 = use the socket address;
+    # behind nginx, 1 = the address nginx saw. Unset, DRF would trust the whole header.
+    "NUM_PROXIES": env.int("NUM_PROXIES", default=0),
 }
 
 # ADR-0003: short-lived access token in memory (Angular), refresh token in an httpOnly cookie.

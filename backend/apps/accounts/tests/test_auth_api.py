@@ -1,6 +1,7 @@
 import pytest
 from django.conf import settings
 from django.urls import reverse
+from rest_framework.throttling import ScopedRateThrottle
 
 from apps.accounts.models import User
 from apps.accounts.tests.factories import UserFactory
@@ -59,6 +60,20 @@ def test_register_rejects_weak_passwords(api_client, password):
     assert not User.objects.exists()
 
 
+def test_register_is_throttled(api_client, monkeypatch):
+    monkeypatch.setattr(ScopedRateThrottle, "THROTTLE_RATES", {"register": "2/hour"})
+
+    statuses = [
+        api_client.post(
+            reverse("auth-register"), {"email": f"spam{n}@example.com", "password": PASSWORD}
+        ).status_code
+        for n in range(3)
+    ]
+
+    assert statuses == [201, 201, 429]
+    assert User.objects.count() == 2
+
+
 # --- login ------------------------------------------------------------------
 
 
@@ -90,6 +105,20 @@ def test_login_is_throttled(api_client, user):
     statuses = [login(api_client, password="wrong-password").status_code for _ in range(11)]
 
     assert statuses[:10] == [401] * 10
+    assert statuses[10] == 429
+
+
+def test_login_throttle_ignores_a_forged_x_forwarded_for(api_client, user):
+    """The client writes that header: trusting it would give every attempt a fresh quota."""
+    statuses = [
+        api_client.post(
+            reverse("auth-login"),
+            {"email": "ana@example.com", "password": "wrong-password"},
+            HTTP_X_FORWARDED_FOR=f"203.0.113.{attempt}",
+        ).status_code
+        for attempt in range(11)
+    ]
+
     assert statuses[10] == 429
 
 
@@ -132,6 +161,14 @@ def test_refresh_token_cannot_be_reused_after_rotation(api_client, user):
 
     assert response.status_code == 401
     assert response.json()["code"] == "session_expired"
+
+
+def test_refresh_is_throttled(api_client, monkeypatch):
+    monkeypatch.setattr(ScopedRateThrottle, "THROTTLE_RATES", {"refresh": "2/min"})
+
+    statuses = [api_client.post(reverse("auth-refresh")).status_code for _ in range(3)]
+
+    assert statuses == [401, 401, 429]
 
 
 def test_refresh_without_cookie_fails(api_client):

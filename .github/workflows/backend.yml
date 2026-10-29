@@ -66,6 +66,16 @@ jobs:
       - name: Test
         run: uv run pytest
 
+      # Production settings pass Django's deployment checklist (HTTPS, HSTS, secure cookies…).
+      # Throwaway values: the check needs a long random secret, not the real one.
+      - name: Check production settings
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          DJANGO_ALLOWED_HOSTS: eventos.example.com
+        run: |
+          export DJANGO_SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')"
+          uv run python manage.py check --deploy --fail-level WARNING
+
       # ADR-0007: the committed schema must match the code.
       - name: Check OpenAPI schema is up to date
         run: |

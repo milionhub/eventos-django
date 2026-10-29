@@ -170,5 +170,6 @@ La cámara del móvil solo funciona con HTTPS, así que se expone el servidor de
 - [Wireframes](docs/wireframes.md)
 - [Identidad visual](docs/design.md)
 - [Decisiones de arquitectura (ADR)](docs/adr/README.md)
+- [Seguridad: revisión y riesgos aceptados](docs/security.md)
 - [Guía: probar el escáner en un móvil](docs/guia-movil.md)
 - [Guía: probar la Fase 5 (dashboard, asistentes, CSV y PWA)](docs/guia-pruebas-fase5.md)

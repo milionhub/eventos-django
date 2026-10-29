@@ -157,11 +157,10 @@ class EventImageView(EventScopedMixin, APIView):
         responses={200: EventDetailSerializer, 400: ErrorSerializer, 409: ErrorSerializer},
     )
     def put(self, request: Request, org_slug: str, event_id: int) -> Response:
+        event = self.get_event()  # 404 before looking at the body
         serializer = EventImageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        event = services.set_event_image(
-            event=self.get_event(), upload=serializer.validated_data["image"]
-        )
+        event = services.set_event_image(event=event, upload=serializer.validated_data["image"])
         return Response(EventDetailSerializer(event).data)
 
     @extend_schema(
@@ -192,11 +191,10 @@ class TicketTypeListView(EventScopedMixin, APIView):
         responses={201: TicketTypeSerializer, 409: ErrorSerializer},
     )
     def post(self, request: Request, org_slug: str, event_id: int) -> Response:
+        event = self.get_event()  # 404 before looking at the body
         serializer = TicketTypeWriteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        ticket_type = services.create_ticket_type(
-            event=self.get_event(), **serializer.validated_data
-        )
+        ticket_type = services.create_ticket_type(event=event, **serializer.validated_data)
         return Response(TicketTypeSerializer(ticket_type).data, status=status.HTTP_201_CREATED)
 
 
@@ -250,11 +248,10 @@ class StaffListView(EventScopedMixin, APIView):
         responses={201: EventStaffSerializer, 400: ErrorSerializer, 409: ErrorSerializer},
     )
     def post(self, request: Request, org_slug: str, event_id: int) -> Response:
+        event = self.get_event()  # 404 before looking at the body
         serializer = AssignStaffSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        assignment = services.assign_staff(
-            event=self.get_event(), user_id=serializer.validated_data["user"]
-        )
+        assignment = services.assign_staff(event=event, user_id=serializer.validated_data["user"])
         return Response(EventStaffSerializer(assignment).data, status=status.HTTP_201_CREATED)
 
 
