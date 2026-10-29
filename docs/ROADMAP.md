@@ -172,6 +172,19 @@
 
 **Cierre:** los 5 recorridos (`requirements.md` §2) funcionan en escritorio y en móvil.
 
+**Bloques de trabajo** (un commit por bloque):
+
+| # | Bloque | Estado |
+|---|---|---|
+| 1 | Stats (backend): por evento (ocupación por categoría, intentos de acceso) y por organización (indicadores y próximos eventos), sin N+1 | ✅ |
+| 2 | Asistentes y CSV (backend): listado con búsqueda y filtro, cancelación por el organizador, CSV protegido frente a inyección de fórmulas | |
+| 3 | Dashboard y stats (frontend): indicadores de la organización y pestaña de stats del evento, barras en CSS | |
+| 4 | Asistentes (frontend): pestaña con búsqueda, filtro, cancelación y descarga del CSV con el token | |
+| 5 | Responsive (360 px) y PWA instalable (`@angular/service-worker`, solo recursos estáticos) | |
+| 6 | Cierre: los 5 recorridos en escritorio y en móvil, README y ROADMAP | |
+
+Decisión 2026-10-29: la prueba en móvil real se hace **solo con iPhone** por ahora; Android queda pendiente.
+
 ---
 
 ## FASE 6 — Endurecimiento · 10–15 h
@@ -229,4 +242,4 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 ## Estado actual
 
 **Fase activa:** 5 — Dashboard, asistentes y móvil (Fase 4 cerrada el 2026-10-29: una entrada se valida desde un móvil real y no se puede usar dos veces, también con escaneos simultáneos).
-**Siguiente paso:** dividir la Fase 5 en bloques, empezando por las estadísticas por evento (ocupación por categoría y accesos).
+**Siguiente paso:** bloque 1 de la Fase 5, stats en el backend.

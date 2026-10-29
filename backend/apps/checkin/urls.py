@@ -12,3 +12,9 @@ urlpatterns = [
         name="checkin-activity",
     ),
 ]
+
+# Mounted under organizations/<org_slug>/
+organizer_urlpatterns = [
+    path("stats/", views.OrganizationStatsView.as_view(), name="organization-stats"),
+    path("events/<int:event_id>/stats/", views.EventStatsView.as_view(), name="event-stats"),
+]

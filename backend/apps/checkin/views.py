@@ -13,10 +13,14 @@ from apps.checkin.models import CheckInLog
 from apps.checkin.serializers import (
     CheckinActivitySerializer,
     CheckinEventSerializer,
+    EventStatsSerializer,
+    OrganizationStatsSerializer,
     ScanRequestSerializer,
     ScanResultSerializer,
 )
 from apps.events.models import Event
+from apps.events.views import ORGANIZERS, EventScopedMixin
+from apps.organizations.mixins import OrganizationScopedMixin
 
 
 def _event_or_404(request: Request, event_id: int) -> Event:
@@ -87,3 +91,28 @@ class CheckinActivityView(APIView):
             return Response(status=status.HTTP_403_FORBIDDEN)
         data = {"stats": selectors.checkin_stats(event), "logs": selectors.recent_logs(event)}
         return Response(CheckinActivitySerializer(data).data)
+
+
+# --- Organizer stats (mounted under organizations/<org_slug>/) ---------------------------------
+# §4: only OWNER and MANAGER see stats; STAFF gets 403 and other organizations 404.
+
+
+@extend_schema(tags=["stats"])
+class EventStatsView(EventScopedMixin, APIView):
+    permission_classes = [IsAuthenticated]
+    roles_by_method = {"GET": ORGANIZERS}
+
+    @extend_schema(operation_id="event_stats", responses=EventStatsSerializer)
+    def get(self, request: Request, org_slug: str, event_id: int) -> Response:
+        return Response(EventStatsSerializer(selectors.event_stats(self.get_event())).data)
+
+
+@extend_schema(tags=["stats"])
+class OrganizationStatsView(OrganizationScopedMixin, APIView):
+    permission_classes = [IsAuthenticated]
+    roles_by_method = {"GET": ORGANIZERS}
+
+    @extend_schema(operation_id="organization_stats", responses=OrganizationStatsSerializer)
+    def get(self, request: Request, org_slug: str) -> Response:
+        stats = selectors.organization_stats(self.organization, timezone.now())
+        return Response(OrganizationStatsSerializer(stats).data)

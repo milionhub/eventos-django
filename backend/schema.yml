@@ -745,6 +745,33 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/organizations/{org_slug}/events/{event_id}/stats/:
+    get:
+      operationId: event_stats
+      description: 'Adds `get_event()`: the event from the URL, only within what the
+        caller may see.'
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - stats
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventStats'
+          description: ''
   /api/v1/organizations/{org_slug}/events/{event_id}/ticket-types/:
     get:
       operationId: ticket_types_list
@@ -1040,6 +1067,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/organizations/{org_slug}/stats/:
+    get:
+      operationId: organization_stats
+      description: |-
+        For views under `organizations/<org_slug>/...` (RN-06).
+
+        Resolves the organization from the URL through the user's own memberships, so an
+        organization the user does not belong to is indistinguishable from one that does
+        not exist: 404. A member whose role is not enough for the method gets 403.
+
+        Views declare who may call each method:
+
+            roles_by_method = {"GET": ALL_ROLES, "PATCH": {Role.OWNER}}
+
+        and then use `self.organization` / `self.membership`, filtering every queryset by
+        `self.organization`.
+      parameters:
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - stats
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationStats'
           description: ''
   /api/v1/public/events/:
     get:
@@ -1493,6 +1553,34 @@ components:
       - created_at
       - id
       - user
+    EventStats:
+      type: object
+      properties:
+        seats:
+          type: integer
+          description: Suma de los cupos de las categorías.
+        reserved:
+          type: integer
+        checked_in:
+          type: integer
+        cancelled:
+          type: integer
+          description: Reservas canceladas.
+        ticket_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/TicketTypeStats'
+        scans:
+          allOf:
+          - $ref: '#/components/schemas/ScanCounts'
+          description: Intentos de acceso por resultado.
+      required:
+      - cancelled
+      - checked_in
+      - reserved
+      - scans
+      - seats
+      - ticket_types
     EventStatusEnum:
       enum:
       - DRAFT
@@ -1822,6 +1910,29 @@ components:
           title: Descripción
       required:
       - name
+    OrganizationStats:
+      type: object
+      properties:
+        active_events:
+          type: integer
+          description: Publicados y sin terminar.
+        seats:
+          type: integer
+          description: Suma de los cupos de las categorías.
+        reserved:
+          type: integer
+        checked_in:
+          type: integer
+        upcoming:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpcomingEventStats'
+      required:
+      - active_events
+      - checked_in
+      - reserved
+      - seats
+      - upcoming
     PaginatedEventList:
       type: object
       required:
@@ -2183,6 +2294,31 @@ components:
         * `OWNER` - Propietario
         * `MANAGER` - Gestor
         * `STAFF` - Personal de acceso
+    ScanCounts:
+      type: object
+      properties:
+        VALID:
+          type: integer
+        ALREADY_USED:
+          type: integer
+        CANCELLED:
+          type: integer
+        NOT_FOUND:
+          type: integer
+        WRONG_EVENT:
+          type: integer
+        EVENT_NOT_ACTIVE:
+          type: integer
+        UNAUTHORIZED:
+          type: integer
+      required:
+      - ALREADY_USED
+      - CANCELLED
+      - EVENT_NOT_ACTIVE
+      - NOT_FOUND
+      - UNAUTHORIZED
+      - VALID
+      - WRONG_EVENT
     ScanRequestRequest:
       type: object
       properties:
@@ -2340,6 +2476,30 @@ components:
       - id
       - name
       - reserved_count
+    TicketTypeStats:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nombre
+        capacity:
+          type: integer
+          readOnly: true
+          title: Cupo
+        reserved:
+          type: integer
+        checked_in:
+          type: integer
+      required:
+      - capacity
+      - checked_in
+      - id
+      - name
+      - reserved
     TicketTypeWriteRequest:
       type: object
       properties:
@@ -2360,6 +2520,50 @@ components:
       required:
       - capacity
       - name
+    UpcomingEventStats:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          readOnly: true
+          title: Título
+        image_url:
+          type: string
+          readOnly: true
+        start_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Inicio
+        end_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Fin
+        seats:
+          type: integer
+          description: Suma de los cupos de las categorías.
+        reserved:
+          type: integer
+        checked_in:
+          type: integer
+      required:
+      - checked_in
+      - end_at
+      - id
+      - image_url
+      - reserved
+      - seats
+      - slug
+      - start_at
+      - title
     User:
       type: object
       properties:

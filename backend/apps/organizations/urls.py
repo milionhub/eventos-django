@@ -1,5 +1,6 @@
 from django.urls import include, path
 
+from apps.checkin.urls import organizer_urlpatterns as checkin_organizer
 from apps.organizations import views
 
 urlpatterns = [
@@ -12,4 +13,5 @@ urlpatterns = [
         name="member",
     ),
     path("<slug:org_slug>/events/", include("apps.events.urls")),
+    path("<slug:org_slug>/", include(checkin_organizer)),
 ]

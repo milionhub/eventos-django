@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from apps.checkin import services
 from apps.checkin.models import CheckInLog
-from apps.events.models import Event
+from apps.events.models import Event, TicketType
 from apps.events.serializers import ImageUrlField
 from apps.ticketing.models import Ticket
 
@@ -83,3 +83,62 @@ class CheckinStatsSerializer(serializers.Serializer):
 class CheckinActivitySerializer(serializers.Serializer):
     stats = CheckinStatsSerializer()
     logs = CheckInLogSerializer(many=True)
+
+
+# --- Organizer stats --------------------------------------------------------------------------
+
+# One integer per result, so the generated client knows every key (zeros included).
+ScanCountsSerializer = type(
+    "ScanCountsSerializer",
+    (serializers.Serializer,),
+    {result: serializers.IntegerField() for result in CheckInLog.Result.values},
+)
+
+
+class TicketTypeStatsSerializer(serializers.ModelSerializer):
+    reserved = serializers.IntegerField(source="reserved_count")
+    checked_in = serializers.IntegerField()
+
+    class Meta:
+        model = TicketType
+        fields = ["id", "name", "capacity", "reserved", "checked_in"]
+        read_only_fields = fields
+
+
+class EventStatsSerializer(serializers.Serializer):
+    seats = serializers.IntegerField(help_text="Suma de los cupos de las categorías.")
+    reserved = serializers.IntegerField()
+    checked_in = serializers.IntegerField()
+    cancelled = serializers.IntegerField(help_text="Reservas canceladas.")
+    ticket_types = TicketTypeStatsSerializer(many=True)
+    scans = ScanCountsSerializer(help_text="Intentos de acceso por resultado.")
+
+
+class UpcomingEventStatsSerializer(serializers.ModelSerializer):
+    image_url = ImageUrlField()
+    seats = serializers.IntegerField(help_text="Suma de los cupos de las categorías.")
+    reserved = serializers.IntegerField()
+    checked_in = serializers.IntegerField()
+
+    class Meta:
+        model = Event
+        fields = [
+            "id",
+            "slug",
+            "title",
+            "image_url",
+            "start_at",
+            "end_at",
+            "seats",
+            "reserved",
+            "checked_in",
+        ]
+        read_only_fields = fields
+
+
+class OrganizationStatsSerializer(serializers.Serializer):
+    active_events = serializers.IntegerField(help_text="Publicados y sin terminar.")
+    seats = serializers.IntegerField(help_text="Suma de los cupos de las categorías.")
+    reserved = serializers.IntegerField()
+    checked_in = serializers.IntegerField()
+    upcoming = UpcomingEventStatsSerializer(many=True)
