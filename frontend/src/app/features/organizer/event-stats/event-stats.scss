@@ -1,6 +1,8 @@
 :host {
   display: grid;
   gap: 16px;
+  // Same gap below the tabs as the other panels.
+  padding-top: 16px;
 }
 
 .loading {

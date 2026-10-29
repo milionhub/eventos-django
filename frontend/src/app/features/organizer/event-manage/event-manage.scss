@@ -16,19 +16,22 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px 8px;
+  gap: 6px 16px;
   margin: 16px 0 0;
   color: var(--mat-sys-on-surface-variant);
+
+  // Each icon stays with its text when the line wraps.
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
 
   mat-icon {
     width: 18px;
     height: 18px;
     color: var(--app-accent);
     font-size: 18px;
-  }
-
-  mat-icon:not(:first-child) {
-    margin-left: 8px;
   }
 }
 

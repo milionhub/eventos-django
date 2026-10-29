@@ -13,11 +13,12 @@
     }}</span>
     <h1 class="display">{{ e.title }}</h1>
     <p class="meta">
-      <mat-icon>schedule</mat-icon>
-      {{ e.start_at | date: "EEEE d 'de' MMMM, HH:mm" | capitalize }} –
-      {{ e.end_at | date: 'HH:mm' }}
-      <mat-icon>place</mat-icon>
-      {{ e.location }}
+      <span>
+        <mat-icon>schedule</mat-icon>
+        {{ e.start_at | date: "EEEE d 'de' MMMM, HH:mm" | capitalize }} –
+        {{ e.end_at | date: 'HH:mm' }}
+      </span>
+      <span><mat-icon>place</mat-icon> {{ e.location }}</span>
     </p>
 
     <div class="actions">
@@ -96,7 +97,10 @@
     </mat-tab>
 
     <!-- Entradas -->
-    <mat-tab [label]="'Entradas (' + e.ticket_types.length + ')'">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        Entradas <span class="tab-count">&nbsp;({{ e.ticket_types.length }})</span>
+      </ng-template>
       <section class="surface-card panel">
         <div
           class="meter"

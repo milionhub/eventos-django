@@ -1,6 +1,8 @@
 :host {
   display: grid;
   gap: 16px;
+  // The tab body clips its overflow: room for the outlined fields' floating labels.
+  padding-top: 16px;
 }
 
 .loading {
@@ -73,6 +75,10 @@
 
     .who {
       grid-column: 1 / -1;
+    }
+
+    .chip {
+      justify-self: end;
     }
   }
 

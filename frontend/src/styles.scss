@@ -293,3 +293,15 @@ h3 {
     transition: none !important;
   }
 }
+
+// Phones: tighter tab labels and no counters, so the event's five tabs fit in 360 px.
+@media (width < 600px) {
+  .mat-mdc-tab-group .mdc-tab {
+    min-width: 0;
+    padding-inline: 8px;
+  }
+
+  .tab-count {
+    display: none;
+  }
+}

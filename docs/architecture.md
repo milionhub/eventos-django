@@ -136,7 +136,7 @@ Documentación en vivo: `/api/docs/` (Swagger) y `/api/schema/`.
 | UI | Angular Material |
 | Cliente API | **Generado a partir del OpenAPI** (`ng-openapi-gen`) → tipos desde Django hasta Angular |
 | QR (escáner) | `@zxing/ngx-scanner` |
-| PWA | `@angular/pwa` |
+| PWA | `@angular/service-worker` configurado a mano (`ngsw-config.json`): solo guarda en caché los archivos de la app y Google Fonts; **nunca la API ni `/media`**. Activo solo en el build de producción |
 | Tests unitarios | El runner por defecto del CLI de Angular |
 | E2E | Playwright |
 | Lint y formato | angular-eslint + Prettier |

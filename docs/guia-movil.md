@@ -201,6 +201,30 @@ En el PC, recarga la entrada de Laura: ahora sale con el sello **Utilizada** y l
 
 ---
 
+## Extra — Instalar la app en el móvil (PWA)
+
+La app se puede instalar como una aplicación más (icono en la pantalla de inicio, sin barra del navegador). El *service worker* que lo hace posible **solo se activa en el build de producción**, así que en vez de `npm start` (paso 1, terminal 2) arranca:
+
+```powershell
+cd C:\dev\eventos-djangorontend
+npm start -- --configuration production
+```
+
+El túnel (terminal 3) es el mismo de siempre. Después:
+
+- **iPhone (Safari):** botón **Compartir** (cuadrado con flecha) → **Añadir a pantalla de inicio** → **Añadir**.
+- **Android (Chrome):** menú **⋮** → **Instalar aplicación** (o el aviso que aparece abajo).
+
+Al abrirla desde el icono, la app ocupa toda la pantalla, con el logo de #4events.
+
+> **Qué guarda la app en el móvil:** solo sus propios archivos (código, estilos, iconos y fuentes). **Nunca** las respuestas de la API ni las imágenes de los eventos: sin conexión la app abre, pero no muestra datos ni valida entradas (RNF-02).
+>
+> **Cada dirección del túnel es una app distinta** para el móvil: si cierras el túnel y abres otro, la app instalada apunta a la dirección vieja y deja de funcionar. Bórrala y vuelve a instalarla.
+>
+> Con el build de producción los cambios de código no se recargan solos: si tocas el frontend, reinicia el comando.
+
+---
+
 ## Problemas frecuentes
 
 | Síntoma | Causa | Solución |

@@ -2,11 +2,13 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import {
   ApplicationConfig,
   inject,
+  isDevMode,
   LOCALE_ID,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideServiceWorker } from '@angular/service-worker';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/auth/auth.interceptor';
@@ -22,5 +24,11 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => inject(AuthService).refresh()),
     // Spanish formats; dates are shown in the browser's time zone (RNF-04).
     { provide: LOCALE_ID, useValue: 'es' },
+    // PWA (RNF-02): caches the app's static files only, never the API (see ngsw-config.json).
+    // Off in development, where it would serve stale builds.
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: !isDevMode(),
+      registrationStrategy: 'registerWhenStable:30000',
+    }),
   ],
 };
