@@ -164,9 +164,9 @@
 
 ## FASE 5 — Dashboard, asistentes y móvil · 12–16 h
 
-- [ ] Stats por evento (ocupación por categoría, accesos) y por organización
-- [ ] Listado de asistentes con búsqueda y filtro + cancelación por el organizador
-- [ ] Exportación CSV
+- [x] Stats por evento (ocupación por categoría, accesos) y por organización
+- [x] Listado de asistentes con búsqueda y filtro + cancelación por el organizador
+- [x] Exportación CSV
 - [ ] Repaso responsive completo (360 px), PWA instalable
 - [ ] Recorridos completos probados en iPhone y Android
 
@@ -178,8 +178,8 @@
 |---|---|---|
 | 1 | Stats (backend): por evento (ocupación por categoría, intentos de acceso) y por organización (indicadores y próximos eventos), sin N+1 | ✅ |
 | 2 | Asistentes y CSV (backend): listado con búsqueda y filtro, cancelación por el organizador, CSV protegido frente a inyección de fórmulas | ✅ |
-| 3 | Dashboard y stats (frontend): indicadores de la organización y pestaña de stats del evento, barras en CSS | |
-| 4 | Asistentes (frontend): pestaña con búsqueda, filtro, cancelación y descarga del CSV con el token | |
+| 3 | Dashboard y stats (frontend): indicadores de la organización y pestaña de stats del evento, barras en CSS |✅ |
+| 4 | Asistentes (frontend): pestaña con búsqueda, filtro, cancelación y descarga del CSV con el token |✅ |
 | 5 | Responsive (360 px) y PWA instalable (`@angular/service-worker`, solo recursos estáticos) | |
 | 6 | Cierre: los 5 recorridos en escritorio y en móvil, README y ROADMAP | |
 
@@ -242,4 +242,4 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 ## Estado actual
 
 **Fase activa:** 5 — Dashboard, asistentes y móvil (Fase 4 cerrada el 2026-10-29: una entrada se valida desde un móvil real y no se puede usar dos veces, también con escaneos simultáneos).
-**Siguiente paso:** bloque 3 de la Fase 5, dashboard y stats en el frontend.
+**Siguiente paso:** bloque 5 de la Fase 5, repaso responsive a 360 px (pestañas de la gestión del evento incluidas) y PWA.

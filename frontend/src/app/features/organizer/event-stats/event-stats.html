@@ -1,0 +1,75 @@
+@if (stats.isLoading() && !stats.hasValue()) {
+  <mat-spinner class="loading" diameter="32" aria-label="Cargando estadísticas" />
+} @else if (stats.error()) {
+  <p class="notice error" role="alert">No se han podido cargar las estadísticas.</p>
+} @else if (stats.value(); as s) {
+  <div class="toolbar">
+    <button mat-button type="button" [disabled]="stats.isLoading()" (click)="stats.reload()">
+      <mat-icon>refresh</mat-icon> Actualizar
+    </button>
+  </div>
+
+  <div class="kpis">
+    <app-stat-tile label="Reservas" [value]="s.reserved" [detail]="'de ' + s.seats + ' plazas'" />
+    <app-stat-tile label="Ocupación" [value]="percent(s.reserved, s.seats) + ' %'">
+      <app-meter [value]="s.reserved" [max]="s.seats" label="Ocupación del evento" />
+    </app-stat-tile>
+    <app-stat-tile
+      label="Dentro"
+      [value]="s.checked_in"
+      [detail]="percent(s.checked_in, s.reserved) + ' % de las reservas'"
+    />
+    <app-stat-tile label="Canceladas" [value]="s.cancelled" detail="reservas anuladas" />
+  </div>
+
+  <section class="surface-card panel" aria-labelledby="by-category">
+    <h2 id="by-category">Por categoría</h2>
+    @if (s.ticket_types.length) {
+      <ul class="categories" role="list">
+        @for (t of s.ticket_types; track t.id) {
+          <li>
+            <strong class="name">{{ t.name }}</strong>
+            <div class="measure">
+              <p><span>Reservadas</span> {{ t.reserved }} / {{ t.capacity }}</p>
+              <app-meter
+                [value]="t.reserved"
+                [max]="t.capacity"
+                [label]="'Reservadas en ' + t.name"
+              />
+            </div>
+            <div class="measure">
+              <p><span>Dentro</span> {{ t.checked_in }} / {{ t.reserved }}</p>
+              <app-meter
+                [value]="t.checked_in"
+                [max]="t.reserved"
+                [label]="'Dentro en ' + t.name"
+              />
+            </div>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="empty">Este evento aún no tiene categorías.</p>
+    }
+  </section>
+
+  <section class="surface-card panel" aria-labelledby="attempts">
+    <h2 id="attempts">Intentos de acceso</h2>
+    @if (attempts().length) {
+      <ul class="attempts" role="list">
+        @for (a of attempts(); track a.result) {
+          <li [attr.data-tone]="results[a.result].tone">
+            <mat-icon aria-hidden="true">{{ results[a.result].icon }}</mat-icon>
+            <span>{{ results[a.result].title }}</span>
+            <strong>{{ a.count }}</strong>
+          </li>
+        }
+      </ul>
+      <p class="total">
+        {{ totalAttempts() }} {{ totalAttempts() === 1 ? 'escaneo' : 'escaneos' }} en total.
+      </p>
+    } @else {
+      <p class="empty">Todavía nadie ha escaneado entradas de este evento.</p>
+    }
+  </section>
+}

@@ -1,0 +1,111 @@
+<!-- The filters apply as you type: Enter in the search box must not reload the page. -->
+<form class="filters" [formGroup]="filters" (submit)="$event.preventDefault()">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
+    <mat-label>Buscar</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput formControlName="q" placeholder="Nombre o email" autocomplete="off" />
+  </mat-form-field>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="status">
+    <mat-label>Entrada</mat-label>
+    <mat-select formControlName="status">
+      <mat-option value="">Todas</mat-option>
+      @for (status of statuses; track status) {
+        <mat-option [value]="status">{{ statusLabels[status] }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <button
+    mat-stroked-button
+    type="button"
+    class="export"
+    [disabled]="busy() === 'export' || !attendees.value()?.count"
+    (click)="export()"
+  >
+    <mat-icon>download</mat-icon> Exportar CSV
+  </button>
+</form>
+
+@if (notice(); as n) {
+  <p
+    class="notice"
+    [class.error]="n.kind === 'error'"
+    [attr.role]="n.kind === 'error' ? 'alert' : 'status'"
+  >
+    <mat-icon>{{ n.kind === 'error' ? 'error' : 'check_circle' }}</mat-icon>
+    {{ n.text }}
+  </p>
+}
+
+@if (attendees.isLoading() && !attendees.hasValue()) {
+  <mat-spinner class="loading" diameter="32" aria-label="Cargando asistentes" />
+} @else if (attendees.error()) {
+  <p class="notice error" role="alert">No se han podido cargar los asistentes.</p>
+} @else if (attendees.value(); as list) {
+  @if (list.results.length) {
+    <ul class="attendees" role="list" [attr.aria-busy]="attendees.isLoading()">
+      @for (a of list.results; track a.id) {
+        <li class="surface-card attendee">
+          <div class="who">
+            <strong>{{ displayName(a) }}</strong>
+            <span>{{ a.user.email }}</span>
+          </div>
+          <span class="category">{{ a.ticket_type.name }}</span>
+          <span
+            class="chip"
+            [attr.data-status]="a.ticket.status === 'VALID' ? null : a.ticket.status"
+          >
+            {{ statusLabels[a.ticket.status] }}
+            @if (a.ticket.checked_in_at) {
+              · {{ a.ticket.checked_in_at | date: 'HH:mm' }}
+            }
+          </span>
+          <span class="booked">Reservó el {{ a.created_at | date: 'd MMM, HH:mm' }}</span>
+          @if (cancellable() && a.ticket.status === 'VALID') {
+            <button
+              mat-button
+              type="button"
+              class="quiet"
+              [class.confirming]="confirming() === a.id"
+              [disabled]="busy() === a.id"
+              (click)="cancel(a)"
+            >
+              {{ confirming() === a.id ? '¿Seguro? Cancelar' : 'Cancelar reserva' }}
+            </button>
+          }
+        </li>
+      }
+    </ul>
+
+    @if (list.next || list.previous) {
+      <nav class="pager" aria-label="Páginas de asistentes">
+        <button
+          mat-button
+          type="button"
+          [disabled]="!list.previous || attendees.isLoading()"
+          (click)="page.set(page() - 1)"
+        >
+          <mat-icon>chevron_left</mat-icon> Anterior
+        </button>
+        <span>{{ range().first }}–{{ range().last }} de {{ range().count }}</span>
+        <button
+          mat-button
+          type="button"
+          [disabled]="!list.next || attendees.isLoading()"
+          (click)="page.set(page() + 1)"
+        >
+          Siguiente <mat-icon iconPositionEnd>chevron_right</mat-icon>
+        </button>
+      </nav>
+    } @else {
+      <p class="count">{{ list.count }} {{ list.count === 1 ? 'reserva' : 'reservas' }}</p>
+    }
+  } @else {
+    <p class="surface-card empty">
+      {{
+        filters.value.q || filters.value.status
+          ? 'Nadie coincide con la búsqueda.'
+          : 'Todavía no hay reservas.'
+      }}
+    </p>
+  }
+}

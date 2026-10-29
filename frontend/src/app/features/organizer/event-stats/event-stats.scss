@@ -1,0 +1,116 @@
+:host {
+  display: grid;
+  gap: 16px;
+}
+
+.loading {
+  margin: 48px auto;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: -8px;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+
+  app-meter {
+    margin-top: 6px;
+  }
+}
+
+.panel {
+  padding: 20px;
+
+  h2 {
+    margin: 0 0 16px;
+    font: var(--mat-sys-title-medium);
+  }
+}
+
+.categories {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: minmax(100px, 1fr) 2fr 2fr;
+    align-items: end;
+    gap: 16px;
+  }
+
+  .name {
+    align-self: center;
+    overflow-wrap: anywhere;
+  }
+}
+
+.measure p {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 6px;
+  font-variant-numeric: tabular-nums;
+
+  span {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+// Phones: name on its own line, both bars below it.
+@media (width < 600px) {
+  .categories li {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.attempts {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: var(--app-border);
+  }
+
+  strong {
+    font-variant-numeric: tabular-nums;
+  }
+
+  // The icon carries the tone; the text stays in the normal ink (never color alone).
+  [data-tone='ok'] mat-icon {
+    color: #12a150;
+  }
+
+  [data-tone='warn'] mat-icon {
+    color: #c27c0e;
+  }
+
+  [data-tone='error'] mat-icon {
+    color: var(--mat-sys-error);
+  }
+}
+
+.total,
+.empty {
+  margin: 12px 0 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.empty {
+  margin: 0;
+}

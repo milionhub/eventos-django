@@ -154,4 +154,40 @@ describe('EventManage', () => {
 
     expect(element().textContent).toContain('Nadie asignado todavía.');
   });
+
+  it('opens the attendees from ?tab=asistentes, and only then asks for them', async () => {
+    await render(detail({ status: 'PUBLISHED', publish_blockers: [] }), 'asistentes');
+
+    http
+      .expectOne(`${URL}reservations/?page=1`)
+      .flush({ count: 0, next: null, previous: null, results: [] });
+    await settle();
+
+    expect(element().querySelector('app-event-attendees')).toBeTruthy();
+    expect(element().textContent).toContain('Todavía no hay reservas.');
+  });
+
+  it('opens the stats from ?tab=stats', async () => {
+    await render(detail({ status: 'PUBLISHED', publish_blockers: [] }), 'stats');
+
+    http.expectOne(`${URL}stats/`).flush({
+      seats: 0,
+      reserved: 0,
+      checked_in: 0,
+      cancelled: 0,
+      ticket_types: [],
+      scans: {
+        VALID: 0,
+        ALREADY_USED: 0,
+        CANCELLED: 0,
+        NOT_FOUND: 0,
+        WRONG_EVENT: 0,
+        EVENT_NOT_ACTIVE: 0,
+        UNAUTHORIZED: 0,
+      },
+    });
+    await settle();
+
+    expect(element().textContent).toContain('Este evento aún no tiene categorías.');
+  });
 });

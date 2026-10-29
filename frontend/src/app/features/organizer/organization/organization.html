@@ -13,6 +13,70 @@
     }
   </header>
 
+  @if (stats.isLoading() && !stats.hasValue()) {
+    <mat-spinner class="loading" diameter="32" aria-label="Cargando resumen" />
+  } @else if (stats.error()) {
+    <p class="notice error" role="alert">No se ha podido cargar el resumen.</p>
+  } @else if (stats.value(); as s) {
+    <section class="summary" aria-labelledby="summary-title">
+      <h2 id="summary-title" class="section-title">Resumen</h2>
+      <div class="kpis">
+        <app-stat-tile label="Eventos activos" [value]="s.active_events" />
+        <app-stat-tile
+          label="Reservas"
+          [value]="s.reserved"
+          [detail]="'de ' + s.seats + ' plazas'"
+        />
+        <app-stat-tile label="Ocupación" [value]="percent(s.reserved, s.seats) + ' %'">
+          <app-meter [value]="s.reserved" [max]="s.seats" label="Ocupación total" />
+        </app-stat-tile>
+        <app-stat-tile
+          label="Accesos"
+          [value]="s.checked_in"
+          [detail]="percent(s.checked_in, s.reserved) + ' % de las reservas'"
+        />
+      </div>
+      <p class="hint">Eventos publicados, también los ya terminados.</p>
+    </section>
+
+    <section aria-labelledby="upcoming-title">
+      <h2 id="upcoming-title" class="section-title">Próximos eventos</h2>
+      @if (s.upcoming.length) {
+        <ul class="upcoming" role="list">
+          @for (event of s.upcoming; track event.id) {
+            <li>
+              <a class="surface-card event-row" [routerLink]="['/org', org(), 'events', event.id]">
+                <app-event-thumb [date]="event.start_at" [imageUrl]="event.image_url" />
+                <div class="info">
+                  <h3>{{ event.title }}</h3>
+                  <p>{{ event.start_at | date: "EEE d 'de' MMMM, HH:mm" | capitalize }}</p>
+                </div>
+                <div class="occupancy">
+                  <p>
+                    <strong>{{ percent(event.reserved, event.seats) }} %</strong>
+                    <span>{{ event.reserved }} / {{ event.seats }}</span>
+                  </p>
+                  <app-meter
+                    [value]="event.reserved"
+                    [max]="event.seats"
+                    [label]="'Ocupación de ' + event.title"
+                  />
+                  @if (event.checked_in) {
+                    <p class="inside">{{ event.checked_in }} dentro</p>
+                  }
+                </div>
+              </a>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="surface-card empty">No hay eventos publicados por delante.</p>
+      }
+    </section>
+
+    <h2 class="section-title">Gestionar</h2>
+  }
+
   <ul class="tiles" role="list">
     <li>
       <a class="surface-card tile" [routerLink]="['/org', org(), 'events']">

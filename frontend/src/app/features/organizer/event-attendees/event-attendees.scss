@@ -1,0 +1,100 @@
+:host {
+  display: grid;
+  gap: 16px;
+}
+
+.loading {
+  margin: 48px auto;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+
+  .search {
+    flex: 1 1 240px;
+  }
+
+  .status {
+    flex: 0 1 180px;
+  }
+
+  .export {
+    margin-left: auto;
+  }
+}
+
+.attendees {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.attendee {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 16px;
+  min-height: 56px;
+  padding: 10px 16px;
+}
+
+.who {
+  display: grid;
+  min-width: 0;
+
+  strong,
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    color: var(--mat-sys-on-surface-variant);
+    font: var(--mat-sys-body-small);
+  }
+}
+
+.category,
+.booked {
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+}
+
+// Phones: the person on top, the rest flows underneath.
+@media (width < 720px) {
+  .attendee {
+    grid-template-columns: 1fr auto;
+
+    .who {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .filters .export {
+    margin-left: 0;
+  }
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.count,
+.empty {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.empty {
+  padding: 20px;
+}

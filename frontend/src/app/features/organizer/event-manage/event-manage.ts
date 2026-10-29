@@ -19,7 +19,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { Api } from '../../../core/api/api';
 import {
@@ -42,9 +42,11 @@ import { errorText } from '../../../shared/api-errors';
 import { CapitalizePipe } from '../../../shared/capitalize.pipe';
 import { eventStatusLabel } from '../../../shared/events';
 import { initials, ROLE_LABELS } from '../../../shared/roles';
+import { EventAttendees } from '../event-attendees/event-attendees';
 import { EventForm, EventFormValue } from '../event-form/event-form';
+import { EventStats } from '../event-stats/event-stats';
 
-const TABS = ['datos', 'entradas', 'staff'];
+const TABS = ['datos', 'entradas', 'staff', 'asistentes', 'stats'];
 const STAFF_TAB = 2;
 
 interface Notice {
@@ -52,7 +54,7 @@ interface Notice {
   text: string;
 }
 
-/** Manage one event: its data, ticket categories and staff, and publish or cancel it. */
+/** Manage one event: data, categories, staff, attendees and stats; publish or cancel it. */
 @Component({
   selector: 'app-event-manage',
   imports: [
@@ -67,7 +69,9 @@ interface Notice {
     MatProgressSpinnerModule,
     MatSelectModule,
     MatTabsModule,
+    EventAttendees,
     EventForm,
+    EventStats,
   ],
   templateUrl: './event-manage.html',
   styleUrl: './event-manage.scss',
@@ -75,8 +79,10 @@ interface Notice {
 export class EventManage {
   private readonly api = inject(Api);
   private readonly fb = inject(NonNullableFormBuilder);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-  /** Route parameters: `:org`, `:id` and `?tab=` (datos | entradas | staff). */
+  /** Route parameters: `:org`, `:id` and `?tab=` (datos | entradas | staff | asistentes | stats). */
   readonly org = input.required<string>();
   readonly id = input.required({ transform: numberAttribute });
   readonly tab = input<string>();
@@ -148,6 +154,17 @@ export class EventManage {
         Validators.max(this.remaining()),
       ]);
       capacity.updateValueAndValidity({ emitEvent: false });
+    });
+  }
+
+  /** The open tab goes into the URL, so a reload or a shared link opens the same one. */
+  protected selectTab(index: number): void {
+    this.selectedTab.set(index);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: index ? TABS[index] : null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 

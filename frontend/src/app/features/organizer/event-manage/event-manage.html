@@ -81,7 +81,7 @@
     class="tabs"
     mat-stretch-tabs="false"
     [selectedIndex]="selectedTab()"
-    (selectedIndexChange)="selectedTab.set($event)"
+    (selectedIndexChange)="selectTab($event)"
   >
     <!-- Datos -->
     <mat-tab label="Datos">
@@ -346,6 +346,25 @@
           }
         }
       </section>
+    </mat-tab>
+
+    <!-- Asistentes and Stats load only when opened. -->
+    <mat-tab label="Asistentes">
+      <ng-template matTabContent>
+        <app-event-attendees
+          [org]="org()"
+          [eventId]="id()"
+          [eventSlug]="e.slug"
+          [cancellable]="e.status === 'PUBLISHED' && !e.is_finished"
+          (changed)="event.reload()"
+        />
+      </ng-template>
+    </mat-tab>
+
+    <mat-tab label="Stats">
+      <ng-template matTabContent>
+        <app-event-stats [org]="org()" [eventId]="id()" />
+      </ng-template>
     </mat-tab>
   </mat-tab-group>
 }
