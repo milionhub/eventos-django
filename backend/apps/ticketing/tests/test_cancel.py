@@ -48,6 +48,17 @@ def test_cancelling_frees_the_seat_and_cancels_the_ticket():
     assert_counters_match_reservations()
 
 
+def test_the_service_refuses_an_attendee_cancelling_someone_elses_reservation():
+    """The API already answers 404 (it only looks among the caller's own); this is the backstop."""
+    reservation = booked()
+
+    with pytest.raises(ValueError, match="own reservations"):
+        cancel_reservation(reservation=reservation, cancelled_by=UserFactory())
+
+    reservation.refresh_from_db()
+    assert reservation.status == Reservation.Status.CONFIRMED
+
+
 def test_the_attendee_can_book_again_after_cancelling():
     reservation = booked()
     cancel_reservation(reservation=reservation, cancelled_by=reservation.user)

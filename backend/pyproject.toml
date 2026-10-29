@@ -18,6 +18,7 @@ dev = [
     "factory-boy>=3.3.3",
     "pre-commit>=4.7.0",
     "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
     "pytest-django>=4.14.0",
     "ruff>=0.17.3",
 ]
@@ -39,3 +40,23 @@ ignore = ["RUF012"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["apps", "config"]
+
+[tool.coverage.run]
+source = ["apps", "config"]
+branch = true
+# dev/prod settings never load under tests; prod.py is checked by `check --deploy` in CI.
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+    "config/asgi.py",
+    "config/wsgi.py",
+    "config/settings/dev.py",
+    "config/settings/prod.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+# A point below the measured figure: a few branches only run when the concurrency tests'
+# threads happen to collide, so the total moves a little from run to run.
+fail_under = 98

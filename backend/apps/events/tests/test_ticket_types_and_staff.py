@@ -30,6 +30,19 @@ Role = Membership.Role
 # --- ticket types: RN-13 (sum of quotas ≤ event capacity) ----------------------------------
 
 
+def test_renaming_a_category_keeps_its_capacity_checks_out_of_the_way():
+    ticket_type = TicketTypeFactory(name="General", capacity=50)
+
+    update_ticket_type(ticket_type=ticket_type, name="Pista", description="De pie")
+
+    ticket_type.refresh_from_db()
+    assert (ticket_type.name, ticket_type.description, ticket_type.capacity) == (
+        "Pista",
+        "De pie",
+        50,
+    )
+
+
 def test_categories_fit_exactly_into_the_capacity():
     event = EventFactory(capacity=100)
 

@@ -56,6 +56,15 @@ def test_update_keeps_the_slug():
     assert (organization.name, organization.slug) == ("Apolo Club", "sala-apolo")
 
 
+def test_update_only_what_is_sent():
+    organization = create_organization(user=UserFactory(), name="Sala Apolo")
+
+    update_organization(organization=organization, description="Conciertos desde 1904")
+
+    organization.refresh_from_db()
+    assert (organization.name, organization.description) == ("Sala Apolo", "Conciertos desde 1904")
+
+
 # --- members ------------------------------------------------------------------
 
 

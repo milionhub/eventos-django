@@ -93,6 +93,20 @@ def test_publish_blockers_explain_what_is_missing():
     ]
 
 
+def test_publish_blockers_catch_an_end_before_the_start():
+    """The database refuses to store it (CHECK event_ends_after_start): checked in memory."""
+    event = TicketTypeFactory(event=EventFactory(start_at=in_days(2))).event
+    event.end_at = in_days(1)
+
+    assert publish_blockers(event) == ["La fecha de fin debe ser posterior a la de inicio."]
+
+
+def test_update_rejects_fields_that_are_not_editable():
+    """A programming error, not user input: the serializer never sends these."""
+    with pytest.raises(ValueError, match="slug"):
+        update_event(event=EventFactory(), slug="otro")
+
+
 def test_cannot_publish_without_ticket_types():
     with pytest.raises(EventNotPublishable, match="categoría de entrada"):
         publish_event(event=EventFactory())

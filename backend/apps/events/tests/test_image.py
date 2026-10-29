@@ -57,6 +57,20 @@ def test_uploads_are_re_encoded_as_webp_and_resized():
     assert "cartel" not in event.image.name  # the client's file name is never used
 
 
+def test_small_images_are_not_enlarged():
+    event = set_event_image(event=EventFactory(), upload=image_file(size=(800, 450)))
+
+    assert stored(event).size == (800, 450)
+
+
+def test_removing_when_there_is_no_image_is_harmless(django_capture_on_commit_callbacks):
+    with django_capture_on_commit_callbacks(execute=True) as callbacks:
+        event = remove_event_image(event=EventFactory())
+
+    assert not event.image
+    assert callbacks == []  # nothing to delete from storage
+
+
 def test_exif_metadata_is_dropped():
     exif = Image.Exif()
     exif[0x010F] = "Móvil de alguien"  # camera make; GPS would be stripped just the same
@@ -134,6 +148,20 @@ def test_upload_permissions(role, expected):
     assert response.status_code == expected
     if expected == 200:
         assert response.json()["image_url"].startswith("/media/events/")
+
+
+def test_the_image_can_be_removed_over_http(media_root, django_capture_on_commit_callbacks):
+    event = set_event_image(event=EventFactory(), upload=image_file())
+    path = media_root / event.image.name
+    user = MembershipFactory(organization=event.organization, role=Role.MANAGER).user
+    url = reverse("event-image", kwargs={"org_slug": event.organization.slug, "event_id": event.pk})
+
+    with django_capture_on_commit_callbacks(execute=True):
+        response = client_for(user).delete(url)
+
+    assert response.status_code == 200
+    assert response.json()["image_url"] == ""  # ADR-0008: "" when there is none
+    assert not path.exists()
 
 
 def test_the_image_shows_up_in_the_public_api():

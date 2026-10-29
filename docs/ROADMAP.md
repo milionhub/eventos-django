@@ -197,7 +197,7 @@ Decisión 2026-10-29: la prueba en móvil real se hace **solo con iPhone** por a
 
 - [ ] E2E con Playwright del recorrido completo (en CI)
 - [x] Revisión de seguridad (permisos, IDs enumerables, throttling, cabeceras, `DEBUG`, secretos): [`security.md`](security.md)
-- [ ] Revisión de cobertura de los servicios críticos
+- [x] Revisión de cobertura de los servicios críticos
 - [x] Auditoría de dependencias (`pip-audit`, `npm audit`)
 - [ ] Accesibilidad básica (contraste, etiquetas, foco)
 
@@ -209,12 +209,17 @@ Decisión 2026-10-29: la prueba en móvil real se hace **solo con iPhone** por a
 |---|---|---|
 | 1 | Auditoría de dependencias: `pip-audit` (vía `uvx`) y `npm audit`, corregir hallazgos y paso en la CI | ✅ |
 | 2 | Revisión de seguridad (backend): test de 404 entre organizaciones en todos los endpoints, IDs enumerables, throttling de registro y refresh, `check --deploy` en la CI, cabeceras (HSTS, Referrer-Policy, CSP) y `docs/security.md` | ✅ |
-| 3 | Cobertura de los servicios críticos: `pytest-cov`, cubrir huecos en `services.py` y `selectors.py`, umbral en la CI | |
+| 3 | Cobertura de los servicios críticos: `pytest-cov`, cubrir huecos en `services.py` y `selectors.py`, umbral en la CI | ✅ |
 | 4 | E2E con Playwright: los 5 recorridos con clics reales, en escritorio y en móvil emulado, en la CI con PostgreSQL | |
 | 5 | Accesibilidad básica: `@axe-core/playwright`, contraste en los dos temas, etiquetas, foco y teclado, avisos del escáner para lectores de pantalla | |
 | 6 | Cierre: recorridos en Android (emulador), README (seguridad) y ROADMAP | |
 
-Decisión 2026-10-29: Android se prueba al final de la fase, con un emulador. Dependencias nuevas previstas, todas de desarrollo y gratuitas: `pytest-cov`, `@playwright/test` y `@axe-core/playwright`. Bloque 1 (2026-10-29): `pip-audit` (40 paquetes de `uv.lock`, los de desarrollo incluidos) y `npm audit` (564 paquetes) sin hallazgos; la CI las ejecuta en cada cambio y cada lunes. `pip-audit` falla con cualquier aviso; `npm audit` solo con altos y críticos, porque los bajos del ecosistema npm suelen estar en herramientas de build sin arreglo publicado. Bloque 2 (2026-10-29): CSP con un middleware propio solo para `/api/v1/` (sin `django-csp`). Hallazgo principal: el throttling se saltaba con `X-Forwarded-For`; arreglado con `NUM_PROXIES`. Detalle en [`security.md`](security.md).
+Decisión 2026-10-29: Android se prueba al final de la fase, con un emulador. Dependencias nuevas previstas, todas de desarrollo y gratuitas: `pytest-cov`, `@playwright/test` y `@axe-core/playwright`. Bloque 1 (2026-10-29): `pip-audit` (40 paquetes de `uv.lock`, los de desarrollo incluidos) y `npm audit` (564 paquetes) sin hallazgos; la CI las ejecuta en cada cambio y cada lunes. `pip-audit` falla con cualquier aviso; `npm audit` solo con altos y críticos, porque los bajos del ecosistema npm suelen estar en herramientas de build sin arreglo publicado. Bloque 2 (2026-10-29): CSP con un middleware propio solo para `/api/v1/` (sin `django-csp`). Hallazgo principal: el throttling se saltaba con `X-Forwarded-For`; arreglado con `NUM_PROXIES`. Detalle en [`security.md`](security.md). Bloque 3 (2026-10-29): cobertura por ramas del 99,2 % (ya partía del 98 %; ahora no cuenta `dev.py` ni `prod.py`, que no se cargan en los tests). Todos los `services.py` y `selectors.py` al 100 %, salvo una rama de carrera en `reserve()` que solo cubren los tests de concurrencia cuando los hilos coinciden. Lo que queda sin cubrir son `__str__` de modelos y acciones del admin. Huecos cerrados:
+- dos registros simultáneos con el mismo email (test de concurrencia nuevo, contra PostgreSQL);
+- `DELETE …/image/`, que no tenía ningún test;
+- otros 6 casos límite de los servicios.
+
+La CI falla por debajo del 98 %.
 
 ---
 
@@ -262,4 +267,4 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 ## Estado actual
 
 **Fase activa:** 6 — Endurecimiento (Fase 5 cerrada el 2026-10-29: los 5 recorridos funcionan en escritorio y en iPhone, con dashboard, stats, asistentes, CSV seguro y app instalable; Android pendiente).
-**Siguiente paso:** bloque 3 de la Fase 6, cobertura de los servicios críticos.
+**Siguiente paso:** bloque 4 de la Fase 6, E2E con Playwright.
