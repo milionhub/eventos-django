@@ -101,6 +101,11 @@ cd frontend && npm run api:generate   # actualiza backend/schema.yml y src/app/c
 ```
 La CI falla si alguno de los dos queda desactualizado.
 
+### Probar el escáner en un móvil
+La cámara del móvil solo funciona con HTTPS, así que se expone el servidor de desarrollo con un túnel gratuito de [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/). Paso a paso en la [guía para el móvil](docs/guia-movil.md).
+
+> ⚠️ Mientras el túnel está abierto, la aplicación (con `DEBUG` activado) es accesible desde internet. Ciérralo al terminar.
+
 ## Documentación
 - [Requisitos y reglas de negocio](docs/requirements.md)
 - [Modelo de datos](docs/data-model.md)
@@ -108,3 +113,4 @@ La CI falla si alguno de los dos queda desactualizado.
 - [Wireframes](docs/wireframes.md)
 - [Identidad visual](docs/design.md)
 - [Decisiones de arquitectura (ADR)](docs/adr/README.md)
+- [Guía: probar el escáner en un móvil](docs/guia-movil.md)
