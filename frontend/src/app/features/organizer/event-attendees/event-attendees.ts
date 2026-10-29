@@ -149,6 +149,8 @@ export class EventAttendees {
     try {
       const csv = await this.api.invoke(attendeesExport, {
         ...this.query(),
+        // What the box says now: the debounced value lags 300 ms behind the typing.
+        q: this.filters.controls.q.value.trim() || undefined,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
       const url = URL.createObjectURL(csv);

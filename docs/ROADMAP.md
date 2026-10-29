@@ -195,7 +195,7 @@ Decisión 2026-10-29: la prueba en móvil real se hace **solo con iPhone** por a
 
 ## FASE 6 — Endurecimiento · 10–15 h
 
-- [ ] E2E con Playwright del recorrido completo (en CI)
+- [x] E2E con Playwright del recorrido completo (en CI)
 - [x] Revisión de seguridad (permisos, IDs enumerables, throttling, cabeceras, `DEBUG`, secretos): [`security.md`](security.md)
 - [x] Revisión de cobertura de los servicios críticos
 - [x] Auditoría de dependencias (`pip-audit`, `npm audit`)
@@ -210,7 +210,7 @@ Decisión 2026-10-29: la prueba en móvil real se hace **solo con iPhone** por a
 | 1 | Auditoría de dependencias: `pip-audit` (vía `uvx`) y `npm audit`, corregir hallazgos y paso en la CI | ✅ |
 | 2 | Revisión de seguridad (backend): test de 404 entre organizaciones en todos los endpoints, IDs enumerables, throttling de registro y refresh, `check --deploy` en la CI, cabeceras (HSTS, Referrer-Policy, CSP) y `docs/security.md` | ✅ |
 | 3 | Cobertura de los servicios críticos: `pytest-cov`, cubrir huecos en `services.py` y `selectors.py`, umbral en la CI | ✅ |
-| 4 | E2E con Playwright: los 5 recorridos con clics reales, en escritorio y en móvil emulado, en la CI con PostgreSQL | |
+| 4 | E2E con Playwright: los 5 recorridos con clics reales, en escritorio y en móvil emulado, en la CI con PostgreSQL | ✅ |
 | 5 | Accesibilidad básica: `@axe-core/playwright`, contraste en los dos temas, etiquetas, foco y teclado, avisos del escáner para lectores de pantalla | |
 | 6 | Cierre: recorridos en Android (emulador), README (seguridad) y ROADMAP | |
 
@@ -219,7 +219,9 @@ Decisión 2026-10-29: Android se prueba al final de la fase, con un emulador. De
 - `DELETE …/image/`, que no tenía ningún test;
 - otros 6 casos límite de los servicios.
 
-La CI falla por debajo del 98 %.
+La CI falla por debajo del 98 %. Bloque 4 (2026-10-29): los 5 recorridos con Playwright, en escritorio (1280 px) y en móvil (Pixel 7), con su propio Django y su propia base de datos. 10 tests, estables en 3 pasadas seguidas. El paso que se prueba siempre se hace con la interfaz; los datos previos que necesita, por la API. Encontraron:
+- un fallo real: el CSV se exportaba con el filtro de búsqueda anterior si se pulsaba «Exportar» antes de 300 ms. Corregido, con un test unitario;
+- los textos del calendario de Material están en inglés («Open calendar»), pendiente para el bloque 5.
 
 ---
 
@@ -267,4 +269,4 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 ## Estado actual
 
 **Fase activa:** 6 — Endurecimiento (Fase 5 cerrada el 2026-10-29: los 5 recorridos funcionan en escritorio y en iPhone, con dashboard, stats, asistentes, CSV seguro y app instalable; Android pendiente).
-**Siguiente paso:** bloque 4 de la Fase 6, E2E con Playwright.
+**Siguiente paso:** bloque 5 de la Fase 6, accesibilidad básica.

@@ -144,6 +144,7 @@ Angular redirige `/api` a Django mediante un proxy, así que basta con abrir `ht
 |---|---|---|
 | Tests | `uv run pytest` | `npm test` |
 | Cobertura | `uv run pytest --cov` (mínimo 98 %; la CI falla por debajo) | — |
+| De extremo a extremo | — | `npm run e2e` (Playwright: los 5 recorridos en escritorio y en móvil) |
 | Lint | `uv run ruff check .` | `npm run lint` |
 | Formato | `uv run ruff format .` | `npm run format` |
 | Vulnerabilidades | `uv export --frozen --no-emit-project > req.txt && uvx pip-audit -r req.txt --disable-pip` | `npm audit --audit-level=high` |
@@ -151,6 +152,18 @@ Angular redirige `/api` a Django mediante un proxy, así que basta con abrir `ht
 Los tests del backend usan PostgreSQL (nunca SQLite), así que el contenedor `db` debe estar arrancado.
 
 La CI ejecuta las dos auditorías en cada cambio y, además, todos los lunes, para enterarse de las vulnerabilidades nuevas aunque no se toque el código.
+
+### Tests de extremo a extremo
+`npm run e2e` (en `frontend/`) recorre los 5 recorridos de [`requirements.md`](docs/requirements.md) §2 con clics reales en Chromium, a 1280 px y en un Pixel 7 emulado:
+1. el organizador crea y publica un evento;
+2. el asistente reserva una entrada;
+3. el asistente cancela su reserva;
+4. el personal de acceso valida entradas;
+5. el organizador consulta los resultados y exporta el CSV.
+
+Los tests arrancan su propio Django en el puerto 8001, con una base de datos `eventos_e2e` que se vacía en cada ejecución, y el build de producción en el 4300. Así no tocan el entorno de desarrollo, que puede seguir abierto mientras corren. Lo único que necesitan es el contenedor `db` arrancado. La primera vez hay que descargar el navegador: `npx playwright install chromium`.
+
+En la CI se ejecutan en un workflow propio (`e2e`). Si algo falla, el informe con la traza de cada test se guarda como artefacto (`npx playwright show-trace`).
 
 ### Cliente de la API
 El cliente Angular se genera a partir del esquema OpenAPI de Django ([ADR-0007](docs/adr/0007-cliente-api-generado.md)). Tras cambiar la API:

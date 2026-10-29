@@ -156,4 +156,25 @@ describe('EventAttendees', () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:csv');
     click.mockRestore();
   });
+
+  it('exports what the search box says, even before the list catches up', async () => {
+    await render();
+    const input = element().querySelector<HTMLInputElement>('input[formcontrolname="q"]')!;
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+    URL.createObjectURL = vi.fn(() => 'blob:csv');
+    URL.revokeObjectURL = vi.fn();
+
+    input.value = ' bruno ';
+    input.dispatchEvent(new Event('input'));
+    element().querySelector<HTMLButtonElement>('.export')!.click(); // no pause after typing
+    await settle();
+
+    const request = http.expectOne((r) => r.url === `${BASE}attendees.csv`);
+    expect(request.request.params.get('q')).toBe('bruno');
+    request.flush(new Blob(['csv']));
+    await settle();
+    click.mockRestore();
+  });
 });
