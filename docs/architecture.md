@@ -112,9 +112,9 @@ Prefijo `/api/v1/`. Paginación por página (`?page=`, tamaño 20). Solo JSON: e
 | POST | `…/events/{id}/publish/`, `…/events/{id}/cancel/` |
 | GET, POST, PATCH, DELETE | `…/events/{id}/ticket-types/[{id}/]` |
 | GET, POST, DELETE | `…/events/{id}/staff/[{id}/]` |
-| GET | `…/events/{id}/reservations/` (asistentes; filtros y búsqueda) |
+| GET | `…/events/{id}/reservations/` (asistentes; `?q=` por nombre o email, `?status=` del estado de la entrada) |
 | POST | `…/events/{id}/reservations/{uuid}/cancel/` |
-| GET | `…/events/{id}/attendees.csv` |
+| GET | `…/events/{id}/attendees.csv` (mismos filtros que el listado + `?tz=Europe/Madrid`; separador `;` y BOM UTF-8 para Excel; celdas que empiezan por `= + - @` escapadas) |
 | GET | `…/events/{id}/stats/` |
 | GET | `organizations/{org}/stats/` |
 

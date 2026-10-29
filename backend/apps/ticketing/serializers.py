@@ -2,6 +2,7 @@ from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from apps.accounts.models import User
 from apps.events.models import Event, TicketType
 from apps.events.serializers import ImageUrlField
 from apps.ticketing import services
@@ -117,3 +118,33 @@ class MyTicketDetailSerializer(MyTicketSerializer):
             and ticket.status == Ticket.Status.VALID
             and timezone.now() <= services.cancellation_deadline(ticket.reservation.event)
         )
+
+
+# --- Organizer side: attendees ------------------------------------------------------------------
+
+
+class AttendeeUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "first_name", "last_name", "email"]
+        read_only_fields = fields
+
+
+class AttendeeTicketSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ["id", "status", "checked_in_at"]
+        read_only_fields = fields
+
+
+class AttendeeSerializer(serializers.ModelSerializer):
+    """One reservation of the event, as the organizer sees it (no token: it is the pass)."""
+
+    user = AttendeeUserSerializer(read_only=True)
+    ticket_type = ReservationTicketTypeSerializer(read_only=True)
+    ticket = AttendeeTicketSerializer(read_only=True)
+
+    class Meta:
+        model = Reservation
+        fields = ["id", "status", "created_at", "cancelled_at", "user", "ticket_type", "ticket"]
+        read_only_fields = fields

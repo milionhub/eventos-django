@@ -2,6 +2,7 @@ from django.urls import include, path
 
 from apps.checkin.urls import organizer_urlpatterns as checkin_organizer
 from apps.organizations import views
+from apps.ticketing.urls import attendee_urlpatterns as attendees
 
 urlpatterns = [
     path("", views.OrganizationListView.as_view(), name="organizations"),
@@ -13,5 +14,6 @@ urlpatterns = [
         name="member",
     ),
     path("<slug:org_slug>/events/", include("apps.events.urls")),
+    path("<slug:org_slug>/events/<int:event_id>/", include(attendees)),
     path("<slug:org_slug>/", include(checkin_organizer)),
 ]

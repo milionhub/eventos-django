@@ -17,3 +17,15 @@ class SVGRenderer(BaseRenderer):
         if isinstance(data, bytes):
             return data
         return json.dumps(data).encode()
+
+
+class CSVRenderer(BaseRenderer):
+    """Lets a view answer `Accept: text/csv`. The view streams the CSV itself; this only
+    renders errors (404...), as JSON."""
+
+    media_type = "text/csv"
+    format = "csv"
+    charset = "utf-8"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None) -> bytes:
+        return json.dumps(data).encode()

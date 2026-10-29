@@ -501,6 +501,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: ''
+  /api/v1/organizations/{org_slug}/events/{event_id}/attendees.csv:
+    get:
+      operationId: attendees_export
+      description: 'Adds `get_event()`: the event from the URL, only within what the
+        caller may see.'
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Busca en nombre, apellidos y email.
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - CANCELLED
+          - USED
+          - VALID
+      - in: query
+        name: tz
+        schema:
+          type: string
+        description: Zona horaria IANA, p. ej. Europe/Madrid.
+      tags:
+      - attendees
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /api/v1/organizations/{org_slug}/events/{event_id}/cancel/:
     post:
       operationId: events_cancel
@@ -637,6 +683,97 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EventDetail'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/v1/organizations/{org_slug}/events/{event_id}/reservations/:
+    get:
+      operationId: attendees_list
+      description: 'Adds `get_event()`: the event from the URL, only within what the
+        caller may see.'
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: Un número de página dentro del conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Busca en nombre, apellidos y email.
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - CANCELLED
+          - USED
+          - VALID
+      tags:
+      - attendees
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAttendeeList'
+          description: ''
+  /api/v1/organizations/{org_slug}/events/{event_id}/reservations/{reservation_id}/cancel/:
+    post:
+      operationId: attendees_cancel
+      description: An organizer cancels someone's reservation until the event ends
+        (RN-21).
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: org_slug
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: reservation_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - attendees
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attendee'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
           description: ''
         '409':
           content:
@@ -1246,6 +1383,91 @@ components:
           description: Id de un usuario miembro de la organización.
       required:
       - user
+    Attendee:
+      type: object
+      description: 'One reservation of the event, as the organizer sees it (no token:
+        it is the pass).'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReservationStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/AttendeeUser'
+          readOnly: true
+        ticket_type:
+          allOf:
+          - $ref: '#/components/schemas/ReservationTicketType'
+          readOnly: true
+        ticket:
+          allOf:
+          - $ref: '#/components/schemas/AttendeeTicket'
+          readOnly: true
+      required:
+      - cancelled_at
+      - created_at
+      - id
+      - status
+      - ticket
+      - ticket_type
+      - user
+    AttendeeTicket:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TicketStatusEnum'
+          readOnly: true
+        checked_in_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - checked_in_at
+      - id
+      - status
+    AttendeeUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        first_name:
+          type: string
+          readOnly: true
+          title: Nombre
+        last_name:
+          type: string
+          readOnly: true
+          title: Apellidos
+        email:
+          type: string
+          format: email
+          readOnly: true
+      required:
+      - email
+      - first_name
+      - id
+      - last_name
     AuthSession:
       type: object
       description: 'Response of login and refresh: the access token plus who it belongs
@@ -1933,6 +2155,29 @@ components:
       - reserved
       - seats
       - upcoming
+    PaginatedAttendeeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attendee'
     PaginatedEventList:
       type: object
       required:

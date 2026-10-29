@@ -71,6 +71,12 @@ export type { TicketTypesDestroy$Params as TicketTypesDestroy$Params } from './f
 export { ticketTypesDestroy as ticketTypesDestroy } from './fn/events/ticket-types-destroy';
 export type { TicketTypesUpdate$Params as TicketTypesUpdate$Params } from './fn/events/ticket-types-update';
 export { ticketTypesUpdate as ticketTypesUpdate } from './fn/events/ticket-types-update';
+export type { AttendeesExport$Params as AttendeesExport$Params } from './fn/attendees/attendees-export';
+export { attendeesExport as attendeesExport } from './fn/attendees/attendees-export';
+export type { AttendeesList$Params as AttendeesList$Params } from './fn/attendees/attendees-list';
+export { attendeesList as attendeesList } from './fn/attendees/attendees-list';
+export type { AttendeesCancel$Params as AttendeesCancel$Params } from './fn/attendees/attendees-cancel';
+export { attendeesCancel as attendeesCancel } from './fn/attendees/attendees-cancel';
 export type { EventStats$Params as EventStats$Params } from './fn/stats/event-stats';
 export { eventStats as eventStats } from './fn/stats/event-stats';
 export type { OrganizationStats$Params as OrganizationStats$Params } from './fn/stats/organization-stats';

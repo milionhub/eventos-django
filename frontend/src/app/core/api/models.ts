@@ -3,6 +3,9 @@
 
 export type { AddMemberRequest } from './models/add-member-request';
 export type { AssignStaffRequest } from './models/assign-staff-request';
+export type { Attendee } from './models/attendee';
+export type { AttendeeTicket } from './models/attendee-ticket';
+export type { AttendeeUser } from './models/attendee-user';
 export type { AuthSession } from './models/auth-session';
 export type { CheckinActivity } from './models/checkin-activity';
 export type { CheckinEvent } from './models/checkin-event';
@@ -28,6 +31,7 @@ export type { MyTicketReservation } from './models/my-ticket-reservation';
 export type { Organization } from './models/organization';
 export type { OrganizationRequest } from './models/organization-request';
 export type { OrganizationStats } from './models/organization-stats';
+export type { PaginatedAttendeeList } from './models/paginated-attendee-list';
 export type { PaginatedEventList } from './models/paginated-event-list';
 export type { PaginatedPublicEventList } from './models/paginated-public-event-list';
 export type { PatchedChangeRoleRequest } from './models/patched-change-role-request';

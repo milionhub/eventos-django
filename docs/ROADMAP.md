@@ -177,7 +177,7 @@
 | # | Bloque | Estado |
 |---|---|---|
 | 1 | Stats (backend): por evento (ocupación por categoría, intentos de acceso) y por organización (indicadores y próximos eventos), sin N+1 | ✅ |
-| 2 | Asistentes y CSV (backend): listado con búsqueda y filtro, cancelación por el organizador, CSV protegido frente a inyección de fórmulas | |
+| 2 | Asistentes y CSV (backend): listado con búsqueda y filtro, cancelación por el organizador, CSV protegido frente a inyección de fórmulas | ✅ |
 | 3 | Dashboard y stats (frontend): indicadores de la organización y pestaña de stats del evento, barras en CSS | |
 | 4 | Asistentes (frontend): pestaña con búsqueda, filtro, cancelación y descarga del CSV con el token | |
 | 5 | Responsive (360 px) y PWA instalable (`@angular/service-worker`, solo recursos estáticos) | |
@@ -242,4 +242,4 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 ## Estado actual
 
 **Fase activa:** 5 — Dashboard, asistentes y móvil (Fase 4 cerrada el 2026-10-29: una entrada se valida desde un móvil real y no se puede usar dos veces, también con escaneos simultáneos).
-**Siguiente paso:** bloque 1 de la Fase 5, stats en el backend.
+**Siguiente paso:** bloque 3 de la Fase 5, dashboard y stats en el frontend.
