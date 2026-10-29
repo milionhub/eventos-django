@@ -145,8 +145,11 @@ Angular redirige `/api` a Django mediante un proxy, así que basta con abrir `ht
 | Tests | `uv run pytest` | `npm test` |
 | Lint | `uv run ruff check .` | `npm run lint` |
 | Formato | `uv run ruff format .` | `npm run format` |
+| Vulnerabilidades | `uv export --frozen --no-emit-project > req.txt && uvx pip-audit -r req.txt --disable-pip` | `npm audit --audit-level=high` |
 
 Los tests del backend usan PostgreSQL (nunca SQLite), así que el contenedor `db` debe estar arrancado.
+
+La CI ejecuta las dos auditorías en cada cambio y, además, todos los lunes, para enterarse de las vulnerabilidades nuevas aunque no se toque el código.
 
 ### Cliente de la API
 El cliente Angular se genera a partir del esquema OpenAPI de Django ([ADR-0007](docs/adr/0007-cliente-api-generado.md)). Tras cambiar la API:
