@@ -7,7 +7,7 @@ Plataforma de gestión de eventos y entradas digitales con QR: los organizadores
 
 **Stack:** Angular · Django REST Framework · PostgreSQL · Docker
 
-> 🚧 En desarrollo — Fases 1 a 4 completadas (auth, organizaciones, eventos, reservas, entradas con QR y validación en la puerta con la cámara del móvil). Consulta [`docs/ROADMAP.md`](docs/ROADMAP.md).
+> 🚧 En desarrollo — Fases 1 a 5 completadas (auth, organizaciones, eventos, reservas, entradas con QR, validación en la puerta con la cámara del móvil, dashboard con estadísticas, gestión de asistentes con exportación CSV y app instalable). Consulta [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Destacado: reservas sin sobreventa
 
@@ -85,6 +85,29 @@ cd backend && uv run pytest apps/checkin/tests/test_concurrency.py -v
 | 10 escaneos simultáneos de la misma entrada | 1 «Válida», 9 «Ya utilizada» y los 10 intentos registrados |
 
 Los otros cinco resultados posibles (entrada no válida, de otro evento, cancelada, fuera de horario y sin permiso) tienen sus propios tests en `test_scan.py` y `test_api.py`. Para probarlo con un móvil de verdad, ver la [guía para el móvil](docs/guia-movil.md).
+
+## Destacado: cifras que cuadran y un CSV que no se puede usar contra ti
+
+### Estadísticas sin cifras infladas
+El dashboard muestra, por evento, las plazas (suma de los cupos de las categorías), las reservas y los accesos. Lo natural en Django es anotarlo todo en la misma consulta:
+```python
+Event.objects.annotate(
+    seats=Sum("ticket_types__capacity"),
+    checked_in=Count("reservations__ticket", filter=Q(reservations__ticket__status="USED")),
+)
+```
+Pero son **dos relaciones uno-a-muchos en el mismo `JOIN`**: cada cupo se suma una vez por cada entrada y cada entrada se cuenta una vez por cada categoría. Con 2 categorías (15 plazas) y 4 reservas, 3 de ellas dentro, salía **60 plazas, 16 reservas y 6 dentro** en vez de 15, 4 y 3. Ningún error, solo números falsos.
+
+La solución es calcular cada cifra en su propia **subconsulta correlacionada** (`Subquery` + `OuterRef`, en [`checkin/selectors.py`](backend/apps/checkin/selectors.py)): cada una agrupa solo su relación, y el número de consultas no crece con el número de eventos (un test comprueba que son las mismas con 1 evento que con 5).
+
+### Exportación CSV protegida frente a inyección de fórmulas
+El CSV de asistentes lleva datos que escribe cualquiera al registrarse, y el organizador lo abre en Excel. Un nombre como `=HYPERLINK("https://example.com";"Clic")` se convertiría en un enlace (o en algo peor). Por eso toda celda que empieza por `= + - @`, tabulador o retorno de carro se escribe con un apóstrofo delante, que Excel interpreta como «esto es texto» ([`ticketing/exports.py`](backend/apps/ticketing/exports.py), recomendación de OWASP). Además:
+- separador `;` y BOM UTF-8, para que Excel en español lo abra bien a la primera;
+- las horas, en la zona horaria del organizador (`?tz=Europe/Madrid`);
+- se genera **en streaming**, sin cargar a todos los asistentes en memoria, y con `Cache-Control: no-store`.
+
+### App instalable, pero nunca con datos viejos
+La web se puede instalar en el móvil como una app (PWA con `@angular/service-worker`). El service worker guarda **solo los archivos de la aplicación**: la API y las imágenes subidas van siempre a la red. Sin conexión, la app abre, pero no enseña aforos ni entradas que podrían estar desactualizados. Cómo instalarla, en la [guía para el móvil](docs/guia-movil.md#extra--instalar-la-app-en-el-móvil-pwa).
 
 ## Cómo ejecutarlo
 

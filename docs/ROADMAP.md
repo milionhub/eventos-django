@@ -168,7 +168,8 @@
 - [x] Listado de asistentes con búsqueda y filtro + cancelación por el organizador
 - [x] Exportación CSV
 - [x] Repaso responsive completo (360 px), PWA instalable
-- [ ] Recorridos completos probados en iPhone y Android
+- [x] Recorridos completos probados en escritorio y en iPhone
+- [ ] Recorridos en Android (pendiente, ver la decisión de abajo)
 
 **Cierre:** los 5 recorridos (`requirements.md` §2) funcionan en escritorio y en móvil.
 
@@ -178,12 +179,17 @@
 |---|---|---|
 | 1 | Stats (backend): por evento (ocupación por categoría, intentos de acceso) y por organización (indicadores y próximos eventos), sin N+1 | ✅ |
 | 2 | Asistentes y CSV (backend): listado con búsqueda y filtro, cancelación por el organizador, CSV protegido frente a inyección de fórmulas | ✅ |
-| 3 | Dashboard y stats (frontend): indicadores de la organización y pestaña de stats del evento, barras en CSS |✅ |
-| 4 | Asistentes (frontend): pestaña con búsqueda, filtro, cancelación y descarga del CSV con el token |✅ |
-| 5 | Responsive (360 px) y PWA instalable (`@angular/service-worker`, solo recursos estáticos) |✅ |
-| 6 | Cierre: los 5 recorridos en escritorio y en móvil, README y ROADMAP | |
+| 3 | Dashboard y stats (frontend): indicadores de la organización y pestaña de stats del evento, barras en CSS | ✅ |
+| 4 | Asistentes (frontend): pestaña con búsqueda, filtro, cancelación y descarga del CSV con el token | ✅ |
+| 5 | Responsive (360 px) y PWA instalable (`@angular/service-worker`, solo recursos estáticos) | ✅ |
+| 6 | Cierre: los 5 recorridos en escritorio y en móvil, README y ROADMAP | ✅ |
 
 Decisión 2026-10-29: la prueba en móvil real se hace **solo con iPhone** por ahora; Android queda pendiente.
+
+**Cómo se cerró (2026-10-29):**
+- **iPhone, a mano:** la [guía de pruebas de la Fase 5](guia-pruebas-fase5.md), con la app instalada como PWA, el escáner con la cámara, el dashboard, las stats, los asistentes, el CSV en Excel y el modo avión. Antes, la [guía para el móvil](guia-movil.md) de la Fase 4.
+- **Recorrido automático R1 → R5,** con el build de producción y una base de datos temporal que se borró al terminar. Las acciones van por la API, igual que las hace la interfaz. Cada pantalla de cada paso se comprueba a 1280 px y a 390 px: que tenga el contenido esperado y que no desborde. 12 pantallas a los dos anchos (24 comprobaciones) más las comprobaciones de la API: escaneo VALID → ALREADY_USED, plaza devuelta al cancelar y CSV. Todo en verde.
+- El recorrido con clics de verdad, ejecutado en la CI, es el E2E con Playwright de la Fase 6.
 
 ---
 
@@ -241,5 +247,5 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 
 ## Estado actual
 
-**Fase activa:** 5 — Dashboard, asistentes y móvil (Fase 4 cerrada el 2026-10-29: una entrada se valida desde un móvil real y no se puede usar dos veces, también con escaneos simultáneos).
-**Siguiente paso:** bloque 6 de la Fase 5, los 5 recorridos en escritorio y en móvil, y cierre.
+**Fase activa:** 6 — Endurecimiento (Fase 5 cerrada el 2026-10-29: los 5 recorridos funcionan en escritorio y en iPhone, con dashboard, stats, asistentes, CSV seguro y app instalable; Android pendiente).
+**Siguiente paso:** proponer el plan de bloques de la Fase 6.
