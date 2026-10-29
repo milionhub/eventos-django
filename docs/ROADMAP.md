@@ -147,7 +147,7 @@
 - [x] Ventana de acceso (RN-29) y permisos (RN-28)
 - [x] **Test de concurrencia:** 2 escaneos simultáneos → 1 VALID + 1 ALREADY_USED
 - [x] UI: selector de eventos + escáner (`@zxing/ngx-scanner`) + resultado a pantalla completa con vibración
-- [ ] Prueba en un móvil real mediante un túnel HTTPS (cloudflared)
+- [x] Prueba en un móvil real mediante un túnel HTTPS (cloudflared)
 
 **Cierre:** una entrada se valida desde el móvil y no se puede usar dos veces.
 
@@ -157,8 +157,8 @@
 |---|---|---|
 | 1 | Validación atómica (backend): `CheckInLog`, `scan()` con UPDATE condicional, 7 resultados, ventana y permisos | ✅ |
 | 2 | Escáner (frontend): eventos validables, cámara con zxing, resultado a pantalla completa, entrada manual | ✅ |
-| 3 | Prueba en un móvil real: túnel HTTPS con cloudflared y guía en el README | |
-| 4 | Cierre: escenario completo, ROADMAP y README | |
+| 3 | Prueba en un móvil real: túnel HTTPS con cloudflared y guía en el README | ✅ |
+| 4 | Cierre: escenario completo, ROADMAP y README | ✅ |
 
 ---
 
@@ -228,5 +228,5 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 
 ## Estado actual
 
-**Fase activa:** 4 — Check-in (Fase 3 cerrada el 2026-10-28: reserva desde el móvil con QR y cupo garantizado bajo concurrencia).
-**Siguiente paso:** dividir la Fase 4 en bloques, empezando por `CheckInLog` y el servicio `scan()` con UPDATE condicional (ADR-0004, RN-28 a RN-32).
+**Fase activa:** 5 — Dashboard, asistentes y móvil (Fase 4 cerrada el 2026-10-29: una entrada se valida desde un móvil real y no se puede usar dos veces, también con escaneos simultáneos).
+**Siguiente paso:** dividir la Fase 5 en bloques, empezando por las estadísticas por evento (ocupación por categoría y accesos).

@@ -7,7 +7,7 @@ Plataforma de gestión de eventos y entradas digitales con QR: los organizadores
 
 **Stack:** Angular · Django REST Framework · PostgreSQL · Docker
 
-> 🚧 En desarrollo — Fases 1 a 3 completadas (auth, organizaciones, eventos, reservas y entradas con QR). Consulta [`docs/ROADMAP.md`](docs/ROADMAP.md).
+> 🚧 En desarrollo — Fases 1 a 4 completadas (auth, organizaciones, eventos, reservas, entradas con QR y validación en la puerta con la cámara del móvil). Consulta [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Destacado: reservas sin sobreventa
 
@@ -54,6 +54,37 @@ cd backend && uv run pytest apps/ticketing/tests/test_concurrency.py -v
 | Reservas y cancelaciones mezcladas | El contador coincide siempre con las reservas confirmadas |
 
 Cada test se validó también **quitando la protección** que comprueba, para asegurar que de verdad detecta el fallo.
+
+## Destacado: una entrada no entra dos veces
+
+En la puerta puede haber varias personas escaneando a la vez, y alguien puede enseñar la misma entrada (o una captura) en dos accesos. La entrada pasa de `VALID` a `USED` con el mismo patrón que las reservas, un `UPDATE` condicional ([`checkin/services.py`](backend/apps/checkin/services.py)):
+
+```sql
+UPDATE ticketing_ticket
+   SET status = 'USED', checked_in_at = now(), checked_in_by_id = %s
+ WHERE id = %s AND status = 'VALID'
+```
+1 fila actualizada → **Válida**. 0 filas → otro escaneo ganó la carrera: **Ya utilizada**, con la hora a la que entró. Cada intento, aceptado o no, queda registrado en `CheckInLog` con quién y cuándo.
+
+### La trampa: el `UPDATE` con una subconsulta
+La primera versión filtraba entrada y evento en una sola línea de Django:
+```python
+Ticket.objects.filter(token=token, status="VALID", reservation__event=event).update(status="USED")
+```
+Parece lo mismo, pero el filtro a través de `reservation__event` obliga a Django a escribir `UPDATE … WHERE id IN (SELECT … WHERE status = 'VALID' AND …)`: **todas** las condiciones, incluida `status = 'VALID'`, acaban dentro de la subconsulta. Cuando el segundo escaneo espera al primero, PostgreSQL vuelve a comprobar la fila ya actualizada (*EvalPlanQual*), pero no vuelve a ejecutar la subconsulta: solo mira `id IN (…)`, que sigue cumpliéndose. Resultado: **los dos escaneos daban «Válida»**. El test de concurrencia lo reprodujo 10 de 10 veces.
+
+La solución: primero se busca la entrada (y se comprueba que es de ese evento) y después se hace el `UPDATE` filtrando **solo por columnas de la propia fila** (`id` y `status`). Ahora pasa 20 de 20 veces.
+
+### Los tests
+```bash
+cd backend && uv run pytest apps/checkin/tests/test_concurrency.py -v
+```
+| Test | Qué garantiza |
+|---|---|
+| Dos puertas escanean la misma entrada a la vez | 1 «Válida» + 1 «Ya utilizada» |
+| 10 escaneos simultáneos de la misma entrada | 1 «Válida», 9 «Ya utilizada» y los 10 intentos registrados |
+
+Los otros cinco resultados posibles (entrada no válida, de otro evento, cancelada, fuera de horario y sin permiso) tienen sus propios tests en `test_scan.py` y `test_api.py`. Para probarlo con un móvil de verdad, ver la [guía para el móvil](docs/guia-movil.md).
 
 ## Cómo ejecutarlo
 

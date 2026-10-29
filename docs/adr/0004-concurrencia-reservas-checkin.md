@@ -37,6 +37,11 @@ El patrón ingenuo "leer → comprobar en Python → escribir" falla: entre la l
 - Las operaciones que bloquean un evento usan `select_for_update(no_key=True)` (`FOR NO KEY UPDATE`), no `FOR UPDATE`. Insertar una reserva comprueba su clave foránea al evento con un bloqueo `FOR KEY SHARE`, incompatible con `FOR UPDATE`: una reserva con la categoría bloqueada y una cancelación del evento esperando esa categoría producían un *deadlock*. Lo detectó el test de concurrencia de reservas frente a cancelación.
 - `reserve()` vuelve a leer el estado del evento tras el `UPDATE` (ya con la fila de la categoría bloqueada) y `cancel_event()` bloquea las categorías antes de anular reservas: así ninguna reserva confirmada sobrevive a la cancelación del evento.
 
+## Nota de implementación (Fase 4)
+- El `UPDATE` del check-in filtra **solo por columnas de la propia entrada**: `WHERE id = X AND status = 'VALID'`. La comprobación de que la entrada es de ese evento se hace antes, al buscarla por `token`, y no dentro del `UPDATE` como sugería el esquema de arriba.
+- Motivo: en Django, filtrar por `reservation__event` dentro del `.update()` genera `UPDATE … WHERE id IN (SELECT …)`, con `status = 'VALID'` dentro de la subconsulta. Cuando un escaneo concurrente espera al primero, PostgreSQL revalúa la fila actualizada (*EvalPlanQual*) pero no vuelve a ejecutar la subconsulta, así que los dos escaneos validaban. El test de concurrencia lo reprodujo 10 de 10 veces; con el filtro por columnas propias pasa 20 de 20.
+- Regla general para este proyecto: **un `UPDATE` condicional que protege una invariante no debe depender de otras tablas.**
+
 ## Alternativas descartadas
 - **`select_for_update()`:** también es válido, pero serializa más y el código es más largo. Lo mencionaremos en el README como alternativa.
 - **Contar reservas con `COUNT(*)` en cada petición:** no es seguro sin bloqueo de tabla.
