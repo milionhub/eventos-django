@@ -108,7 +108,7 @@ Ya estaba revisado en el [ADR-0003](adr/0003-autenticacion-jwt.md). Se confirma 
 ## Riesgos aceptados y pendientes
 
 - **Saber si un email ya tiene cuenta.** El registro responde 409 si el email ya existe. Es la experiencia habitual («ya tienes cuenta, entra») y el throttling de registro limita que se use para probar emails en masa. El login no lo revela: responde siempre «Email o contraseña incorrectos».
-- **Sesión perdida si se navega mientras se renueva el token.** Encontrado en la Fase 7, sin corregir. Con rotación y blacklist (ADR-0003), cada carga de página cambia el token de refresh. Si el usuario navega justo en ese instante, el servidor ya ha invalidado el token anterior pero el navegador nunca recibe el nuevo, y tiene que volver a entrar. No expone datos: solo obliga a iniciar sesión otra vez. Se reproduce con recargar y navegar sin esperar. Arreglarlo cambia una decisión cerrada, así que necesita un ADR nuevo.
+- **Margen de 30 s tras rotar el refresh** ([ADR-0009](adr/0009-margen-rotacion-refresh.md)). Un token robado que acaba de rotar sigue valiendo unos segundos. Se acepta a cambio de no cerrar sesiones al navegar. Si alguien vuelve pasados los 30 s tras perder la respuesta de la renovación, sigue teniendo que entrar otra vez.
 
 ## Modo demo (Fase 7)
 

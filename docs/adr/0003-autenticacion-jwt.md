@@ -1,6 +1,6 @@
 # ADR-0003 — JWT con refresh en cookie httpOnly
 
-**Estado:** Aceptado · **Fecha:** 2026-10-27
+**Estado:** Aceptado, matizado por [ADR-0009](0009-margen-rotacion-refresh.md) · **Fecha:** 2026-10-27
 
 ## Contexto
 SPA Angular + API DRF. JWT aparece con frecuencia en las ofertas de empleo, pero guardar tokens en `localStorage` los expone a XSS.

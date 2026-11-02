@@ -152,7 +152,8 @@ def test_refresh_rotates_the_cookie_and_returns_a_new_access_token(api_client, u
     assert response.cookies[COOKIE].value != old_refresh
 
 
-def test_refresh_token_cannot_be_reused_after_rotation(api_client, user):
+def test_refresh_token_cannot_be_reused_once_the_grace_period_is_over(api_client, user, settings):
+    settings.REFRESH_REUSE_GRACE_SECONDS = 0
     old_refresh = login(api_client).cookies[COOKIE].value
     api_client.post(reverse("auth-refresh"))
 
@@ -161,6 +162,28 @@ def test_refresh_token_cannot_be_reused_after_rotation(api_client, user):
 
     assert response.status_code == 401
     assert response.json()["code"] == "session_expired"
+
+
+def test_navigating_away_during_a_refresh_keeps_the_session(api_client, user):
+    """ADR-0009: the browser never got the new token, so it sends the old one again."""
+    old_refresh = login(api_client).cookies[COOKIE].value
+    api_client.post(reverse("auth-refresh"))  # its response is lost: the page was left
+
+    api_client.cookies[COOKIE] = old_refresh
+    response = api_client.post(reverse("auth-refresh"))
+
+    assert response.status_code == 200
+    assert response.json()["access"]
+    assert response.cookies[COOKIE].value != old_refresh
+
+
+def test_logging_out_closes_the_grace_period(api_client, user):
+    old_refresh = login(api_client).cookies[COOKIE].value
+    api_client.post(reverse("auth-refresh"))
+    api_client.post(reverse("auth-logout"))
+
+    api_client.cookies[COOKIE] = old_refresh
+    assert api_client.post(reverse("auth-refresh")).status_code == 401
 
 
 def test_refresh_is_throttled(api_client, monkeypatch):

@@ -264,6 +264,8 @@ No comprobado en Android: leer un QR con la cámara (el emulador solo muestra un
 | 6 | Borrador para LinkedIn y CV | |
 | 7 | README definitivo y corto: se hace al final, con todo lo anterior ya cerrado | |
 
+Hallazgo 2026-11-02, al probar la demo: navegar mientras se renovaba el token cerraba la sesión. Arreglado con un margen de 30 s, ver [ADR-0009](adr/0009-margen-rotacion-refresh.md).
+
 Decisión 2026-11-02: las capturas son para el README, una por pantalla, en `docs/screenshots/`, hechas sobre una base de datos que solo contiene la demo. El despliegue gratuito sigue siendo opcional y se decide al final.
 
 ---

@@ -131,6 +131,8 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
 }
+# ADR-0009: how long a refresh token still works after rotation replaced it.
+REFRESH_REUSE_GRACE_SECONDS = env.int("REFRESH_REUSE_GRACE_SECONDS", default=30)
 # Business settings (requirements.md §3).
 # RN-20: attendees may cancel until this many hours before the event starts.
 CANCELLATION_DEADLINE_HOURS = env.int("CANCELLATION_DEADLINE_HOURS", default=2)

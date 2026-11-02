@@ -4,9 +4,16 @@ import threading
 
 import pytest
 from django.db import connection
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts.models import User
-from apps.accounts.services import EmailAlreadyRegistered, register_user
+from apps.accounts.services import (
+    EmailAlreadyRegistered,
+    SessionExpired,
+    refresh_session,
+    register_user,
+)
+from apps.accounts.tests.factories import UserFactory
 
 
 @pytest.mark.django_db(transaction=True)
@@ -40,3 +47,29 @@ def test_simultaneous_sign_ups_with_one_email_create_one_account():
 
     assert sorted(outcomes) == ["created"] + ["taken"] * 4
     assert User.objects.count() == 1
+
+
+@pytest.mark.django_db(transaction=True)
+def test_simultaneous_refreshes_of_one_token_all_keep_the_session():
+    """ADR-0009: two tabs loading at once, both sending the cookie. None may be logged out."""
+    token = str(RefreshToken.for_user(UserFactory()))
+    barrier = threading.Barrier(8)
+    outcomes: list[str] = []
+
+    def refresh() -> None:
+        try:
+            barrier.wait()
+            refresh_session(token=token)
+            outcomes.append("ok")
+        except SessionExpired:
+            outcomes.append("expired")
+        finally:
+            connection.close()
+
+    threads = [threading.Thread(target=refresh) for _ in range(8)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    assert outcomes == ["ok"] * 8
