@@ -247,7 +247,7 @@ No comprobado en Android: leer un QR con la cámara (el emulador solo muestra un
 - [ ] `docker compose --profile demo up` (nginx + gunicorn + db) funcionando a la primera
   - Pendiente de [`security.md`](security.md): `NUM_PROXIES=1` detrás de nginx, caché compartida para el throttling (`DatabaseCache`), CSP de la app Angular en nginx y `/admin/` protegido
 - [ ] README: qué es, GIF, arquitectura (diagrama), decisiones destacadas (concurrencia, auth, multi-organización), cómo ejecutarlo, credenciales demo, badge de CI
-- [ ] Vídeo corto de demostración (móvil + escritorio)
+- [ ] Vídeo corto de demostración (móvil + escritorio): aplazado, sin fecha (decisión del 2026-11-02)
 - [ ] (Opcional) despliegue gratuito si es viable
 - [ ] Publicación en LinkedIn + CV
 
@@ -259,14 +259,13 @@ No comprobado en Android: leer un QR con la cámara (el emulador solo muestra un
 |---|---|---|
 | 1 | Subir el cierre de la Fase 6 y confirmar la CI en verde | ✅ |
 | 2 | Capturas para el README: portada y evento | ✅ |
-| 3 | Capturas para el README: dashboard y escáner en móvil | ✅ |
-| 4 | README: qué es, capturas, diagrama de arquitectura y decisiones destacadas | |
-| 5 | `docker compose --profile demo`: nginx y gunicorn | |
-| 6 | `docker compose --profile demo`: pendientes de seguridad y prueba desde cero | |
-| 7 | Vídeo corto de demostración, con guion | |
-| 8 | Borrador para LinkedIn y CV | |
+| 3 | Capturas para el README: todas las pantallas, por recorrido, con alguna en claro y en móvil | ✅ |
+| 4 | `docker compose --profile demo`: nginx y gunicorn | |
+| 5 | `docker compose --profile demo`: pendientes de seguridad y prueba desde cero | |
+| 6 | Borrador para LinkedIn y CV | |
+| 7 | README definitivo y corto: se hace al final, con todo lo anterior ya cerrado | |
 
-Decisión 2026-11-02: las capturas son solo para el README, así que basta con unas pocas en `docs/screenshots/`, hechas sobre una base de datos que solo contiene la demo. El despliegue gratuito sigue siendo opcional y se decide al final.
+Decisión 2026-11-02: las capturas son para el README, una por pantalla, en `docs/screenshots/`, hechas sobre una base de datos que solo contiene la demo. El despliegue gratuito sigue siendo opcional y se decide al final.
 
 ---
 
@@ -300,4 +299,4 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 ## Estado actual
 
 **Fase activa:** 7 — Portfolio (Fase 6 cerrada el 2026-11-02: E2E, seguridad, cobertura, dependencias, accesibilidad y Android).
-**Siguiente paso:** bloque 4 de la Fase 7, README con capturas, diagrama de arquitectura y decisiones destacadas.
+**Siguiente paso:** bloque 4 de la Fase 7, `docker compose --profile demo` con nginx y gunicorn.
