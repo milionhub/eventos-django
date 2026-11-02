@@ -1,7 +1,10 @@
 name: eventos
 
 services:
+  # Development: docker compose up -d db. Its own profile so the demo does not start it,
+  # which would fail on any machine with port 5432 already taken.
   db:
+    profiles: [dev]
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
@@ -52,6 +55,10 @@ services:
       SESSION_COOKIE_SECURE: "False"
       CSRF_COOKIE_SECURE: "False"
       REFRESH_COOKIE_SECURE: "False"
+      # nginx is the one proxy in front: rate limits count the address it saw.
+      NUM_PROXIES: "1"
+      # Fills an empty database on the first start. Its passwords are public: demo only.
+      SEED_DEMO: "1"
     volumes:
       - demo-media:/app/media
       - demo-static:/app/staticfiles
@@ -66,8 +73,8 @@ services:
         - "import urllib.request as u; u.urlopen(u.Request('http://127.0.0.1:8000/api/v1/health/', headers={'Host': 'localhost'}), timeout=3)"
       interval: 5s
       timeout: 5s
-      retries: 20
-      start_period: 20s
+      retries: 60
+      start_period: 30s
 
   demo-web:
     profiles: [demo]

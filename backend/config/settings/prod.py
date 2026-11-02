@@ -17,5 +17,13 @@ SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
 # (e.g. 31536000) once HTTPS is known to work. No preload: that needs control of the domain.
 SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=3600)
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# The rate limit counters live in the cache. The default one is per process, so with several
+# gunicorn workers each would count on its own and the real limit would multiply.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "django_cache",
+    }
+}
 # The HSTS preload list is for domains we own; with no budget there is no domain of our own.
 SILENCED_SYSTEM_CHECKS = ["security.W021"]

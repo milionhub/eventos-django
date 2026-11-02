@@ -51,6 +51,19 @@ def test_command_needs_force_without_debug(settings):
     assert not Organization.objects.exists()
 
 
+def test_command_if_empty_only_fills_once(settings):
+    settings.DEBUG = True
+    call_command("seed_demo", attendees=ATTENDEES, if_empty=True, stdout=StringIO())
+    count = Event.objects.count()
+    assert count
+
+    out = StringIO()
+    call_command("seed_demo", attendees=ATTENDEES, if_empty=True, stdout=out)
+
+    assert "no se cambia nada" in out.getvalue()
+    assert Event.objects.count() == count
+
+
 def test_command_reset_replaces_the_previous_demo(settings):
     settings.DEBUG = True
     out = StringIO()

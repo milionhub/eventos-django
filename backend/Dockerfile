@@ -28,4 +28,4 @@ EXPOSE 8000
 
 # As a command and not a .sh file: Git on Windows may check scripts out with CRLF line endings,
 # which break them inside a Linux container.
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py collectstatic --noinput && exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --access-logfile -"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py createcachetable && python manage.py collectstatic --noinput && if [ \"$SEED_DEMO\" = 1 ]; then python manage.py seed_demo --force --if-empty; fi && exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --access-logfile -"]

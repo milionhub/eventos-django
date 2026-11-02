@@ -244,8 +244,7 @@ No comprobado en Android: leer un QR con la cámara (el emulador solo muestra un
 ## FASE 7 — Portfolio · 8–12 h
 
 - [x] `seed_demo`: organizaciones, eventos y usuarios de prueba por rol (hecho el 2026-11-02, antes de cerrar la Fase 6, para probar Android con datos reales)
-- [ ] `docker compose --profile demo up` (nginx + gunicorn + db) funcionando a la primera
-  - Pendiente de [`security.md`](security.md): `NUM_PROXIES=1` detrás de nginx, caché compartida para el throttling (`DatabaseCache`), CSP de la app Angular en nginx y `/admin/` protegido
+- [x] `docker compose --profile demo up` (nginx + gunicorn + db) funcionando a la primera
 - [ ] README: qué es, GIF, arquitectura (diagrama), decisiones destacadas (concurrencia, auth, multi-organización), cómo ejecutarlo, credenciales demo, badge de CI
 - [ ] Vídeo corto de demostración (móvil + escritorio): aplazado, sin fecha (decisión del 2026-11-02)
 - [ ] (Opcional) despliegue gratuito si es viable
@@ -261,7 +260,7 @@ No comprobado en Android: leer un QR con la cámara (el emulador solo muestra un
 | 2 | Capturas para el README: portada y evento | ✅ |
 | 3 | Capturas para el README: todas las pantallas, por recorrido, con alguna en claro y en móvil | ✅ |
 | 4 | `docker compose --profile demo`: nginx y gunicorn | ✅ |
-| 5 | `docker compose --profile demo`: pendientes de seguridad y prueba desde cero | |
+| 5 | `docker compose --profile demo`: pendientes de seguridad y prueba desde cero | ✅ |
 | 6 | Borrador para LinkedIn y CV | |
 | 7 | README definitivo y corto: se hace al final, con todo lo anterior ya cerrado | |
 
@@ -299,4 +298,4 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 ## Estado actual
 
 **Fase activa:** 7 — Portfolio (Fase 6 cerrada el 2026-11-02: E2E, seguridad, cobertura, dependencias, accesibilidad y Android).
-**Siguiente paso:** bloque 5 de la Fase 7, pendientes de seguridad del modo demo, datos automáticos y prueba desde cero.
+**Siguiente paso:** bloque 6 de la Fase 7, borrador para LinkedIn y CV.

@@ -28,13 +28,20 @@ class Command(BaseCommand):
             "--attendees", type=int, default=320, help="Asistentes ficticios (320 por defecto)."
         )
         parser.add_argument(
+            "--if-empty",
+            action="store_true",
+            help="Si ya hay datos de la demo, no hace nada en vez de dar error.",
+        )
+        parser.add_argument(
             "--force",
             action="store_true",
             help="Permite ejecutarlo con DEBUG=False. Sus contraseñas son públicas: "
             "nunca en un servidor con datos reales.",
         )
 
-    def handle(self, *args, reset: bool, attendees: int, force: bool, **options) -> None:
+    def handle(
+        self, *args, reset: bool, attendees: int, if_empty: bool, force: bool, **options
+    ) -> None:
         if not settings.DEBUG and not force:
             raise CommandError("Con DEBUG=False hace falta --force: las contraseñas son públicas.")
         if reset:
@@ -42,6 +49,9 @@ class Command(BaseCommand):
         try:
             summary = seed_demo(attendees=attendees)
         except DemoDataExists as exc:
+            if if_empty:
+                self.stdout.write("Ya hay datos de la demo: no se cambia nada.")
+                return
             raise CommandError(
                 "Ya hay datos de la demo, o una organización real con el mismo slug. "
                 "Usa --reset para borrar la demo anterior."

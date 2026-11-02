@@ -8,4 +8,6 @@ RUN npm run build
 
 FROM nginx:1.29-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx-proxy.conf /etc/nginx/snippets/proxy.conf
+COPY nginx-security.conf /etc/nginx/snippets/security.conf
 COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html

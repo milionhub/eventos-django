@@ -1,0 +1,39 @@
+name: demo
+
+on:
+  push:
+    branches: [main]
+    paths: ["frontend/**", "backend/**", "compose.yaml", ".github/workflows/demo.yml"]
+  pull_request:
+    paths: ["frontend/**", "backend/**", "compose.yaml", ".github/workflows/demo.yml"]
+  workflow_dispatch: # manual run from the Actions tab
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  one-command:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      # What the README promises: one command, nothing configured, on a clean machine.
+      - name: Start the demo
+        run: docker compose --profile demo up --build --detach --wait --wait-timeout 300
+
+      - name: Check it through nginx
+        run: |
+          base=http://localhost:8180
+          curl --fail --silent "$base/api/v1/health/"
+          count=$(curl --fail --silent "$base/api/v1/public/events/" | jq .count)
+          test "$count" -gt 0
+          image=$(curl --fail --silent "$base/api/v1/public/events/" | jq -r '[.results[] | select(.image_url != "")][0].image_url')
+          curl --fail --silent --output /dev/null "$base$image"
+          curl --fail --silent --head "$base/" | grep -i "content-security-policy: default-src 'self'; script-src 'self';"
+          curl --fail --silent --output /dev/null "$base/static/admin/css/base.css"
+
+      - name: Logs
+        if: failure()
+        run: docker compose --profile demo logs

@@ -11,14 +11,7 @@
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
     <!-- Apply the saved theme before Angular boots to avoid a flash of the wrong colors. -->
-    <script>
-      try {
-        var theme = localStorage.getItem('theme');
-        if (theme === 'light' || theme === 'dark') {
-          document.documentElement.style.colorScheme = theme;
-        }
-      } catch (e) {}
-    </script>
+    <script src="theme-init.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

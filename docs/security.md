@@ -108,6 +108,19 @@ Ya estaba revisado en el [ADR-0003](adr/0003-autenticacion-jwt.md). Se confirma 
 ## Riesgos aceptados y pendientes
 
 - **Saber si un email ya tiene cuenta.** El registro responde 409 si el email ya existe. Es la experiencia habitual («ya tienes cuenta, entra») y el throttling de registro limita que se use para probar emails en masa. El login no lo revela: responde siempre «Email o contraseña incorrectos».
-- **Contadores de throttling por proceso.** Se guardan en la caché por defecto de Django, que es memoria local. Con varios procesos de gunicorn, cada uno lleva su propia cuenta y el límite real se multiplica por el número de procesos. **Para la Fase 7:** caché compartida en la base de datos (`DatabaseCache` + `createcachetable`, sin coste) o un solo proceso en la demo.
-- **CSP de la app Angular:** Fase 7, en nginx.
-- **El admin de Django** está en `/admin/`. En un despliegue real convendría limitarlo por IP o cambiar la ruta. Se revisa en la Fase 7.
+- **Sesión perdida si se navega mientras se renueva el token.** Encontrado en la Fase 7, sin corregir. Con rotación y blacklist (ADR-0003), cada carga de página cambia el token de refresh. Si el usuario navega justo en ese instante, el servidor ya ha invalidado el token anterior pero el navegador nunca recibe el nuevo, y tiene que volver a entrar. No expone datos: solo obliga a iniciar sesión otra vez. Se reproduce con recargar y navegar sin esperar. Arreglarlo cambia una decisión cerrada, así que necesita un ADR nuevo.
+
+## Modo demo (Fase 7)
+
+`docker compose --profile demo` añade lo que faltaba detrás de nginx. Se comprobó en un navegador real con la demo en marcha:
+
+| Punto | Qué se hizo | Comprobación |
+|---|---|---|
+| IP del cliente | `NUM_PROXIES=1` | Con 16 logins y un `X-Forwarded-For` falso distinto en cada uno, se bloquean igual |
+| Contadores compartidos | `DatabaseCache` en `prod.py` (tabla creada al arrancar) | Antes, con 2 workers, el primer 429 llegaba en el login 17; ahora el límite de 10 por minuto se cumple |
+| CSP de la app | En nginx: `script-src 'self'`, sin scripts en línea | Ninguna violación con QR, cámara, subida de imagen, fuentes y CSV |
+| Admin | `/admin/login/` limitado en nginx a 10 por minuto, con ráfaga de 5, porque su formulario no pasa por los límites de la API | El intento 7 seguido recibe 429 |
+
+Para quitar los scripts en línea, el del tema pasó a `public/theme-init.js` y se desactivó `inlineCritical` en el build de producción, que añadía otro. Los estilos siguen necesitando `'unsafe-inline'`, porque Angular y Material los escriben en la página.
+
+La demo va por HTTP en `localhost`: con esos ajustes `check --deploy` da 4 avisos, esperados. Sus contraseñas y su clave secreta son públicas, así que solo escucha en `127.0.0.1` y no sirve como despliegue real. Un despliegue público necesitaría además HTTPS, su propia clave y limitar `/admin/` por IP.
