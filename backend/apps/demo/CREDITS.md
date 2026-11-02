@@ -6,7 +6,6 @@ Fotos de Wikimedia Commons con licencia **CC0** (dominio público), comprobada p
 |---|---|
 | `cinema-seats.webp` | [Disused Cinema (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Disused_Cinema_(Unsplash).jpg) |
 | `confetti.webp` | [Dockville Festival, Hamburg, Germany (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Dockville_Festival,_Hamburg,_Germany_(Unsplash).jpg) |
-| `craft.webp` | [Beekeeper's workshop (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Beekeeper%27s_workshop_(Unsplash).jpg) |
 | `dinner.webp` | [Gourmet meal and white wine (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Gourmet_meal_and_white_wine_(Unsplash).jpg) |
 | `dj-controller.webp` | [DJ at work (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:DJ_at_work_(Unsplash).jpg) |
 | `dj-party.webp` | [Dance club (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Dance_club_(Unsplash).jpg) |

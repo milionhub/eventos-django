@@ -108,7 +108,7 @@ EVENTS = (
     # --- Today: the door is open, so the scanner has something to do -------------------------
     DemoEvent(
         org="nebula",
-        title="Saxofones de Medianoche",
+        title="Saxofones en Directo",
         location=NEBULA,
         description="Cuarteto de saxos y sección rítmica: dos pases de jazz con clásicos y "
         "composiciones propias. La sala abre una hora antes con servicio de barra.",
@@ -210,6 +210,7 @@ EVENTS = (
         location=MERCADO,
         description="Del grano a la taza: molienda, extracción y arte latte con una campeona "
         "nacional de barismo.",
+        image="dinner",
         day=11,
         hour=10,
         hours=3,
@@ -221,6 +222,7 @@ EVENTS = (
         location=TEATRO,
         description="Escribe, rueda y monta un corto en una jornada. Trae tu móvil: nosotros "
         "ponemos el resto del equipo.",
+        image="meeting-room",
         day=12,
         hour=9,
         hours=9,
@@ -230,7 +232,7 @@ EVENTS = (
         org="nebula",
         title="Vinilos y Vermú",
         location=NEBULA,
-        description="Domingo de escucha colectiva: cada asistente trae un disco y lo presenta. "
+        description="Mañana de escucha colectiva: cada asistente trae un disco y lo presenta. "
         "El vermú corre de nuestra cuenta.",
         image="vinyl",
         day=16,
@@ -308,7 +310,6 @@ EVENTS = (
         location=MERCADO,
         description="Cose y encuaderna tu propio cuaderno con técnicas tradicionales. Recién "
         "publicado: todavía no tiene reservas.",
-        image="craft",
         day=40,
         hour=10,
         categories=(Category("Plaza", 14),),
