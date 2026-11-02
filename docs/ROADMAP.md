@@ -260,7 +260,7 @@ No comprobado en Android: leer un QR con la cámara (el emulador solo muestra un
 | 1 | Subir el cierre de la Fase 6 y confirmar la CI en verde | ✅ |
 | 2 | Capturas para el README: portada y evento | ✅ |
 | 3 | Capturas para el README: todas las pantallas, por recorrido, con alguna en claro y en móvil | ✅ |
-| 4 | `docker compose --profile demo`: nginx y gunicorn | |
+| 4 | `docker compose --profile demo`: nginx y gunicorn | ✅ |
 | 5 | `docker compose --profile demo`: pendientes de seguridad y prueba desde cero | |
 | 6 | Borrador para LinkedIn y CV | |
 | 7 | README definitivo y corto: se hace al final, con todo lo anterior ya cerrado | |
@@ -299,4 +299,4 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 ## Estado actual
 
 **Fase activa:** 7 — Portfolio (Fase 6 cerrada el 2026-11-02: E2E, seguridad, cobertura, dependencias, accesibilidad y Android).
-**Siguiente paso:** bloque 4 de la Fase 7, `docker compose --profile demo` con nginx y gunicorn.
+**Siguiente paso:** bloque 5 de la Fase 7, pendientes de seguridad del modo demo, datos automáticos y prueba desde cero.

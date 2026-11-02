@@ -19,5 +19,71 @@ services:
       timeout: 3s
       retries: 10
 
+  # --- The whole app, for trying it out: docker compose --profile demo up --build -----------
+  # Its own database and files, so it never touches the development data above. Everything
+  # has a default because it must work without a .env, and it only listens on this machine.
+  demo-db:
+    profiles: [demo]
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: eventos
+      POSTGRES_USER: eventos
+      POSTGRES_PASSWORD: eventos
+    volumes:
+      - demo-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventos -d eventos"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  demo-api:
+    profiles: [demo]
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      DJANGO_SECRET_KEY: only-for-the-local-demo-never-use-this-value-anywhere-else
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      DATABASE_URL: postgres://eventos:eventos@demo-db:5432/eventos
+      # Plain http on localhost: the HTTPS-only settings stay on everywhere else.
+      SECURE_SSL_REDIRECT: "False"
+      SECURE_HSTS_SECONDS: "0"
+      SESSION_COOKIE_SECURE: "False"
+      CSRF_COOKIE_SECURE: "False"
+      REFRESH_COOKIE_SECURE: "False"
+    volumes:
+      - demo-media:/app/media
+      - demo-static:/app/staticfiles
+    depends_on:
+      demo-db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request as u; u.urlopen(u.Request('http://127.0.0.1:8000/api/v1/health/', headers={'Host': 'localhost'}), timeout=3)"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  demo-web:
+    profiles: [demo]
+    build: ./frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${DEMO_PORT:-8180}:80"
+    volumes:
+      - demo-media:/srv/media:ro
+      - demo-static:/srv/static:ro
+    depends_on:
+      demo-api:
+        condition: service_healthy
+
 volumes:
   pgdata:
+  demo-pgdata:
+  demo-media:
+  demo-static:

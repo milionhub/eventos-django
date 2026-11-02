@@ -1,0 +1,12 @@
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+media/
+staticfiles/
+**/__pycache__/
+**/tests/
+conftest.py
+Dockerfile
+.dockerignore
