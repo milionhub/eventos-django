@@ -44,10 +44,20 @@
   background-size: cover;
 }
 
+// Darken the bottom-left corner so the date reads on any photo.
+.poster::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(to top right, rgb(0 0 0 / 65%), transparent 55%);
+  content: '';
+}
+
 .poster-date {
   position: absolute;
   left: 20px;
   bottom: 14px;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   color: #fff;
