@@ -10,8 +10,7 @@ Two details make it safe and readable in Excel:
 
 import csv
 from collections.abc import Iterable, Iterator
-from datetime import datetime
-from zoneinfo import ZoneInfo
+from datetime import datetime, tzinfo
 
 from apps.ticketing.models import Reservation, Ticket
 
@@ -27,11 +26,11 @@ def safe_cell(value: str) -> str:
     return f"'{value}" if value.startswith(FORMULA_TRIGGERS) else value
 
 
-def _when(moment: datetime | None, tz: ZoneInfo) -> str:
+def _when(moment: datetime | None, tz: tzinfo) -> str:
     return moment.astimezone(tz).strftime("%Y-%m-%d %H:%M") if moment else ""
 
 
-def attendee_row(reservation: Reservation, tz: ZoneInfo) -> list[str]:
+def attendee_row(reservation: Reservation, tz: tzinfo) -> list[str]:
     user, ticket = reservation.user, reservation.ticket
     return [
         safe_cell(cell)
@@ -54,7 +53,7 @@ class _Echo:
         return value
 
 
-def attendees_csv(reservations: Iterable[Reservation], tz: ZoneInfo) -> Iterator[str]:
+def attendees_csv(reservations: Iterable[Reservation], tz: tzinfo) -> Iterator[str]:
     """The CSV line by line, so a long list streams without building it in memory."""
     writer = csv.writer(_Echo(), delimiter=DELIMITER)
     yield BOM + writer.writerow(HEADER)

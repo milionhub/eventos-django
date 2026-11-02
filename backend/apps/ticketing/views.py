@@ -1,3 +1,5 @@
+import re
+from datetime import timedelta, timezone, tzinfo
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from django.http import Http404, StreamingHttpResponse
@@ -142,10 +144,21 @@ def _attendee_filters(request: Request) -> dict:
     return {"q": params.get("q", "").strip()[:100], "ticket_status": ticket_status}
 
 
-def _timezone(request: Request) -> ZoneInfo:
-    """The browser's time zone (RNF-04), so the CSV shows the times the organizer sees."""
+UTC_OFFSET = re.compile(r"(?P<sign>[+-])(?P<hours>\d{2}):(?P<minutes>\d{2})")
+
+
+def _timezone(request: Request) -> tzinfo:
+    """The browser's time zone (RNF-04), so the CSV shows the times the organizer sees.
+
+    Usually an IANA name, but `Intl` answers with an offset ("+00:00") when the device has no
+    named zone configured, as on a fresh Android.
+    """
     name = request.query_params.get("tz") or "UTC"
     try:
+        if offset := UTC_OFFSET.fullmatch(name):
+            sign = -1 if offset["sign"] == "-" else 1
+            delta = timedelta(hours=int(offset["hours"]), minutes=int(offset["minutes"]))
+            return timezone(sign * delta)
         return ZoneInfo(name)
     except (ZoneInfoNotFoundError, ValueError) as error:
         raise ValidationError({"tz": "Zona horaria desconocida."}) from error
@@ -195,7 +208,7 @@ class AttendeeExportView(EventScopedMixin, APIView):
         operation_id="attendees_export",
         parameters=[
             *ATTENDEE_FILTERS,
-            OpenApiParameter("tz", description="Zona horaria IANA, p. ej. Europe/Madrid."),
+            OpenApiParameter("tz", description="Zona horaria IANA o desplazamiento (+02:00)."),
         ],
         responses={(200, "text/csv"): OpenApiTypes.BINARY},
     )

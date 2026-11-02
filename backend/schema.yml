@@ -538,7 +538,7 @@ paths:
         name: tz
         schema:
           type: string
-        description: Zona horaria IANA, p. ej. Europe/Madrid.
+        description: Zona horaria IANA o desplazamiento (+02:00).
       tags:
       - attendees
       security:

@@ -287,6 +287,22 @@ def test_csv_times_are_in_the_requested_time_zone():
     assert row[4:] == ["Utilizada", "2026-07-01 21:30", "2026-07-01 21:30"]  # UTC+2 in July
 
 
+@pytest.mark.parametrize(
+    ("tz", "expected"),
+    [("+00:00", "19:30"), ("+02:00", "21:30"), ("-03:30", "16:00")],
+)
+def test_csv_accepts_the_offset_a_device_without_named_zone_reports(tz, expected):
+    """Found on the Android emulator: Intl answered "+00:00" and the export failed with a 400."""
+    ticket_type = bookable_ticket_type()
+    reservation = book(ticket_type)
+    checked_in = datetime(2026, 7, 1, 19, 30, tzinfo=UTC)
+    Reservation.objects.filter(pk=reservation.pk).update(created_at=checked_in)
+
+    _, body = download(ticket_type.event, tz=tz)
+
+    assert rows_of(body)[1][5] == f"2026-07-01 {expected}"
+
+
 def test_csv_defaults_to_utc_and_rejects_unknown_time_zones():
     ticket_type = bookable_ticket_type()
     book(ticket_type)

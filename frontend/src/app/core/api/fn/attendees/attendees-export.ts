@@ -19,7 +19,7 @@ export interface AttendeesExport$Params {
   status?: 'CANCELLED' | 'USED' | 'VALID';
 
 /**
- * Zona horaria IANA, p. ej. Europe/Madrid.
+ * Zona horaria IANA o desplazamiento (+02:00).
  */
   tz?: string;
 }
