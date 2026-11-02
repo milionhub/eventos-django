@@ -199,7 +199,7 @@ Decisión 2026-10-29: la prueba en móvil real se hace **solo con iPhone** por a
 - [x] Revisión de seguridad (permisos, IDs enumerables, throttling, cabeceras, `DEBUG`, secretos): [`security.md`](security.md)
 - [x] Revisión de cobertura de los servicios críticos
 - [x] Auditoría de dependencias (`pip-audit`, `npm audit`)
-- [ ] Accesibilidad básica (contraste, etiquetas, foco)
+- [x] Accesibilidad básica (contraste, etiquetas, foco)
 
 **Cierre:** CI en verde con E2E, sin vulnerabilidades críticas conocidas.
 
@@ -211,7 +211,7 @@ Decisión 2026-10-29: la prueba en móvil real se hace **solo con iPhone** por a
 | 2 | Revisión de seguridad (backend): test de 404 entre organizaciones en todos los endpoints, IDs enumerables, throttling de registro y refresh, `check --deploy` en la CI, cabeceras (HSTS, Referrer-Policy, CSP) y `docs/security.md` | ✅ |
 | 3 | Cobertura de los servicios críticos: `pytest-cov`, cubrir huecos en `services.py` y `selectors.py`, umbral en la CI | ✅ |
 | 4 | E2E con Playwright: los 5 recorridos con clics reales, en escritorio y en móvil emulado, en la CI con PostgreSQL | ✅ |
-| 5 | Accesibilidad básica: `@axe-core/playwright`, contraste en los dos temas, etiquetas, foco y teclado, avisos del escáner para lectores de pantalla | |
+| 5 | Accesibilidad básica: `@axe-core/playwright`, contraste en los dos temas, etiquetas, foco y teclado, avisos del escáner para lectores de pantalla | ✅ |
 | 6 | Cierre: recorridos en Android (emulador), README (seguridad) y ROADMAP | |
 
 Decisión 2026-10-29: Android se prueba al final de la fase, con un emulador. Dependencias nuevas previstas, todas de desarrollo y gratuitas: `pytest-cov`, `@playwright/test` y `@axe-core/playwright`. Bloque 1 (2026-10-29): `pip-audit` (40 paquetes de `uv.lock`, los de desarrollo incluidos) y `npm audit` (564 paquetes) sin hallazgos; la CI las ejecuta en cada cambio y cada lunes. `pip-audit` falla con cualquier aviso; `npm audit` solo con altos y críticos, porque los bajos del ecosistema npm suelen estar en herramientas de build sin arreglo publicado. Bloque 2 (2026-10-29): CSP con un middleware propio solo para `/api/v1/` (sin `django-csp`). Hallazgo principal: el throttling se saltaba con `X-Forwarded-For`; arreglado con `NUM_PROXIES`. Detalle en [`security.md`](security.md). Bloque 3 (2026-10-29): cobertura por ramas del 99,2 % (ya partía del 98 %; ahora no cuenta `dev.py` ni `prod.py`, que no se cargan en los tests). Todos los `services.py` y `selectors.py` al 100 %, salvo una rama de carrera en `reserve()` que solo cubren los tests de concurrencia cuando los hilos coinciden. Lo que queda sin cubrir son `__str__` de modelos y acciones del admin. Huecos cerrados:
@@ -222,6 +222,16 @@ Decisión 2026-10-29: Android se prueba al final de la fase, con un emulador. De
 La CI falla por debajo del 98 %. Bloque 4 (2026-10-29): los 5 recorridos con Playwright, en escritorio (1280 px) y en móvil (Pixel 7), con su propio Django y su propia base de datos. 10 tests, estables en 3 pasadas seguidas. El paso que se prueba siempre se hace con la interfaz; los datos previos que necesita, por la API. Encontraron:
 - un fallo real: el CSV se exportaba con el filtro de búsqueda anterior si se pulsaba «Exportar» antes de 300 ms. Corregido, con un test unitario;
 - los textos del calendario de Material están en inglés («Open calendar»), pendiente para el bloque 5.
+
+Bloque 5 (2026-10-29): axe (WCAG 2.1 AA) en unas 20 pantallas, en los dos temas, en escritorio y en móvil, y un test solo con teclado. Encontró y se arregló:
+- **contraste** de las etiquetas (chips): 3,8–4,5:1, ahora ≥ 5:1, con el token `--app-accent-text`;
+- **botón de la cuenta:** su nombre accesible no contenía el texto visible (WCAG 2.5.3);
+- **selector de categorías:** usaba `<li>` dentro de un `radiogroup`;
+- **foco invisible** en todos los botones y pestañas de Material (`outline: none`);
+- **faltaba** «Saltar al contenido»;
+- **calendario y selector de hora** con textos en inglés.
+
+El resultado del escáner ya se anunciaba (`role="alert"`, `aria-live="assertive"`).
 
 ---
 
@@ -269,4 +279,4 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 ## Estado actual
 
 **Fase activa:** 6 — Endurecimiento (Fase 5 cerrada el 2026-10-29: los 5 recorridos funcionan en escritorio y en iPhone, con dashboard, stats, asistentes, CSV seguro y app instalable; Android pendiente).
-**Siguiente paso:** bloque 5 de la Fase 6, accesibilidad básica.
+**Siguiente paso:** bloque 6 de la Fase 6, cierre: recorridos en Android (emulador), README y ROADMAP.

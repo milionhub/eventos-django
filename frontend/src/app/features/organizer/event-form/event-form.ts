@@ -10,7 +10,7 @@ import {
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDatepickerIntl, MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -19,6 +19,7 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
 import { RouterLink } from '@angular/router';
 
 import { EventDetail, EventWriteRequest } from '../../../core/api/models';
+import { SpanishDatepickerIntl } from '../../../shared/datepicker-intl';
 import { ImageChange, ImagePicker } from '../../../shared/image-picker/image-picker';
 
 /** What the form hands over on save: the event data and what to do with its image. */
@@ -91,7 +92,11 @@ function startOfToday(): Date {
     ImagePicker,
   ],
   // Dates in Spanish, weeks starting on Monday. Kept here so the initial bundle stays lean.
-  providers: [provideNativeDateAdapter(), { provide: MAT_DATE_LOCALE, useValue: 'es-ES' }],
+  providers: [
+    provideNativeDateAdapter(),
+    { provide: MAT_DATE_LOCALE, useValue: 'es-ES' },
+    { provide: MatDatepickerIntl, useClass: SpanishDatepickerIntl },
+  ],
   templateUrl: './event-form.html',
   styleUrl: './event-form.scss',
 })

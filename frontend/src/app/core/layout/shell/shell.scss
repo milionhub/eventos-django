@@ -134,8 +134,31 @@
   }
 }
 
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  padding: 10px 16px;
+  border-radius: var(--app-radius-sm);
+  background: var(--mat-sys-inverse-surface);
+  color: var(--mat-sys-inverse-on-surface);
+  font: var(--mat-sys-label-large);
+  text-decoration: none;
+  transform: translateY(-200%);
+
+  &:focus {
+    transform: none;
+  }
+}
+
 .main {
   flex: 1;
+
+  // Focused by the skip link only: no ring around the whole page.
+  &:focus {
+    outline: none;
+  }
   padding: 24px var(--gutter) 48px;
 }
 

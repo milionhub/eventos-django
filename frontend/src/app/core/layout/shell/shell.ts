@@ -98,4 +98,10 @@ export class Shell {
     await this.auth.logout();
     await this.router.navigateByUrl('/');
   }
+
+  /** The href would make the router navigate to "/#contenido": move the focus instead. */
+  protected skipToContent(event: Event, main: HTMLElement): void {
+    event.preventDefault();
+    main.focus();
+  }
 }

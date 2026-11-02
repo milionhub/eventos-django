@@ -37,6 +37,7 @@ Definidos en `styles.scss` y disponibles en cualquier componente:
 | Token | Valor |
 |---|---|
 | `--app-accent` | Coral (más oscuro en tema claro) |
+| `--app-accent-text` | Coral para texto pequeño sobre fondo tintado de coral (chips): `#A61F1B` en claro y `#FF7368` en oscuro, ≥ 5:1. El coral de marca se queda en 3,8–4,5:1 ahí |
 | `--app-font-display` | Bricolage Grotesque |
 | `--app-radius` / `--app-radius-sm` | 16px / 8px |
 | `--app-border` | 1px con `outline-variant` |
@@ -72,6 +73,7 @@ Las tarjetas que representan eventos o entradas tienen forma de entrada física:
 - `.surface-card`: superficie elevada para tarjetas y paneles.
 - `.chip`: etiqueta en forma de píldora (roles, estados). Con `data-status="DRAFT|PUBLISHED|CANCELLED|FINISHED"` toma el color del estado del evento.
 - `.back-link`: enlace "← Volver" encima del titular.
+- `.sr-only`: texto solo para lectores de pantalla (oculto a la vista).
 - `.notice` / `.notice.error`: aviso tras una acción (éxito o error).
 - `.quiet`: botón de texto secundario (Editar, Quitar…), gris; con `.confirming` se vuelve rojo mientras pide confirmación.
 
@@ -79,5 +81,6 @@ Las fechas formateadas pasan por el pipe `capitalize` (solo la primera letra): `
 
 ## Reglas
 - Un único acento por pantalla: el coral marca la acción principal; el resto, en neutros. Las acciones secundarias ("Quitar", "Cancelar") van en gris y solo se vuelven rojas al pedir confirmación.
-- Todo usable a 360 px (RNF-01) y con foco visible (`:focus-visible` en coral).
+- Todo usable a 360 px (RNF-01) y con foco visible (`:focus-visible` en coral). Los botones y pestañas de Material quitan el contorno y solo tiñen el fondo, así que `styles.scss` se lo devuelve.
+- Accesibilidad (Fase 6): WCAG 2.1 AA comprobado con axe en todas las pantallas de los recorridos, en los dos temas (`e2e/a11y.e2e.ts`), y uso solo con teclado en `e2e/keyboard.e2e.ts`. Los nombres accesibles contienen siempre el texto visible (WCAG 2.5.3) y los textos de Material (calendario, selector de hora) van en español.
 - Las animaciones se desactivan con `prefers-reduced-motion`.

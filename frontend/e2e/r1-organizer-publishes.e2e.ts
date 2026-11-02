@@ -39,19 +39,16 @@ test('R1: el organizador crea y publica un evento', async ({ page }) => {
 
     // Next week, picked in the calendar (the day field is read-only on purpose).
     const day = new Date(Date.now() + 7 * 86_400_000);
-    await page
-      .getByRole('button', { name: /Open calendar|Abrir calendario/i })
-      .first()
-      .click();
+    await page.getByRole('button', { name: 'Abrir calendario' }).first().click();
     if (day.getMonth() !== new Date().getMonth()) {
-      await page.getByRole('button', { name: /Next month|Mes siguiente/i }).click();
+      await page.getByRole('button', { name: 'Mes siguiente' }).click();
     }
     await page
       .locator('.mat-calendar-body-cell:not(.mat-calendar-body-disabled)')
       .getByText(String(day.getDate()), { exact: true })
       .click();
-    await page.getByLabel('Hora de inicio').fill('20:30');
-    await page.getByLabel('Hora de inicio').press('Tab');
+    await page.getByRole('combobox', { name: 'Hora de inicio' }).fill('20:30');
+    await page.getByRole('combobox', { name: 'Hora de inicio' }).press('Tab');
     await page.getByRole('button', { name: '3 h' }).click();
     await page.getByLabel('Aforo total').fill('100');
     await page.getByRole('button', { name: 'Crear borrador' }).click();

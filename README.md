@@ -144,7 +144,7 @@ Angular redirige `/api` a Django mediante un proxy, así que basta con abrir `ht
 |---|---|---|
 | Tests | `uv run pytest` | `npm test` |
 | Cobertura | `uv run pytest --cov` (mínimo 98 %; la CI falla por debajo) | — |
-| De extremo a extremo | — | `npm run e2e` (Playwright: los 5 recorridos en escritorio y en móvil) |
+| De extremo a extremo | — | `npm run e2e` (Playwright: los 5 recorridos en escritorio y en móvil, accesibilidad con axe y uso con teclado) |
 | Lint | `uv run ruff check .` | `npm run lint` |
 | Formato | `uv run ruff format .` | `npm run format` |
 | Vulnerabilidades | `uv export --frozen --no-emit-project > req.txt && uvx pip-audit -r req.txt --disable-pip` | `npm audit --audit-level=high` |

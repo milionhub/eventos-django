@@ -16,6 +16,10 @@
   </mat-sidenav>
 
   <mat-sidenav-content class="content">
+    <!-- First stop for the keyboard: past the header straight to the page (WCAG 2.4.1). -->
+    <a class="skip-link" href="#contenido" (click)="skipToContent($event, main)">
+      Saltar al contenido
+    </a>
     <header class="toolbar">
       @if (isHandset()) {
         <button mat-icon-button type="button" aria-label="Abrir menú" (click)="drawer.toggle()">
@@ -54,15 +58,15 @@
       @if (user(); as user) {
         <!-- The menu code (CDK overlay) is only downloaded once someone is signed in. -->
         @defer {
-          <button
-            type="button"
-            class="account"
-            [matMenuTriggerFor]="accountMenu"
-            aria-label="Menú de la cuenta"
-          >
+          <button type="button" class="account" [matMenuTriggerFor]="accountMenu">
+            <!-- Named by its content, not aria-label: the name then always contains what is
+                 seen (WCAG 2.5.3), e.g. "Olga, menú de la cuenta". -->
             <span class="avatar" aria-hidden="true">{{ initials() }}</span>
-            @if (!isHandset()) {
+            @if (isHandset()) {
+              <span class="sr-only">Menú de la cuenta de {{ user.first_name || user.email }}</span>
+            } @else {
               <span class="account-name">{{ user.first_name || user.email }}</span>
+              <span class="sr-only">, menú de la cuenta</span>
             }
           </button>
           <mat-menu #accountMenu="matMenu" xPosition="before">
@@ -91,7 +95,7 @@
       }
     </header>
 
-    <main class="main">
+    <main #main id="contenido" class="main" tabindex="-1">
       <router-outlet />
     </main>
 

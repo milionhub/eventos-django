@@ -57,7 +57,7 @@
       <mat-form-field appearance="outline">
         <mat-label>Hora de inicio</mat-label>
         <input matInput [matTimepicker]="startTime" formControlName="startTime" />
-        <mat-timepicker-toggle matIconPrefix [for]="startTime" />
+        <mat-timepicker-toggle matIconPrefix [for]="startTime" aria-label="Elegir hora de inicio" />
         <mat-timepicker #startTime interval="15m" />
         <mat-hint>Escríbela (20:30) o elígela.</mat-hint>
         @if (form.controls.startTime.hasError('required')) {
@@ -85,7 +85,7 @@
       <mat-form-field appearance="outline">
         <mat-label>Hora de fin</mat-label>
         <input matInput [matTimepicker]="endTime" formControlName="endTime" />
-        <mat-timepicker-toggle matIconPrefix [for]="endTime" />
+        <mat-timepicker-toggle matIconPrefix [for]="endTime" aria-label="Elegir hora de fin" />
         <mat-timepicker #endTime interval="15m" />
         @if (duration(); as d) {
           <mat-hint>Dura {{ d }}</mat-hint>

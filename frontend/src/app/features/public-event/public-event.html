@@ -48,32 +48,30 @@
       @if (e.is_finished) {
         <p class="notice">Este evento ya ha terminado.</p>
       } @else {
-        <ul class="options" role="radiogroup" aria-label="Elige una categoría">
+        <div class="options" role="radiogroup" aria-label="Elige una categoría">
           @for (ticketType of e.ticket_types; track ticketType.id) {
-            <li>
-              <button
-                type="button"
-                role="radio"
-                class="option"
-                [class.selected]="selected() === ticketType.id"
-                [attr.aria-checked]="selected() === ticketType.id"
-                [disabled]="ticketType.sold_out"
-                (click)="selected.set(ticketType.id)"
-              >
-                <span class="radio" aria-hidden="true"></span>
-                <span class="name">
-                  <strong>{{ ticketType.name }}</strong>
-                  @if (ticketType.description) {
-                    <small>{{ ticketType.description }}</small>
-                  }
-                </span>
-                <span class="left">
-                  {{ ticketType.sold_out ? 'Agotado' : ticketType.available + ' libres' }}
-                </span>
-              </button>
-            </li>
+            <button
+              type="button"
+              role="radio"
+              class="option"
+              [class.selected]="selected() === ticketType.id"
+              [attr.aria-checked]="selected() === ticketType.id"
+              [disabled]="ticketType.sold_out"
+              (click)="selected.set(ticketType.id)"
+            >
+              <span class="radio" aria-hidden="true"></span>
+              <span class="name">
+                <strong>{{ ticketType.name }}</strong>
+                @if (ticketType.description) {
+                  <small>{{ ticketType.description }}</small>
+                }
+              </span>
+              <span class="left">
+                {{ ticketType.sold_out ? 'Agotado' : ticketType.available + ' libres' }}
+              </span>
+            </button>
           }
-        </ul>
+        </div>
 
         @if (bookingError(); as problem) {
           <p class="notice error" role="alert">
