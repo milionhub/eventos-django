@@ -45,7 +45,8 @@ backend/
 │   ├── organizations/  # Organization, Membership
 │   ├── events/         # Event, TicketType, EventStaff, endpoints públicos
 │   ├── ticketing/      # Reservation, Ticket, QR
-│   └── checkin/        # CheckInLog, validación, stats de accesos
+│   ├── checkin/        # CheckInLog, validación, stats de accesos
+│   └── demo/           # seed_demo: datos de demostración, sin modelos ni endpoints
 └── tests/              # o tests/ dentro de cada app (ver la convención en CLAUDE.md)
 ```
 

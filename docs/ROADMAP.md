@@ -169,7 +169,7 @@
 - [x] Exportación CSV
 - [x] Repaso responsive completo (360 px), PWA instalable
 - [x] Recorridos completos probados en escritorio y en iPhone
-- [ ] Recorridos en Android (pendiente, ver la decisión de abajo)
+- [x] Recorridos en Android (hecho al cerrar la Fase 6, con un emulador)
 
 **Cierre:** los 5 recorridos (`requirements.md` §2) funcionan en escritorio y en móvil.
 
@@ -212,7 +212,7 @@ Decisión 2026-10-29: la prueba en móvil real se hace **solo con iPhone** por a
 | 3 | Cobertura de los servicios críticos: `pytest-cov`, cubrir huecos en `services.py` y `selectors.py`, umbral en la CI | ✅ |
 | 4 | E2E con Playwright: los 5 recorridos con clics reales, en escritorio y en móvil emulado, en la CI con PostgreSQL | ✅ |
 | 5 | Accesibilidad básica: `@axe-core/playwright`, contraste en los dos temas, etiquetas, foco y teclado, avisos del escáner para lectores de pantalla | ✅ |
-| 6 | Cierre: recorridos en Android (emulador), README (seguridad) y ROADMAP | |
+| 6 | Cierre: recorridos en Android (emulador), README y ROADMAP | ✅ |
 
 Decisión 2026-10-29: Android se prueba al final de la fase, con un emulador. Dependencias nuevas previstas, todas de desarrollo y gratuitas: `pytest-cov`, `@playwright/test` y `@axe-core/playwright`. Bloque 1 (2026-10-29): `pip-audit` (40 paquetes de `uv.lock`, los de desarrollo incluidos) y `npm audit` (564 paquetes) sin hallazgos; la CI las ejecuta en cada cambio y cada lunes. `pip-audit` falla con cualquier aviso; `npm audit` solo con altos y críticos, porque los bajos del ecosistema npm suelen estar en herramientas de build sin arreglo publicado. Bloque 2 (2026-10-29): CSP con un middleware propio solo para `/api/v1/` (sin `django-csp`). Hallazgo principal: el throttling se saltaba con `X-Forwarded-For`; arreglado con `NUM_PROXIES`. Detalle en [`security.md`](security.md). Bloque 3 (2026-10-29): cobertura por ramas del 99,2 % (ya partía del 98 %; ahora no cuenta `dev.py` ni `prod.py`, que no se cargan en los tests). Todos los `services.py` y `selectors.py` al 100 %, salvo una rama de carrera en `reserve()` que solo cubren los tests de concurrencia cuando los hilos coinciden. Lo que queda sin cubrir son `__str__` de modelos y acciones del admin. Huecos cerrados:
 - dos registros simultáneos con el mismo email (test de concurrencia nuevo, contra PostgreSQL);
@@ -233,11 +233,18 @@ Bloque 5 (2026-10-29): axe (WCAG 2.1 AA) en unas 20 pantallas, en los dos temas,
 
 El resultado del escáner ya se anunciaba (`role="alert"`, `aria-live="assertive"`).
 
+**Cómo se cerró (2026-11-02), bloque 6:** los recorridos R1 a R5 en el Chrome 124 real de un emulador Pixel 6a (Android 15, 412 px), con el build de producción, los datos de `seed_demo` y una base de datos desechable. Se revisaron las capturas una a una: nada se corta ni desborda. La cámara abre tras conceder el permiso. Encontró y se arregló:
+- **un fallo real:** el CSV no se descargaba en Android. Un dispositivo sin zona horaria con nombre hace que `Intl` devuelva `+00:00`, y la API lo rechazaba con un 400. Ahora acepta también desplazamientos, con test;
+- **el texto del buscador de la portada** se cortaba en móvil («Busca por nombre o ciudad»). Ahora es «Evento o ciudad».
+
+No comprobado en Android: leer un QR con la cámara (el emulador solo muestra una escena virtual; en iPhone sí se probó y la validación se probó con la entrada manual), ver el archivo CSV en el dispositivo (la API respondió 200 y no hubo error, pero no apareció en la carpeta de descargas con el navegador controlado por DevTools) y la instalación de la PWA desde el menú de Chrome (el service worker y el manifiesto sí funcionan).
+
 ---
 
 ## FASE 7 — Portfolio · 8–12 h
 
-- [ ] `seed_demo`: organizaciones, eventos y usuarios de prueba por rol
+- [x] `seed_demo`: organizaciones, eventos y usuarios de prueba por rol (hecho el 2026-11-02, antes de cerrar la Fase 6, para probar Android con datos reales)
+- [ ] Capturas de escritorio (Windows) con la demo cargada
 - [ ] `docker compose --profile demo up` (nginx + gunicorn + db) funcionando a la primera
   - Pendiente de [`security.md`](security.md): `NUM_PROXIES=1` detrás de nginx, caché compartida para el throttling (`DatabaseCache`), CSP de la app Angular en nginx y `/admin/` protegido
 - [ ] README: qué es, GIF, arquitectura (diagrama), decisiones destacadas (concurrencia, auth, multi-organización), cómo ejecutarlo, credenciales demo, badge de CI
@@ -278,5 +285,5 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 
 ## Estado actual
 
-**Fase activa:** 6 — Endurecimiento (Fase 5 cerrada el 2026-10-29: los 5 recorridos funcionan en escritorio y en iPhone, con dashboard, stats, asistentes, CSV seguro y app instalable; Android pendiente).
-**Siguiente paso:** bloque 6 de la Fase 6, cierre: recorridos en Android (emulador), README y ROADMAP.
+**Fase activa:** 7 — Portfolio (Fase 6 cerrada el 2026-11-02: E2E, seguridad, cobertura, dependencias, accesibilidad y Android).
+**Siguiente paso:** capturas de escritorio con los datos de la demo.

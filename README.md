@@ -7,7 +7,7 @@ Plataforma de gestión de eventos y entradas digitales con QR: los organizadores
 
 **Stack:** Angular · Django REST Framework · PostgreSQL · Docker
 
-> 🚧 En desarrollo — Fases 1 a 5 completadas (auth, organizaciones, eventos, reservas, entradas con QR, validación en la puerta con la cámara del móvil, dashboard con estadísticas, gestión de asistentes con exportación CSV y app instalable). Consulta [`docs/ROADMAP.md`](docs/ROADMAP.md).
+> 🚧 En desarrollo — Fases 1 a 6 completadas (auth, organizaciones, eventos, reservas, entradas con QR, validación en la puerta con la cámara del móvil, dashboard con estadísticas, gestión de asistentes con exportación CSV y app instalable). Consulta [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Destacado: reservas sin sobreventa
 
@@ -138,6 +138,25 @@ cd backend && uv run python manage.py runserver   # API en http://127.0.0.1:8000
 cd frontend && npm start                          # web en http://localhost:4200
 ```
 Angular redirige `/api` a Django mediante un proxy, así que basta con abrir `http://localhost:4200`.
+
+### Datos de demostración
+```bash
+cd backend && uv run python manage.py seed_demo            # tarda menos de un minuto
+cd backend && uv run python manage.py seed_demo --reset    # la vuelve a crear con fechas de hoy
+```
+Crea 3 organizaciones, 28 eventos con fotos reales y unas 1600 reservas con sus escaneos: hay eventos agotados, en curso, terminados, cancelados y en borrador. Las fechas son relativas al momento de ejecutarlo. Todo pasa por los servicios reales, así que los contadores cuadran. `--reset` solo borra lo que creó la demo.
+
+Contraseña de todas las cuentas: `Demo-Eventos-2026`
+
+| Cuenta | Para ver |
+|---|---|
+| `marta@demo.test` | Propietaria de Sala Nébula: dashboard, stats, asistentes y CSV |
+| `diego@demo.test` | Gestor en una organización y personal de acceso en otra |
+| `hugo@demo.test` | Personal de acceso: el escáner, con un evento en curso |
+| `lucia@demo.test` | Asistente con entradas válidas, usadas y canceladas |
+| `admin@demo.test` | Administradora de plataforma, en `/admin/` |
+
+Las contraseñas son públicas: con `DEBUG=False` el comando exige `--force`, y nunca debe usarse en un servidor con datos reales. Las fotos son CC0: [créditos](backend/apps/demo/CREDITS.md).
 
 ### Tests y calidad
 | | Backend (`backend/`) | Frontend (`frontend/`) |
