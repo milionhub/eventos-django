@@ -244,7 +244,6 @@ No comprobado en Android: leer un QR con la cámara (el emulador solo muestra un
 ## FASE 7 — Portfolio · 8–12 h
 
 - [x] `seed_demo`: organizaciones, eventos y usuarios de prueba por rol (hecho el 2026-11-02, antes de cerrar la Fase 6, para probar Android con datos reales)
-- [ ] Capturas de escritorio (Windows) con la demo cargada
 - [ ] `docker compose --profile demo up` (nginx + gunicorn + db) funcionando a la primera
   - Pendiente de [`security.md`](security.md): `NUM_PROXIES=1` detrás de nginx, caché compartida para el throttling (`DatabaseCache`), CSP de la app Angular en nginx y `/admin/` protegido
 - [ ] README: qué es, GIF, arquitectura (diagrama), decisiones destacadas (concurrencia, auth, multi-organización), cómo ejecutarlo, credenciales demo, badge de CI
@@ -253,6 +252,21 @@ No comprobado en Android: leer un QR con la cámara (el emulador solo muestra un
 - [ ] Publicación en LinkedIn + CV
 
 **Cierre:** cualquiera puede entender el proyecto en 2 minutos y ejecutarlo con un comando.
+
+**Bloques de trabajo** (cortos: un objetivo por bloque, informe y visto bueno antes del siguiente):
+
+| # | Bloque | Estado |
+|---|---|---|
+| 1 | Subir el cierre de la Fase 6 y confirmar la CI en verde | ✅ |
+| 2 | Capturas para el README: portada y evento | ✅ |
+| 3 | Capturas para el README: dashboard y escáner en móvil | |
+| 4 | README: qué es, capturas, diagrama de arquitectura y decisiones destacadas | |
+| 5 | `docker compose --profile demo`: nginx y gunicorn | |
+| 6 | `docker compose --profile demo`: pendientes de seguridad y prueba desde cero | |
+| 7 | Vídeo corto de demostración, con guion | |
+| 8 | Borrador para LinkedIn y CV | |
+
+Decisión 2026-11-02: las capturas son solo para el README, así que basta con unas pocas en `docs/screenshots/`, hechas sobre una base de datos que solo contiene la demo. El despliegue gratuito sigue siendo opcional y se decide al final.
 
 ---
 
@@ -286,4 +300,4 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 ## Estado actual
 
 **Fase activa:** 7 — Portfolio (Fase 6 cerrada el 2026-11-02: E2E, seguridad, cobertura, dependencias, accesibilidad y Android).
-**Siguiente paso:** capturas de escritorio con los datos de la demo.
+**Siguiente paso:** bloque 3 de la Fase 7, capturas de dashboard y escáner en móvil.
