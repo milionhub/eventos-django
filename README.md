@@ -1,9 +1,9 @@
-# eventos-django
+# #4events
 
-[![backend](https://github.com/milionhub/eventos-django/actions/workflows/backend.yml/badge.svg)](https://github.com/milionhub/eventos-django/actions/workflows/backend.yml)
-[![frontend](https://github.com/milionhub/eventos-django/actions/workflows/frontend.yml/badge.svg)](https://github.com/milionhub/eventos-django/actions/workflows/frontend.yml)
-[![e2e](https://github.com/milionhub/eventos-django/actions/workflows/e2e.yml/badge.svg)](https://github.com/milionhub/eventos-django/actions/workflows/e2e.yml)
-[![demo](https://github.com/milionhub/eventos-django/actions/workflows/demo.yml/badge.svg)](https://github.com/milionhub/eventos-django/actions/workflows/demo.yml)
+[![backend](https://github.com/milionhub/4events/actions/workflows/backend.yml/badge.svg)](https://github.com/milionhub/4events/actions/workflows/backend.yml)
+[![frontend](https://github.com/milionhub/4events/actions/workflows/frontend.yml/badge.svg)](https://github.com/milionhub/4events/actions/workflows/frontend.yml)
+[![e2e](https://github.com/milionhub/4events/actions/workflows/e2e.yml/badge.svg)](https://github.com/milionhub/4events/actions/workflows/e2e.yml)
+[![demo](https://github.com/milionhub/4events/actions/workflows/demo.yml/badge.svg)](https://github.com/milionhub/4events/actions/workflows/demo.yml)
 
 **#4events** es una plataforma de eventos y entradas con QR: los organizadores publican eventos, los asistentes reservan desde el móvil y el personal valida los accesos con la cámara.
 
