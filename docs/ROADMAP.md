@@ -261,8 +261,8 @@ No comprobado en Android: leer un QR con la cámara (el emulador solo muestra un
 | 3 | Capturas para el README: todas las pantallas, por recorrido, con alguna en claro y en móvil | ✅ |
 | 4 | `docker compose --profile demo`: nginx y gunicorn | ✅ |
 | 5 | `docker compose --profile demo`: pendientes de seguridad y prueba desde cero | ✅ |
-| 6 | Borrador para LinkedIn y CV | |
-| 7 | README definitivo y corto: se hace al final, con todo lo anterior ya cerrado | |
+| 6 | README definitivo y corto, con los detalles en `docs/` | ✅ |
+| 7 | LinkedIn y CV, revisados paso a paso | |
 
 Hallazgo 2026-11-02, al probar la demo: navegar mientras se renovaba el token cerraba la sesión. Arreglado con un margen de 30 s, ver [ADR-0009](adr/0009-margen-rotacion-refresh.md).
 
@@ -300,4 +300,4 @@ Incluye aprendizaje y depuración. Si una fase se alarga mucho más, es señal d
 ## Estado actual
 
 **Fase activa:** 7 — Portfolio (Fase 6 cerrada el 2026-11-02: E2E, seguridad, cobertura, dependencias, accesibilidad y Android).
-**Siguiente paso:** bloque 6 de la Fase 7, borrador para LinkedIn y CV.
+**Siguiente paso:** bloque 7 de la Fase 7, LinkedIn y CV.
